@@ -35,7 +35,8 @@ export class SnapShotLoader implements ISnapShotLoader {
   public store: Array<SnapShot> = [];
   constructor(resources: PIXI.IResourceDictionary) {
     for (const [resourceUrl, resource] of Object.entries(resources)) {
-      this.store.push(new SnapShot(resourceUrl, resource.texture));
+      const s = new SnapShot(resourceUrl, resource.texture);
+      this.store.push(s);
     }
   }
 }

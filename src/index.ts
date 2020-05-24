@@ -1,11 +1,9 @@
-// import React from 'react';
-// import ReactDOM from 'react-dom';
 import './index.css';
-// import App from './App';
 import * as PIXI from 'pixi.js';
 import { SnapShot, SnapShotLoader } from './interfaces/SnapShot';
 import { Viewport } from 'pixi-viewport';
-import { urlSmallSet } from './fixtures/imagesDataSet.ts';
+import { urlSmallSet } from './fixtures/imagesDataSet';
+import { SpaceModifiers } from "./interfaces/SpaceModifiers";
 
 const app = new PIXI.Application({
   width: 1200,
@@ -55,8 +53,14 @@ if (appDiv) {
 
   function setup(loader: PIXI.Loader) {
     const snapShots = new SnapShotLoader(loader.resources);
+    SpaceModifiers.positionGrid(snapShots.store);
+
+    snapShots.store.forEach((s, i) => {
+      s.scale = new PIXI.Point(.1, .1);
+    });
+
     snapShots.store.forEach((snapShot: SnapShot) => {
-      viewport.addChild(snapShot.snapShot.sprite);
+      viewport.addChild(snapShot);
     });
   }
 }
