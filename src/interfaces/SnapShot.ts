@@ -1,13 +1,13 @@
 import * as PIXI from 'pixi.js';
 
 interface ISnapShotObject {
-  title: string,
-  resourceUrl: string,
-  sprite: PIXI.Sprite
+  title: string;
+  resourceUrl: string;
+  sprite: PIXI.Sprite;
 }
 
 interface ISnapShot extends PIXI.Container {
-  snapShot: ISnapShotObject
+  snapShot: ISnapShotObject;
 }
 
 export class SnapShot extends PIXI.Container implements ISnapShot {
@@ -20,7 +20,7 @@ export class SnapShot extends PIXI.Container implements ISnapShot {
     this.snapShot = {
       title: '',
       sprite: image,
-      resourceUrl
+      resourceUrl,
     };
 
     this.addChild(image);
@@ -28,7 +28,7 @@ export class SnapShot extends PIXI.Container implements ISnapShot {
 }
 
 interface ISnapShotLoader {
-  store: Array<SnapShot>
+  store: Array<SnapShot>;
 }
 
 export class SnapShotLoader implements ISnapShotLoader {

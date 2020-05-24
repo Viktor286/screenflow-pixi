@@ -72,6 +72,7 @@
     "start": "node scripts/start.js",
     "build": "node scripts/build.js",
     "test": "node scripts/test.js",
+    "prettify": "prettier --write -l ./src",
     "serve-files": "serve assets/"
   },
   "eslintConfig": {
@@ -145,6 +146,8 @@
     ]
   },
   "devDependencies": {
+    "eslint-config-prettier": "^6.11.0",
+    "prettier": "^2.0.5",
     "serve": "^11.3.1"
   }
 }

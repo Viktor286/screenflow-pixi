@@ -3,17 +3,16 @@
 import './index.css';
 // import App from './App';
 import * as PIXI from 'pixi.js';
-import {SnapShot, SnapShotLoader} from "./interfaces/SnapShot";
+import { SnapShot, SnapShotLoader } from './interfaces/SnapShot';
 import { Viewport } from 'pixi-viewport';
-import { urlSmallSet } from "./fixtures/imagesDataSet.ts";
-
+import { urlSmallSet } from './fixtures/imagesDataSet.ts';
 
 const app = new PIXI.Application({
   width: 1200,
   height: 800,
   antialias: true,
   resolution: 1,
-  transparent: true
+  transparent: true,
 });
 
 const appDiv = document.querySelector('.app');
@@ -26,31 +25,28 @@ if (appDiv) {
     worldWidth: 1000,
     worldHeight: 1000,
 
-    interaction: app.renderer.plugins.interaction // the interaction module is important for wheel to work properly when renderer.view is placed or scaled
+    interaction: app.renderer.plugins.interaction, // the interaction module is important for wheel to work properly when renderer.view is placed or scaled
   });
 
   // add the viewport to the stage
-  app.stage.addChild(viewport)
+  app.stage.addChild(viewport);
 
   // activate plugins
-  viewport
-    .drag()
-    .pinch()
-    .wheel()
-    .decelerate();
+  viewport.drag().pinch().wheel().decelerate();
 
   const loader = new PIXI.Loader();
-  loader.add(urlSmallSet)
-    .on("progress", loadProgressHandler)
-    .load(setup);
+  loader.add(urlSmallSet).on('progress', loadProgressHandler).load(setup);
 
   let rectangle = new PIXI.Graphics();
-  rectangle.lineStyle(3, 0xFF3300, 1);
+  rectangle.lineStyle(3, 0xff3300, 1);
   rectangle.drawRect(0, 0, 100, 100);
   viewport.addChild(rectangle);
 
-  function loadProgressHandler(loader: PIXI.Loader, resource: PIXI.LoaderResource):void {
-    console.log("loading: " + resource.url);
+  function loadProgressHandler(
+    loader: PIXI.Loader,
+    resource: PIXI.LoaderResource,
+  ): void {
+    console.log('loading: ' + resource.url);
     // console.log("progress: " + loader.progress + "%");
     //If you gave your files names as the first argument
     //of the `add` method, you can access them like this

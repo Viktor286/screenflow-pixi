@@ -1,14 +1,10 @@
 export const urlSmallSet = [
   'http://localhost:5000/LargePNGCosmos/vlc_1wg8lrOxvM.png',
   'http://localhost:5000/LargePNGCosmos/vlc_2E3NKGFlYF.png',
-  'http://localhost:5000/LargePNGCosmos/vlc_2g16Vd36rh.png'
+  'http://localhost:5000/LargePNGCosmos/vlc_2g16Vd36rh.png',
 ];
 
-export const smallSet = [
-  'vlc_1wg8lrOxvM',
-  'vlc_2E3NKGFlYF',
-  'vlc_2g16Vd36rh'
-];
+export const smallSet = ['vlc_1wg8lrOxvM', 'vlc_2E3NKGFlYF', 'vlc_2g16Vd36rh'];
 
 export const largeSet = [
   'vlc_1wg8lrOxvM',
