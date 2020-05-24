@@ -73,7 +73,7 @@
     "build": "node scripts/build.js",
     "test": "node scripts/test.js",
     "prettify": "prettier --write -l ./src",
-    "serve-files": "serve assets/"
+    "serve-files": "serve assets/image-server/"
   },
   "eslintConfig": {
     "extends": "react-app"
