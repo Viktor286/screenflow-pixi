@@ -1,9 +1,9 @@
 import './index.css';
 import * as PIXI from 'pixi.js';
-import { SnapShot, SnapShotLoader } from './interfaces/SnapShot';
+import { SnapShotContainer, SnapShotLoader } from './interfaces/SnapShot';
 import { Viewport } from 'pixi-viewport';
-import { urlLargeSet } from './fixtures/imagesDataSet';
-import { SpaceModifiers } from "./interfaces/SpaceModifiers";
+import { urlLargeSet as imageSet } from './fixtures/imagesDataSet';
+import { SpaceModifiers } from './interfaces/SpaceModifiers';
 
 const app = new PIXI.Application({
   width: 1200,
@@ -34,15 +34,18 @@ if (appDiv) {
   rectangle.drawRect(300, 300, 100, 100);
   viewport.addChild(rectangle);
 
-  viewport.on('zoomed', e => {
+  viewport.on('zoomed', (e) => {
     const zoomLevel = e.viewport.transform.scale.x;
     // console.log('e.viewport', e.viewport);
 
-    e.viewport.children.forEach(container => {
-      if (container instanceof SnapShot && container.snapShot.selected) {
-        container.drawSelection(zoomLevel);
+    e.viewport.children.forEach((container) => {
+      if (
+        container instanceof SnapShotContainer &&
+        container.snapShot.selected
+      ) {
+        container.snapShot.drawSelection(zoomLevel);
       }
-    })
+    });
 
     // This might be not 100% correct
     // const zoomCoords = {
@@ -54,13 +57,13 @@ if (appDiv) {
     // };
     // console.log('e', e);
     // console.log('zoomCoords', zoomCoords);
-  })
+  });
 
   // activate plugins
   viewport.drag().pinch().wheel().decelerate();
 
   const loader = new PIXI.Loader();
-  loader.add(urlLargeSet).on('progress', loadProgressHandler).load(setup);
+  loader.add(imageSet).on('progress', loadProgressHandler).load(setup);
 
   function loadProgressHandler(
     loader: PIXI.Loader,
@@ -78,10 +81,10 @@ if (appDiv) {
     SpaceModifiers.positionGrid(snapShots.store, 8, 230, 120);
 
     snapShots.store.forEach((s, i) => {
-      s.scale = new PIXI.Point(.1, .1);
+      s.scale = new PIXI.Point(0.1, 0.1);
     });
 
-    snapShots.store.forEach((snapShot: SnapShot) => {
+    snapShots.store.forEach((snapShot: SnapShotContainer) => {
       viewport.addChild(snapShot);
     });
   }

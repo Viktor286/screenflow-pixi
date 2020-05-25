@@ -1,58 +1,50 @@
 import * as PIXI from 'pixi.js';
 
-interface ISnapShotObject {
+export class SnapShot {
   title: string;
-  resourceUrl: string;
+  parent: PIXI.Container;
   sprite: PIXI.Sprite;
-  selectionDrawing: PIXI.Graphics,
-  selected: boolean,
-  width: number,
-  height: number
-}
+  selectionDrawing: PIXI.Graphics;
+  selected: boolean;
+  width: number;
+  height: number;
 
-interface ISnapShot extends PIXI.Container {
-  snapShot: ISnapShotObject;
-}
-
-export class SnapShot extends PIXI.Container implements ISnapShot {
-  public snapShot: ISnapShotObject;
-
-  constructor(resourceUrl: string, texture: PIXI.Texture) {
-    super();
-
-    const image = PIXI.Sprite.from(texture);
-    this.snapShot = {
-      title: '',
-      sprite: image,
-      resourceUrl,
-      selectionDrawing:  new PIXI.Graphics(),
-      selected: true,
-      width: image.width,
-      height: image.height
-    };
-
-    this.addChild(image);
-    this.addChild(this.snapShot.selectionDrawing);
-    // console.log('SnapShot', this);
+  constructor(texture: PIXI.Texture, parent: PIXI.Container) {
+    const sprite = PIXI.Sprite.from(texture);
+    this.title = '';
+    this.parent = parent;
+    this.sprite = sprite;
+    this.selectionDrawing = new PIXI.Graphics();
+    this.selected = true;
+    this.width = sprite.width;
+    this.height = sprite.height;
   }
 
-  drawSelection(zoomLevel: number = 1) {
-    this.snapShot.selectionDrawing
+  drawSelection(zoomLevel: number = 1): void {
+    this.selectionDrawing
       .clear()
-      .lineStyle(1.1 / zoomLevel / this.transform.scale.x, 0x73b2ff)
-      .drawRect(0, 0, this.snapShot.width, this.snapShot.height)
+      .lineStyle(1.1 / zoomLevel / this.parent.transform.scale.x, 0x73b2ff)
+      .drawRect(0, 0, this.width, this.height);
   }
 }
 
-interface ISnapShotLoader {
-  store: Array<SnapShot>;
+export class SnapShotContainer extends PIXI.Container {
+  snapShot: SnapShot;
+
+  constructor(texture: PIXI.Texture) {
+    super();
+    this.snapShot = new SnapShot(texture, this);
+    this.addChild(this.snapShot.sprite);
+    this.addChild(this.snapShot.selectionDrawing);
+  }
 }
 
-export class SnapShotLoader implements ISnapShotLoader {
-  public store: Array<SnapShot> = [];
+export class SnapShotLoader {
+  store: Array<SnapShotContainer> = [];
+
   constructor(resources: PIXI.IResourceDictionary) {
-    for (const [resourceUrl, resource] of Object.entries(resources)) {
-      const s = new SnapShot(resourceUrl, resource.texture);
+    for (const resource of Object.values(resources)) {
+      const s = new SnapShotContainer(resource.texture);
       this.store.push(s);
     }
   }

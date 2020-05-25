@@ -1,4 +1,4 @@
-import { SnapShot } from './SnapShot';
+import { SnapShotContainer } from './SnapShot';
 
 interface IPoint {
   x: number;
@@ -7,7 +7,7 @@ interface IPoint {
 
 export class SpaceModifiers {
   static positionGrid(
-    elements: Array<IPoint | PIXI.Point | SnapShot>,
+    elements: Array<IPoint | PIXI.Point | SnapShotContainer>,
     colAmount: number = 10,
     gridWidth: number = 300,
     rowHeight: number = 100,
