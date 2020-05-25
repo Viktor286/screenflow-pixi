@@ -1,14 +1,22 @@
 import './index.css';
+// import * as PIXI from 'pixi.js';
+import App from './interfaces/App';
 import { PixiEngine } from './interfaces/PixiEngine';
 import { PixiLoader } from './interfaces/PixiLoader';
 import { urlSmallSet as imageSet } from './fixtures/imagesDataSet';
+import { SpaceModifiers } from './interfaces/SpaceModifiers';
 
 const appDiv = document.querySelector('.app');
 if (appDiv instanceof HTMLElement) {
-  const pixiApp = new PixiEngine(appDiv, 1000, 800);
-  const pixiLoader = new PixiLoader(pixiApp.viewport);
+  const app = new App(new PixiEngine(appDiv, 1000, 800));
+
+  const pixiLoader = new PixiLoader(app);
   pixiLoader.loadUrlSet(imageSet);
-  console.log(pixiApp);
+
+  /** Temp Test modifiers **/
+  SpaceModifiers.transformPositionGrid(app.state.snapshots.store, 8, 230, 120);
+
+  console.log(app);
 
   // viewport.on('zoomed', (e) => {
   //   const zoomLevel = e.viewport.transform.scale.x;

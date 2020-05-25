@@ -25,4 +25,26 @@ export class SpaceModifiers {
       idx++;
     });
   }
+
+  static transformPositionGrid(
+    elements: SnapShotContainer[],
+    colAmount: number = 10,
+    gridWidth: number = 300,
+    rowHeight: number = 100,
+  ) {
+    let c = 0;
+    let r = 0;
+    elements.forEach((el, idx) => {
+      const x = (idx % colAmount) * gridWidth;
+      if (c >= colAmount) {
+        c = 0;
+        r++;
+      }
+      c++;
+      const y = r * rowHeight;
+
+      el.setTransform(x, y);
+      idx++;
+    });
+  }
 }
