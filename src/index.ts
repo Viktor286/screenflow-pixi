@@ -1,9 +1,9 @@
-import './index.css';
 // import * as PIXI from 'pixi.js';
+import './index.css';
 import App from './interfaces/App';
 import { PixiEngine } from './interfaces/PixiEngine';
 import { urlSmallSet as imageSet } from './fixtures/imagesDataSet';
-import { SnapShotLoader } from './interfaces/SnapShot';
+import { SnapShotContainer } from './interfaces/SnapShot';
 import { SpaceModifiers } from './interfaces/SpaceModifiers';
 
 async function main() {
@@ -13,20 +13,27 @@ async function main() {
 
     const loader = await PixiEngine.loadUrlSet(imageSet);
 
-    /** TODO: refactor SnapShotLoader to work with store **/
-    const snapShots = new SnapShotLoader(loader.resources);
-    app.state.snapshots.store = snapShots.store;
+    app.state.snapshots.store = SnapShotContainer.createSnapShotsFromPixiResources(
+      loader.resources,
+    );
 
-    // Set initial transforms
-    snapShots.store.forEach((snapShot, i) => {
-      /** TODO: change modifier interface to matrix output **/
-      SpaceModifiers.transformPositionGrid(snapShots.store, 8, 240, 120, 0.1);
+    /** TODO: change modifier interface to matrix output (prev, next states for animation) **/
+    SpaceModifiers.transformPositionGrid(
+      app.state.snapshots.store,
+      8,
+      240,
+      120,
+      0.1,
+    );
+
+    // Objects viewport initialization
+    app.state.snapshots.store.forEach((snapShot, i, store) => {
       app.engine.pixiViewport.addChild(snapShot);
     });
 
-    snapShots.store.forEach((snapShot, i) => {
-      // snapShot.x = 0;
-    });
+    // app.state.snapshots.store.forEach((snapShot, i) => {
+    // snapShot.x = 0;
+    // });
 
     // viewport.on('zoomed', (e) => {
     //   const zoomLevel = e.viewport.transform.scale.x;

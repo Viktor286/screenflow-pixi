@@ -37,15 +37,15 @@ export class SnapShotContainer extends PIXI.Container {
     this.addChild(this.snapShot.sprite);
     this.addChild(this.snapShot.selectionDrawing);
   }
-}
 
-export class SnapShotLoader {
-  store: Array<SnapShotContainer> = [];
-
-  constructor(resources: PIXI.IResourceDictionary) {
+  static createSnapShotsFromPixiResources(
+    resources: PIXI.IResourceDictionary,
+  ): SnapShotContainer[] {
+    let store: SnapShotContainer[] = [];
     for (const resource of Object.values(resources)) {
       const s = new SnapShotContainer(resource.texture);
-      this.store.push(s);
+      store.push(s);
     }
+    return store;
   }
 }
