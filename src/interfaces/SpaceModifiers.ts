@@ -31,6 +31,7 @@ export class SpaceModifiers {
     colAmount: number = 10,
     gridWidth: number = 300,
     rowHeight: number = 100,
+    scale: number,
   ) {
     let c = 0;
     let r = 0;
@@ -42,8 +43,7 @@ export class SpaceModifiers {
       }
       c++;
       const y = r * rowHeight;
-
-      el.setTransform(x, y);
+      el.setTransform(x, y, scale || el.scale.x, scale || el.scale.y);
       idx++;
     });
   }
