@@ -2,7 +2,6 @@ import './index.css';
 // import * as PIXI from 'pixi.js';
 import App from './interfaces/App';
 import { PixiEngine } from './interfaces/PixiEngine';
-import { PixiLoader } from './interfaces/PixiLoader';
 import { urlSmallSet as imageSet } from './fixtures/imagesDataSet';
 import { SnapShotLoader } from './interfaces/SnapShot';
 import { SpaceModifiers } from './interfaces/SpaceModifiers';
@@ -12,8 +11,7 @@ async function main() {
   if (appDiv instanceof HTMLElement) {
     const app = new App(new PixiEngine(appDiv, 1000, 800));
 
-    /** TODO: merge this class with FileIO **/
-    const loader = await PixiLoader.loadUrlSet(imageSet);
+    const loader = await PixiEngine.loadUrlSet(imageSet);
 
     /** TODO: refactor SnapShotLoader to work with store **/
     const snapShots = new SnapShotLoader(loader.resources);
