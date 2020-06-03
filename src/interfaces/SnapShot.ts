@@ -38,6 +38,13 @@ export class SnapShotContainer extends PIXI.Container {
     this.addChild(this.snapShot.selectionDrawing);
   }
 
+  /**
+   *
+   * This function starts non-redux pattern
+   * SnapShotContainer is in fact renderContainer
+   * can we/need we? manage SnapShot store before render
+   *
+   **/
   static createSnapShotsFromPixiResources(
     resources: PIXI.IResourceDictionary,
   ): SnapShotContainer[] {

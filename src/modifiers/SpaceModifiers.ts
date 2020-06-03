@@ -1,4 +1,4 @@
-import { SnapShotContainer } from './SnapShot';
+import { SnapShotContainer } from '../interfaces/SnapShot';
 
 interface IPoint {
   x: number;
@@ -28,21 +28,21 @@ export class SpaceModifiers {
 
   static transformPositionGrid(
     elements: SnapShotContainer[],
-    colAmount: number = 10,
-    gridWidth: number = 300,
-    rowHeight: number = 100,
+    colLimit: number = 10,
+    cellWidth: number = 300,
+    cellHeight: number = 100,
     scale: number,
   ) {
-    let c = 0;
-    let r = 0;
+    let col = 0;
+    let row = 0;
     elements.forEach((el, idx) => {
-      const x = (idx % colAmount) * gridWidth;
-      if (c >= colAmount) {
-        c = 0;
-        r++;
+      const x = (idx % colLimit) * cellWidth;
+      if (col >= colLimit) {
+        col = 0;
+        row++;
       }
-      c++;
-      const y = r * rowHeight;
+      col++;
+      const y = row * cellHeight;
       el.setTransform(x, y, scale || el.scale.x, scale || el.scale.y);
       idx++;
     });
