@@ -3,7 +3,7 @@ import './index.css';
 import App from './interfaces/App';
 import { PixiEngine } from './interfaces/PixiEngine';
 import { urlSmallSet as imageSet } from './fixtures/imagesDataSet';
-import { SnapShotContainer } from './interfaces/SnapShot';
+import SnapShotContainer from './interfaces/SnapShotContainer';
 import FilesIO from './interfaces/FilesIO';
 import { SpaceModifiers } from './modifiers/SpaceModifiers';
 
@@ -19,9 +19,10 @@ async function main() {
     app.engine.addToViewport(rectangle);
 
     /** Load test images **/
-    const loaded = await FilesIO.loadUrlSet(imageSet);
+    const loader = await FilesIO.loadUrlSet(imageSet);
+
     const loadedSnapshots = SnapShotContainer.createSnapShotsFromPixiResources(
-      loaded.resources,
+      loader.resources,
     );
 
     SpaceModifiers.setPositionGrid(loadedSnapshots, 8, 240, 120, 0.1);

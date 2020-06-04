@@ -1,4 +1,4 @@
-import { SnapShotContainer } from '../interfaces/SnapShot';
+import SnapShotContainer from '../interfaces/SnapShotContainer';
 
 interface IPoint {
   x: number;

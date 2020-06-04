@@ -1,5 +1,5 @@
-import { SnapShotContainer } from './SnapShot';
 import { PixiEngine } from './PixiEngine';
+import SnapShotContainer from './SnapShotContainer';
 
 interface ISnapshots {
   list: SnapShotContainer[];
@@ -19,13 +19,16 @@ export default class App {
     };
   }
 
+  /** Install snapshots in list and viewport **/
   addSnapshots(snapshot: SnapShotContainer | SnapShotContainer[]) {
     if (!Array.isArray(snapshot)) {
       snapshot = [snapshot];
     }
 
-    snapshot.forEach((sp) => {
-      this.snapshots.list.push(sp);
+    snapshot.forEach((snapshotContainer) => {
+      this.snapshots.list.push(snapshotContainer);
+      snapshotContainer.snapshot.parentList = this.snapshots.list;
+      snapshotContainer.interactive = true;
       this.engine.addToViewport(snapshot);
     });
   }
