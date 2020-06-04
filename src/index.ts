@@ -19,25 +19,14 @@ async function main() {
     app.engine.addToViewport(rectangle);
 
     /** Load test images **/
-    const loader = await FilesIO.loadUrlSet(imageSet);
-
-    /** Begin store? **/
-    app.state.snapshots.store = SnapShotContainer.createSnapShotsFromPixiResources(
-      loader.resources,
+    const loaded = await FilesIO.loadUrlSet(imageSet);
+    const loadedSnapshots = SnapShotContainer.createSnapShotsFromPixiResources(
+      loaded.resources,
     );
 
-    console.log('app.state.snapshots.store', app.state.snapshots.store);
-    app.engine.addToViewport(app.state.snapshots.store);
+    SpaceModifiers.setPositionGrid(loadedSnapshots, 8, 240, 120, 0.1);
 
-    /** Auto update from store **/
-    /** TODO: change modifier interface to matrix output (prev, next states for animation) **/
-    SpaceModifiers.transformPositionGrid(
-      app.state.snapshots.store,
-      8,
-      240,
-      120,
-      0.1,
-    );
+    app.addSnapshots(loadedSnapshots);
 
     // /** Auto update from store **/
     // app.state.snapshots.store.forEach((snapShot, i) => {

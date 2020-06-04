@@ -5,33 +5,14 @@ interface IPoint {
   y: number;
 }
 
+/** TODO: change modifier interface to matrix output (prev, next states for animation) **/
 export class SpaceModifiers {
-  static positionGrid(
-    elements: Array<IPoint | PIXI.Point | SnapShotContainer>,
-    colAmount: number = 10,
-    gridWidth: number = 300,
-    rowHeight: number = 100,
-  ) {
-    let c = 0;
-    let r = 0;
-    elements.forEach((el, idx) => {
-      el.x = (idx % colAmount) * gridWidth;
-      if (c >= colAmount) {
-        c = 0;
-        r++;
-      }
-      c++;
-      el.y = r * rowHeight;
-      idx++;
-    });
-  }
-
-  static transformPositionGrid(
+  static setPositionGrid(
     elements: SnapShotContainer[],
     colLimit: number = 10,
     cellWidth: number = 300,
     cellHeight: number = 100,
-    scale: number,
+    scale: number = 1,
   ) {
     let col = 0;
     let row = 0;
@@ -43,7 +24,12 @@ export class SpaceModifiers {
       }
       col++;
       const y = row * cellHeight;
-      el.setTransform(x, y, scale || el.scale.x, scale || el.scale.y);
+
+      el.x = x;
+      el.y = y;
+      el.scale.x = scale;
+      el.scale.y = scale;
+
       idx++;
     });
   }
