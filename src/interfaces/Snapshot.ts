@@ -1,21 +1,12 @@
 import * as PIXI from 'pixi.js';
-import SnapShotContainer from './SnapShotContainer';
+import Memo from './Memo';
 
-/** Mimics PIXI.interaction.InteractionEvent with targets overwritten **/
-interface ISnapshotsEvent {
-  stopped: boolean;
-  target: SnapShotContainer;
-  currentTarget: SnapShotContainer;
-  type: string;
-  data: PIXI.interaction.InteractionData;
-  stopPropagation(): void;
-  reset(): void;
-}
+/** TODO: Snapshot needs to have its own set of events, extends PIXI.Container ? **/
 
 export class Snapshot {
   title: string;
   parent: PIXI.Container;
-  parentList: SnapShotContainer[] | undefined;
+  parentList: Memo[] | undefined;
   sprite: PIXI.Sprite;
   selectionDrawing: PIXI.Graphics;
   selected: boolean;
@@ -32,8 +23,6 @@ export class Snapshot {
     this.selected = false;
     this.width = sprite.width;
     this.height = sprite.height;
-
-    this.activateInteraction();
   }
 
   select() {
@@ -57,45 +46,5 @@ export class Snapshot {
 
   eraseSelection() {
     this.selectionDrawing.clear();
-  }
-
-  activateInteraction() {
-    // https://pixijs.io/examples/#/interaction/interactivity.js
-    // Mouse & touch events are normalized into
-    // the pointer* events for handling different
-    // button events.
-    this.parent
-      .on('pointerdown', Snapshot.interaction().onButtonDown)
-      .on('pointerup', Snapshot.interaction().onButtonUp)
-      .on('pointerupoutside', Snapshot.interaction().onButtonUp)
-      .on('pointerover', Snapshot.interaction().onButtonOver)
-      .on('pointerout', Snapshot.interaction().onButtonOut);
-  }
-
-  static interaction() {
-    return {
-      onButtonUp: (e: ISnapshotsEvent) => {
-        console.log('1 onButton Up', e);
-        const targetSnapshotContainer: SnapShotContainer = e.target;
-        const snapShot = targetSnapshotContainer.snapshot;
-
-        snapShot.selected ? snapShot.deselect() : snapShot.select();
-      },
-
-      onButtonDown: (e: ISnapshotsEvent) => {
-        console.log('2 onButton Down');
-        // const targetSnapshotContainer: SnapShotContainer = e.target;
-        // const snapShot = targetSnapshotContainer.snapShot;
-        // snapShot.selected ? snapShot.deselect() : snapShot.select();
-      },
-
-      onButtonOver: () => {
-        console.log('3 onButton Over');
-      },
-
-      onButtonOut: () => {
-        console.log('4 onButton Out');
-      },
-    };
   }
 }

@@ -3,7 +3,7 @@ import './index.css';
 import App from './interfaces/App';
 import { PixiEngine } from './interfaces/PixiEngine';
 import { urlSmallSet as imageSet } from './fixtures/imagesDataSet';
-import SnapShotContainer from './interfaces/SnapShotContainer';
+import Memo from './interfaces/Memo';
 import FilesIO from './interfaces/FilesIO';
 import { SpaceModifiers } from './modifiers/SpaceModifiers';
 
@@ -21,7 +21,7 @@ async function main() {
     /** Load test images **/
     const loader = await FilesIO.loadUrlSet(imageSet);
 
-    const loadedSnapshots = SnapShotContainer.createSnapShotsFromPixiResources(
+    const loadedSnapshots = Memo.createSnapShotsFromPixiResources(
       loader.resources,
     );
 

@@ -1,9 +1,9 @@
 import { PixiEngine } from './PixiEngine';
-import SnapShotContainer from './SnapShotContainer';
+import Memo from './Memo';
 
 interface ISnapshots {
-  list: SnapShotContainer[];
-  selected: SnapShotContainer[];
+  list: Memo[];
+  selected: Memo[];
 }
 
 export default class App {
@@ -20,7 +20,7 @@ export default class App {
   }
 
   /** Install snapshots in list and viewport **/
-  addSnapshots(snapshot: SnapShotContainer | SnapShotContainer[]) {
+  addSnapshots(snapshot: Memo | Memo[]) {
     if (!Array.isArray(snapshot)) {
       snapshot = [snapshot];
     }

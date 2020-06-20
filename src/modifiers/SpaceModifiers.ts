@@ -1,4 +1,4 @@
-import SnapShotContainer from '../interfaces/SnapShotContainer';
+import Memo from '../interfaces/Memo';
 
 interface IPoint {
   x: number;
@@ -8,7 +8,7 @@ interface IPoint {
 /** TODO: change modifier interface to matrix output (prev, next states for animation) **/
 export class SpaceModifiers {
   static setPositionGrid(
-    elements: SnapShotContainer[],
+    elements: Memo[],
     colLimit: number = 10,
     cellWidth: number = 300,
     cellHeight: number = 100,
