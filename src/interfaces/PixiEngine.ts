@@ -9,23 +9,30 @@ import { Viewport } from 'pixi-viewport';
 export class PixiEngine {
   pixiApp: PIXI.Application;
   pixiViewport: Viewport;
+  hostHTML: HTMLElement;
 
-  constructor(targetDiv: HTMLElement, initWidth: number, initHeight: number) {
+  constructor(targetDiv: HTMLElement) {
+    this.hostHTML = targetDiv;
+
+    const hostHTMLWidth = this.hostHTML.clientWidth;
+    const hostHTMLHeight = this.hostHTML.clientHeight;
+
     this.pixiApp = new PIXI.Application({
-      width: initWidth,
-      height: initHeight,
+      width: hostHTMLWidth,
+      height: hostHTMLHeight,
       antialias: true,
       resolution: 1,
       transparent: true,
     });
-    targetDiv.appendChild(this.pixiApp.view);
+
+    this.hostHTML.appendChild(this.pixiApp.view);
 
     // Viewport
     this.pixiViewport = new Viewport({
-      screenWidth: window.innerWidth,
-      screenHeight: window.innerHeight,
-      worldWidth: initWidth,
-      worldHeight: initHeight,
+      screenWidth: hostHTMLWidth,
+      screenHeight: hostHTMLHeight,
+      worldWidth: hostHTMLWidth,
+      worldHeight: hostHTMLHeight,
       interaction: this.pixiApp.renderer.plugins.interaction, // the interaction module is important for wheel to work properly when renderer.view is placed or scaled
     });
 
@@ -33,6 +40,9 @@ export class PixiEngine {
 
     // Initial render of blank viewport
     this.pixiApp.stage.addChild(this.pixiViewport);
+
+    // Events
+    window.addEventListener('resize', this.resizeViewportHandler);
   }
 
   addToViewport(displayObject: PIXI.DisplayObject | PIXI.DisplayObject[]) {
@@ -42,4 +52,12 @@ export class PixiEngine {
 
     return this.pixiViewport.addChild(displayObject);
   }
+
+  resizeViewportHandler = () => {
+    // solution ref: https://github.com/davidfig/pixi-viewport/issues/212#issuecomment-608231281
+    const hostHTMLWidth = this.hostHTML.clientWidth;
+    const hostHTMLHeight = this.hostHTML.clientHeight;
+    this.pixiViewport.resize(hostHTMLWidth, hostHTMLHeight);
+    this.pixiApp.renderer.resize(hostHTMLWidth, hostHTMLHeight);
+  };
 }

@@ -19,12 +19,15 @@ export default class Memo extends PIXI.Container {
     super();
     this.snapshot = new Snapshot(texture, this);
 
-    this.activateInteraction();
+    // this.activateInteraction();
 
     this.addChild(this.snapshot.sprite);
     this.addChild(this.snapshot.selectionDrawing);
   }
 
+  /**
+   * Next TODO: Setup debug for iOS and Chrome monitoring
+   */
   activateInteraction() {
     // https://pixijs.io/examples/#/interaction/interactivity.js
     // Mouse & touch events are normalized into

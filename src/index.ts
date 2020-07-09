@@ -10,7 +10,7 @@ import { SpaceModifiers } from './modifiers/SpaceModifiers';
 async function main() {
   const appDiv = document.querySelector('.app');
   if (appDiv instanceof HTMLElement) {
-    const app = new App(new PixiEngine(appDiv, 1000, 800));
+    const app = new App(new PixiEngine(appDiv));
 
     /** Temp Test sample **/
     let rectangle = new PIXI.Graphics();
