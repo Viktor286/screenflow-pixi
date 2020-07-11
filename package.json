@@ -64,7 +64,7 @@
     "typescript": "^3.7.5",
     "url-loader": "2.3.0",
     "webpack": "4.42.0",
-    "webpack-dev-server": "3.10.3",
+    "webpack-dev-server": "^3.11.0",
     "webpack-manifest-plugin": "2.2.0",
     "workbox-webpack-plugin": "4.3.1"
   },
@@ -148,6 +148,6 @@
   "devDependencies": {
     "eslint-config-prettier": "^6.11.0",
     "prettier": "^2.0.5",
-    "serve": "^11.3.1"
+    "serve": "^11.3.2"
   }
 }
