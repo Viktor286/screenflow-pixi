@@ -1,15 +1,28 @@
 import * as PIXI from 'pixi.js';
 import { Viewport } from 'pixi-viewport';
+import InteractionEvents from './InteractionEvents';
 
+// PIXI documentation: https://pixijs.download/dev/docs/PIXI.html
+//
+// Module: node_modules/pixi.js/lib/pixi.es.js
+//
+// Code Examples:
 // sprite = new PIXI.Sprite(PIXI.loader.resources["images/anyImage.png"].texture);
 // base = new PIXI.BaseTexture(anyImageObject),
 // texture = new PIXI.Texture(base),
 // sprite = new PIXI.Sprite(texture);
 
+// Viewport documentation: https://davidfig.github.io/pixi-viewport/jsdoc/Viewport.html
+// Module: node_modules/pixi-viewport/dist/viewport.es.js
+
+// Code Examples:
+// this.pixiViewport.moveCenter(3, 3);
+
 export class PixiEngine {
   pixiApp: PIXI.Application;
   pixiViewport: Viewport;
   hostHTML: HTMLElement;
+  interactionEvents: InteractionEvents;
 
   constructor(targetDiv: HTMLElement) {
     this.hostHTML = targetDiv;
@@ -43,6 +56,9 @@ export class PixiEngine {
 
     // Events
     window.addEventListener('resize', this.resizeViewportHandler);
+
+    this.pixiApp.stage.interactive = true;
+    this.interactionEvents = new InteractionEvents(this);
   }
 
   addToViewport(displayObject: PIXI.DisplayObject | PIXI.DisplayObject[]) {
@@ -57,7 +73,7 @@ export class PixiEngine {
     // solution ref: https://github.com/davidfig/pixi-viewport/issues/212#issuecomment-608231281
     const hostHTMLWidth = this.hostHTML.clientWidth;
     const hostHTMLHeight = this.hostHTML.clientHeight;
-    this.pixiViewport.resize(hostHTMLWidth, hostHTMLHeight);
     this.pixiApp.renderer.resize(hostHTMLWidth, hostHTMLHeight);
+    this.pixiViewport.resize(hostHTMLWidth, hostHTMLHeight);
   };
 }

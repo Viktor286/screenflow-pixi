@@ -37,3 +37,19 @@ button:active {
   height: 100%;
   position: absolute;
 }
+
+#uiMonitor {
+  background: #16171c;
+  color: #91b6e3;
+  font-size: 12px;
+  position: fixed;
+  z-index: 9999;
+  padding: 10px;
+  width: 100%;
+  display: flex;
+  bottom: 0;
+}
+
+.e-type {
+  color: white;
+}
