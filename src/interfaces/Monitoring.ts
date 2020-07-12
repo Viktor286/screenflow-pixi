@@ -1,24 +1,21 @@
 class MonitoringColumn {
   logStack: String[];
   container: HTMLElement;
+  content: HTMLElement;
 
   constructor(public title: string, public parent: HTMLElement) {
     this.logStack = [];
-    this.container = this.createLogColumn();
-  }
 
-  createLogColumn() {
-    const container = document.createElement('div');
+    this.container = document.createElement('div');
 
-    container.id = this.title;
-    container.style.width = '30%';
-    // container.style.position = 'fixed'
-    // container.style.zIndex = '10000'
-    // container.style.pointerEvents = 'none'
-    // container.style.userSelect = 'none'
+    this.container.id = this.title;
+    this.container.innerHTML = `<div class="header"><h2>${this.title}</h2></div>`;
 
-    this.parent.appendChild(container);
-    return container;
+    this.content = document.createElement('div');
+    this.content.classList.add('content');
+
+    this.container.appendChild(this.content);
+    this.parent.appendChild(this.container);
   }
 
   addMessage(type: string, textMsg: string) {
@@ -35,7 +32,7 @@ class MonitoringColumn {
   }
 
   updateView() {
-    this.container.innerHTML = this.logStack.join('<br />');
+    this.content.innerHTML = this.logStack.join('<br />');
   }
 }
 
