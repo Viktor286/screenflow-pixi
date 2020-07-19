@@ -21,8 +21,7 @@ class MonitoringColumn {
   addMessage(type: string, textMsg: string) {
     const now = new Date();
     const timestamp = `${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`;
-
-    this.logStack.push(`${timestamp} <span class="e-type">[${type}]</span> ${textMsg}`);
+    this.logStack.push(`${timestamp} <span class="e-type"> | </span> ${textMsg}`);
 
     if (this.logStack.length > 20) {
       this.logStack.shift();

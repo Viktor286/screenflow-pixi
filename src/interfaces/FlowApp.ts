@@ -2,6 +2,8 @@ import { GraphicsEngine } from './GraphicsEngine';
 import Memo from './Memo';
 import { Viewport } from 'pixi-viewport';
 import PIXI from 'pixi.js';
+import DevMonitor from './DevMonitor';
+import StageEvents from './InteractionEvents/StageEvents';
 
 interface IMemos {
   list: Memo[];
@@ -16,6 +18,7 @@ export default class FlowApp {
   stage: PIXI.Container; // engine.pixiApp.stage
   viewport: Viewport; // engine.pixiApp.stage.viewport
   memos: IMemos; // engine.pixiApp.stage.viewport.objects
+  devMonitor: DevMonitor; // TODO: replace for "Debug" with included prod logic
 
   // interactionEvents: InteractionEvents;
 
@@ -28,8 +31,11 @@ export default class FlowApp {
       selected: [],
     };
 
+    this.devMonitor = new DevMonitor();
+
     // Setup app-wide stage
     this.stage.interactive = true;
+    new StageEvents(this.stage, this.devMonitor);
 
     this.viewport = this.setupViewport(this.engine.hostHTML.clientWidth, this.engine.hostHTML.clientHeight);
 
