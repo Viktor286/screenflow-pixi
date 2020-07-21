@@ -4,7 +4,6 @@ import PIXI from 'pixi.js';
 import DevMonitor from './DevMonitor';
 import StageEvents from './InteractionEvents/StageEvents';
 import Viewport from './Viewport';
-import ViewportEvents from './InteractionEvents/ViewportEvents';
 import Memos from './Memos';
 
 export default class FlowApp {
@@ -25,8 +24,7 @@ export default class FlowApp {
     new StageEvents(this.stage, this.devMonitor);
 
     // Setup viewport
-    this.viewport = new Viewport(this.engine);
-    new ViewportEvents(this.viewport.instance, this.devMonitor);
+    this.viewport = new Viewport(this);
     this.stage.addChild(this.viewport.instance);
 
     // Setup Memos

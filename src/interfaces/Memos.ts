@@ -1,12 +1,7 @@
 import * as PIXI from 'pixi.js';
 import { Snapshot } from './Snapshot';
-import MemoEvents from './InteractionEvents/MemoEvents';
+import { MemoEvents } from './InteractionEvents/MemoEvents';
 import FlowApp from './FlowApp';
-
-interface IMemos {
-  list: Memo[];
-  selected: Memo[];
-}
 
 export default class Memos {
   list: Memo[];
@@ -15,6 +10,10 @@ export default class Memos {
   constructor(public app: FlowApp) {
     this.list = [];
     this.selected = [];
+
+    if (this.app.devMonitor) {
+      this.app.devMonitor.addDevMonitor('memoEvents');
+    }
   }
 
   addMemo(resource: PIXI.Texture) {
@@ -23,30 +22,24 @@ export default class Memos {
     this.app.viewport.addToViewport(memo);
   }
 
-  // /**
-  //  *
-  //  * This function starts non-redux pattern
-  //  *
-  //  **/
-  // static createMemosFromPixiResources(resources: PIXI.IResourceDictionary): Memo[] {
-  //   let memos: Memo[] = [];
-  //   for (const resource of Object.values(resources)) {
-  //     const s = new Memo(resource.texture);
-  //     memos.push(s);
-  //   }
-  //   return memos;
-  // }
+  sendEventToMonitor(memo: Memo, eventName: string, msg: string = '') {
+    this.app.devMonitor.dispatchMonitor('memoEvents', `[${memo.id}] ${eventName}`, msg);
+  }
 }
 
 export class Memo extends PIXI.Container {
   snapshot: Snapshot;
   selected: boolean;
   selectionDrawing: PIXI.Graphics;
+  id: string;
   width: number;
   height: number;
+  memos: Memos;
 
-  constructor(texture: PIXI.Texture, app: FlowApp) {
+  constructor(texture: PIXI.Texture, public app: FlowApp) {
     super();
+    this.memos = this.app.memos;
+    this.id = Math.random().toString(32).slice(2);
     this.snapshot = new Snapshot(texture, this);
 
     this.width = this.snapshot.width;
@@ -55,10 +48,10 @@ export class Memo extends PIXI.Container {
     this.selected = false;
     this.selectionDrawing = new PIXI.Graphics();
 
-    new MemoEvents(this, app.devMonitor);
-
     this.addChild(this.snapshot.sprite);
     this.addChild(this.selectionDrawing);
+
+    new MemoEvents(this);
   }
 
   select() {

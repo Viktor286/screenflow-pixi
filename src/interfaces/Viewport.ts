@@ -1,15 +1,20 @@
 import PIXI from 'pixi.js';
 import { GraphicsEngine } from './GraphicsEngine';
 import { Viewport as PixiViewport } from 'pixi-viewport';
+import FlowApp from './FlowApp';
+import ViewportEvents from './InteractionEvents/ViewportEvents';
 
 // Viewport documentation: https://davidfig.github.io/pixi-viewport/jsdoc/Viewport.html
 // Module: node_modules/pixi-viewport/dist/viewport.es.js
 
 export default class Viewport {
   instance: PixiViewport;
+  engine: GraphicsEngine;
 
-  constructor(public engine: GraphicsEngine) {
+  constructor(public app: FlowApp) {
+    this.engine = app.engine;
     this.instance = this.setupViewport(this.engine.hostHTML.clientWidth, this.engine.hostHTML.clientHeight);
+    new ViewportEvents(this.instance, this.app.devMonitor);
   }
 
   setupViewport(hostHTMLWidth: number, hostHTMLHeight: number) {
