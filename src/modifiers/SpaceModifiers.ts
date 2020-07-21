@@ -1,4 +1,4 @@
-import Memo from '../interfaces/Memo';
+import { Memo } from '../interfaces/Memos';
 
 interface IPoint {
   x: number;

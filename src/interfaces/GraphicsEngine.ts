@@ -11,7 +11,7 @@ import * as PIXI from 'pixi.js';
 // sprite = new PIXI.Sprite(texture);
 
 export class GraphicsEngine {
-  pixiApp: PIXI.Application;
+  instance: PIXI.Application;
   hostHTML: HTMLElement;
 
   constructor(targetDiv: HTMLElement) {
@@ -20,7 +20,7 @@ export class GraphicsEngine {
     const hostHTMLWidth = this.hostHTML.clientWidth;
     const hostHTMLHeight = this.hostHTML.clientHeight;
 
-    this.pixiApp = new PIXI.Application({
+    this.instance = new PIXI.Application({
       width: hostHTMLWidth,
       height: hostHTMLHeight,
       antialias: true,
@@ -28,6 +28,6 @@ export class GraphicsEngine {
       transparent: true,
     });
 
-    this.hostHTML.appendChild(this.pixiApp.view);
+    this.hostHTML.appendChild(this.instance.view);
   }
 }

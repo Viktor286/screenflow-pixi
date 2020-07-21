@@ -19,6 +19,10 @@ export default class DevMonitor {
     this.htmlHost.style.bottom = '0';
     this.htmlHost.style.background = '#16171c';
     this.htmlHost.style.color = '#91b6e3';
+    this.htmlHost.style.fontSize = '12px';
+    this.htmlHost.style.maxHeight = '50vh';
+    this.htmlHost.style.display = 'flex';
+    this.htmlHost.style.justifyContent = 'space-around';
     this.htmlHost.style.zIndex = '9999'; // TODO: Inspect z-indexes
 
     window.document.body.appendChild(this.htmlHost);

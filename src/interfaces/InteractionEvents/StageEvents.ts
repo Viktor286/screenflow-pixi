@@ -12,7 +12,7 @@ export default class StageEvents {
     this.initStageEvents();
   }
 
-  sendToMonitor(eventName: string, msg: string) {
+  sendToMonitor(eventName: string, msg: string = '') {
     if (this.eventMonitor instanceof DevMonitor) {
       this.eventMonitor.dispatchMonitor('stageEvents', eventName, msg);
     }
@@ -65,8 +65,9 @@ export default class StageEvents {
 
   stageClick(e: StageEvent) {
     const eventName = 'Click';
-    console.log(`[stage] ${eventName}`, e);
-    this.sendToMonitor(eventName, `${Math.round(e.data.global.x)} : ${Math.round(e.data.global.y)}`);
+    const msg = `${Math.round(e.data.global.x)} : ${Math.round(e.data.global.y)}`;
+    console.log(`[stage] ${eventName} ${msg}`, e);
+    this.sendToMonitor(eventName, msg);
   }
 
   stageMouseDown(e: StageEvent) {

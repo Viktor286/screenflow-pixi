@@ -3,7 +3,6 @@ import './index.css';
 import FlowApp from './interfaces/FlowApp';
 import { GraphicsEngine } from './interfaces/GraphicsEngine';
 import { urlSmallSet as imageSet } from './fixtures/imagesDataSet';
-import Memo from './interfaces/Memo';
 import FilesIO from './interfaces/FilesIO';
 import { SpaceModifiers } from './modifiers/SpaceModifiers';
 
@@ -16,16 +15,16 @@ async function main() {
     let rectangle = new PIXI.Graphics();
     rectangle.lineStyle(1.1, 0xff3300, 1);
     rectangle.drawRect(300, 300, 100, 100);
-    app.addToViewport(rectangle);
+    app.viewport.addToViewport(rectangle);
 
     /** Load test images **/
     const loader = await FilesIO.loadUrlSet(imageSet);
 
-    const loadedSnapshots = Memo.createMemosFromPixiResources(loader.resources);
+    for (const resource of Object.values(loader.resources)) {
+      app.memos.addMemo(resource.texture);
+    }
 
-    SpaceModifiers.setPositionGrid(loadedSnapshots, 8, 240, 120, 0.1);
-
-    app.addMemo(loadedSnapshots);
+    SpaceModifiers.setPositionGrid(app.memos.list, 8, 240, 120, 0.1);
 
     // /** Auto update from store **/
     // app.state.snapshots.store.forEach((snapShot, i) => {
