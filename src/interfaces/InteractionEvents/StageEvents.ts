@@ -1,7 +1,7 @@
 import * as PIXI from 'pixi.js';
 import DevMonitor from '../DevMonitor';
 
-type StageEvent = PIXI.interaction.InteractionEvent;
+type StageEvent = PIXI.InteractionEvent;
 
 export default class StageEvents {
   constructor(public stage: PIXI.Container, public eventMonitor: DevMonitor | null) {

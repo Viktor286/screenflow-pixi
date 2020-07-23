@@ -8,7 +8,7 @@ interface MemoEvent {
   target: Memo;
   currentTarget: Memo;
   type: string;
-  data: PIXI.interaction.InteractionData;
+  data: PIXI.InteractionData;
   stopPropagation(): void;
   reset(): void;
 }
