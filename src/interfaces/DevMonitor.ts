@@ -1,39 +1,42 @@
 type StreamMessage = string;
 type Monitor = 'stageEvents' | 'viewportEvents' | 'memoEvents';
 
-interface IMonitors {
+interface IMonitorStreams {
   [key: string]: MonitoringStream;
 }
 
 export default class DevMonitor {
-  htmlHost: HTMLElement;
-  monitors: IMonitors;
+  eventMonitorHost: HTMLElement;
+  eventMonitorStreams: IMonitorStreams;
 
   constructor() {
-    this.monitors = {};
+    this.eventMonitorStreams = {};
 
-    this.htmlHost = document.createElement('div');
-    this.htmlHost.id = 'DevMonitor';
-    this.htmlHost.style.width = '100%';
-    this.htmlHost.style.position = 'absolute';
-    this.htmlHost.style.bottom = '0';
-    this.htmlHost.style.background = '#16171c';
-    this.htmlHost.style.color = '#91b6e3';
-    this.htmlHost.style.fontSize = '12px';
-    this.htmlHost.style.maxHeight = '50vh';
-    this.htmlHost.style.display = 'flex';
-    this.htmlHost.style.justifyContent = 'space-around';
-    this.htmlHost.style.zIndex = '9999'; // TODO: Inspect z-indexes
+    this.eventMonitorHost = this.createEventMonitorHost();
 
-    window.document.body.appendChild(this.htmlHost);
+    window.document.body.appendChild(this.eventMonitorHost);
+  }
 
-    console.log('this.htmlHost', this.htmlHost);
+  createEventMonitorHost() {
+    const div = document.createElement('div');
+    div.id = 'EventMonitor';
+    div.style.width = '100%';
+    div.style.position = 'absolute';
+    div.style.bottom = '0';
+    div.style.background = '#16171c';
+    div.style.color = '#91b6e3';
+    div.style.fontSize = '12px';
+    div.style.maxHeight = '50vh';
+    div.style.display = 'flex';
+    div.style.justifyContent = 'space-around';
+    div.style.zIndex = '9999'; // TODO: Inspect z-indexes
+    return div;
   }
 
   createDevMonitorElement(title: string): HTMLElement {
     const section = document.createElement('section');
     section.id = title;
-    section.classList.add('dev-monitor-section');
+    section.classList.add('event-monitor-section');
     section.innerHTML = `<div class="header"><h2>${title}</h2></div>`;
     return section;
   }
@@ -42,13 +45,13 @@ export default class DevMonitor {
     const mStream = new MonitoringStream(title);
     const mSection = this.createDevMonitorElement(title);
     mStream.initStreamUiContainer(mSection);
-    this.htmlHost.appendChild(mSection);
-    this.monitors[title] = mStream;
+    this.eventMonitorHost.appendChild(mSection);
+    this.eventMonitorStreams[title] = mStream;
   }
 
   dispatchMonitor(monitor: Monitor, eventType: string, eventMsg: string) {
-    this.monitors[monitor].addStreamMessage(eventType, eventMsg);
-    this.monitors[monitor].updateStreamView();
+    this.eventMonitorStreams[monitor].addStreamMessage(eventType, eventMsg);
+    this.eventMonitorStreams[monitor].updateStreamView();
   }
 }
 
