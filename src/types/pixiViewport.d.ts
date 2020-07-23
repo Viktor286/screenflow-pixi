@@ -222,6 +222,13 @@ interface ZoomedEventData {
   viewport: Viewport;
 }
 
+interface lastViewport {
+  scaleX: number;
+  scaleY: number;
+  x: number;
+  y: number;
+}
+
 export declare class Viewport extends PIXI.Container {
   screenWidth: number;
   screenHeight: number;
@@ -245,6 +252,9 @@ export declare class Viewport extends PIXI.Container {
 
   dirty: boolean;
   pause: boolean;
+
+  moving: boolean;
+  lastViewport: any;
 
   constructor(options?: ViewportOptions);
 

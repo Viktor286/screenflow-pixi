@@ -1,5 +1,5 @@
 import DevMonitor from '../DevMonitor';
-import { ClickEventData, Viewport as PixiViewport } from 'pixi-viewport';
+import { ClickEventData, MovedEventData, Viewport as PixiViewport } from 'pixi-viewport';
 
 export default class ViewportEvents {
   constructor(public viewport: PixiViewport, public eventMonitor: DevMonitor | null) {
@@ -16,6 +16,8 @@ export default class ViewportEvents {
     }
   }
 
+  // Docs
+  // https://davidfig.github.io/pixi-viewport/jsdoc/Viewport.html#event:frame-end
   initViewportEvents() {
     // Activate only required events for optimization purposes
 
@@ -23,13 +25,13 @@ export default class ViewportEvents {
     this.viewport.on('clicked', (e) => this.viewportClicked(e));
     this.viewport.on('drag-start', (e) => this.viewportDragStart(e));
     this.viewport.on('drag-end', (e) => this.viewportDragEnd(e));
-    // viewport.on('frame-end', (e) => this.viewportFrameEnd(e));
+    // this.viewport.on('frame-end', (e) => this.viewportFrameEnd(e)); // ???
 
-    // viewport.on('moved', (e) => this.viewportMoved(e));
-    // viewport.on('moved-end', (e) => this.viewportMovedEnd(e));
-    // viewport.on('zoomed-end', (e) => this.viewportZoomedEnd(e));
-    // viewport.on('mouse-edge-start', (e) => this.viewportMouseEdgeStart(e));
-    // viewport.on('mouse-edge-end', (e) => this.viewportMouseEdgeEnd(e));
+    // this.viewport.on('moved', (e) => this.viewportMoved(e));
+    this.viewport.on('moved-end', (e) => this.viewportMovedEnd(e));
+    this.viewport.on('zoomed-end', (e) => this.viewportZoomedEnd(e));
+    this.viewport.on('mouse-edge-start', (e) => this.viewportMouseEdgeStart(e));
+    this.viewport.on('mouse-edge-end', (e) => this.viewportMouseEdgeEnd(e));
 
     // Viewport plugins
     // viewport.on('wheel-scroll', (e) => this.viewportWheelScroll(e));
@@ -47,88 +49,115 @@ export default class ViewportEvents {
 
   viewportClicked(e: ClickEventData) {
     const eventName = 'Clicked';
-    console.log(`[viewport] ${eventName}`, e);
-    this.sendToMonitor(eventName);
+    const msg = `${Math.round(e.event.data.global.x)} : ${Math.round(e.event.data.global.y)}`;
+    console.log(`[viewport] ${eventName} ${msg}`, e);
+    this.sendToMonitor(eventName, msg);
   }
 
   viewportDragStart(e: ClickEventData) {
     const eventName = 'DragStart';
-    console.log(`[viewport] ${eventName}`, e);
-    this.sendToMonitor(eventName);
+    const msg = `${Math.round(e.event.data.global.x)} : ${Math.round(e.event.data.global.y)}`;
+    console.log(`[viewport] ${eventName} ${msg}`, e);
+    this.sendToMonitor(eventName, msg);
   }
 
   viewportDragEnd(e: ClickEventData) {
     const eventName = 'DragEnd';
-    console.log(`[viewport] ${eventName}`, e);
-    this.sendToMonitor(eventName);
+    const msg = `${Math.round(e.event.data.global.x)} : ${Math.round(e.event.data.global.y)}`;
+    console.log(`[viewport] ${eventName} ${msg}`, e);
+    this.sendToMonitor(eventName, msg);
   }
 
-  // viewportFrameEnd(e: Viewport) {
+  // viewportFrameEnd(e: PixiViewport) {
   //   console.log('[viewport] FrameEnd', e);
   // }
-  //
-  // viewportMoved(e: Viewport) {
-  //   console.log('[viewport] Moved', e);
-  // }
-  //
-  // viewportMovedEnd(e: Viewport) {
-  //   console.log('[viewport] MovedEnd', e);
-  // }
-  //
-  // viewportZoomedEnd(e: Viewport) {
-  //   console.log('[viewport] ZoomedEnd', e);
-  // }
-  //
-  // viewportMouseEdgeStart(e: Viewport) {
-  //   console.log('[viewport] MouseEdgeStart', e);
-  // }
-  //
-  // viewportMouseEdgeEnd(e: Viewport) {
-  //   console.log('[viewport] MouseEdgeEnd', e);
-  // }
+
+  // hitArea.x, .y = lastViewport.x, .y
+  // transform.scale._x = lastViewport.scaleX
+  viewportMoved(e: MovedEventData) {
+    const eventName = 'Moved';
+    const msg = this.getViewportLogMsg(e.viewport);
+    console.log(`[viewport] ${eventName} ${msg}`);
+    this.sendToMonitor(eventName, msg);
+  }
+
+  viewportMovedEnd(e: PixiViewport) {
+    const eventName = 'MovedEnd';
+    const msg = this.getViewportLogMsg(e);
+    console.log(`[viewport] ${eventName} ${msg}`, e);
+    this.sendToMonitor(eventName, msg);
+  }
+
+  getViewportLogMsg(v: PixiViewport) {
+    const { lastViewport } = v;
+    const { scaleX, scaleY, x, y } = lastViewport;
+    return `${Math.round(x)}:${Math.round(y)} (${scaleX.toFixed(2)}:${scaleY.toFixed(2)})`;
+  }
+
+  viewportZoomedEnd(e: PixiViewport) {
+    const eventName = 'ZoomedEnd';
+    const msg = this.getViewportLogMsg(e);
+    console.log(`[viewport] ${eventName} ${msg}`, e);
+    this.sendToMonitor(eventName, msg);
+  }
+
+  // What is MouseEdge start/end?
+  viewportMouseEdgeStart(e: PixiViewport) {
+    const eventName = 'MouseEdgeStart';
+    const msg = ``;
+    console.log(`[viewport] ${eventName} ${msg}`, e);
+    this.sendToMonitor(eventName, msg);
+  }
+
+  viewportMouseEdgeEnd(e: PixiViewport) {
+    const eventName = 'MouseEdgeEnd';
+    const msg = ``;
+    console.log(`[viewport] ${eventName} ${msg}`, e);
+    this.sendToMonitor(eventName, msg);
+  }
   //
   // // Viewport plugins
-  // viewportWheelScroll(e: Viewport) {
+  // viewportWheelScroll(e: PixiViewport) {
   //   console.log('[viewport] WheelScroll', e);
   // }
   //
-  // viewportPinchStart(e: Viewport) {
+  // viewportPinchStart(e: PixiViewport) {
   //   console.log('[viewport] PinchStart', e);
   // }
   //
-  // viewportPinchEnd(e: Viewport) {
+  // viewportPinchEnd(e: PixiViewport) {
   //   console.log('[viewport] PinchEnd', e);
   // }
   //
-  // viewportBounceXStart(e: Viewport) {
+  // viewportBounceXStart(e: PixiViewport) {
   //   console.log('[viewport] BounceXStart', e);
   // }
   //
-  // viewportBounceXEnd(e: Viewport) {
+  // viewportBounceXEnd(e: PixiViewport) {
   //   console.log('[viewport] BounceXEnd', e);
   // }
   //
-  // viewportBounceYStart(e: Viewport) {
+  // viewportBounceYStart(e: PixiViewport) {
   //   console.log('[viewport] BounceYStart', e);
   // }
   //
-  // viewportBounceYEnd(e: Viewport) {
+  // viewportBounceYEnd(e: PixiViewport) {
   //   console.log('[viewport] BounceYEnd', e);
   // }
   //
-  // viewportSnapStart(e: Viewport) {
+  // viewportSnapStart(e: PixiViewport) {
   //   console.log('[viewport] SnapStart', e);
   // }
   //
-  // viewportSnapEnd(e: Viewport) {
+  // viewportSnapEnd(e: PixiViewport) {
   //   console.log('[viewport] SnapEnd', e);
   // }
   //
-  // viewportSnapZoomStart(e: Viewport) {
+  // viewportSnapZoomStart(e: PixiViewport) {
   //   console.log('[viewport] SnapZoomStart', e);
   // }
   //
-  // viewportSnapZoomEnd(e: Viewport) {
+  // viewportSnapZoomEnd(e: PixiViewport) {
   //   console.log('[viewport] SnapZoomEnd', e);
   // }
 }

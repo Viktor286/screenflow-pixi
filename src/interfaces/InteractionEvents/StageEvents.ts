@@ -40,15 +40,16 @@ export default class StageEvents {
     // this.stage.on('rightup', (e: StageEvent) => this.stageRightUp(e));
     // this.stage.on('rightupoutside', (e: StageEvent) => this.stageRightUpOutside(e));
 
-    // Button events
-    // this.stage.on('pointercancel', (e: StageEvent) => this.stagePointerCancel(e));
-    // this.stage.on('pointerdown', (e: StageEvent) => this.stagePointerDown(e));
+    // Pointer events
     // this.stage.on('pointermove', (e: StageEvent) => this.stagePointerMove(e));
-    // this.stage.on('pointerout', (e: StageEvent) => this.stagePointerOut(e));
+
+    this.stage.on('pointercancel', (e: StageEvent) => this.stagePointerCancel(e));
+    this.stage.on('pointerdown', (e: StageEvent) => this.stagePointerDown(e));
+    this.stage.on('pointerout', (e: StageEvent) => this.stagePointerOut(e));
     // this.stage.on('pointerover', (e: StageEvent) => this.stagePointerOver(e));
-    // this.stage.on('pointertap', (e: StageEvent) => this.stagePointerTap(e));
-    // this.stage.on('pointerup', (e: StageEvent) => this.stagePointerUp(e));
-    // this.stage.on('pointerupoutside', (e: StageEvent) => this.stagePointerUpOutside(e));
+    this.stage.on('pointertap', (e: StageEvent) => this.stagePointerTap(e));
+    this.stage.on('pointerup', (e: StageEvent) => this.stagePointerUp(e));
+    this.stage.on('pointerupoutside', (e: StageEvent) => this.stagePointerUpOutside(e));
 
     // Touch-only events
     // this.stage.on('touchcancel', (e: StageEvent) => this.stageTouchCancel(e));
@@ -95,35 +96,59 @@ export default class StageEvents {
   }
 
   stagePointerCancel(e: StageEvent) {
-    console.log('[stage] PointerCancel', e);
+    const eventName = 'PointerCancel';
+    const msg = `${Math.round(e.data.global.x)} : ${Math.round(e.data.global.y)}`;
+    console.log(`[stage] ${eventName} ${msg}`, e);
+    this.sendToMonitor(eventName, msg);
   }
 
   stagePointerDown(e: StageEvent) {
-    console.log('[stage] PointerDown', e);
+    const eventName = 'PointerDown';
+    const msg = `${Math.round(e.data.global.x)} : ${Math.round(e.data.global.y)}`;
+    console.log(`[stage] ${eventName} ${msg}`, e);
+    this.sendToMonitor(eventName, msg);
   }
 
   stagePointerMove(e: StageEvent) {
-    console.log('[stage] PointerMove', e);
+    const eventName = 'PointerMove';
+    const msg = `${Math.round(e.data.global.x)} : ${Math.round(e.data.global.y)}`;
+    console.log(`[stage] ${eventName} ${msg}`, e);
+    this.sendToMonitor(eventName, msg);
   }
 
   stagePointerOut(e: StageEvent) {
-    console.log('[stage] PointerOut', e);
+    const eventName = 'PointerOut';
+    const msg = `${Math.round(e.data.global.x)} : ${Math.round(e.data.global.y)}`;
+    console.log(`[stage] ${eventName} ${msg}`, e);
+    this.sendToMonitor(eventName, msg);
   }
 
   stagePointerOver(e: StageEvent) {
-    console.log('[stage] PointerOver', e);
+    const eventName = 'PointerOver';
+    const msg = `${Math.round(e.data.global.x)} : ${Math.round(e.data.global.y)}`;
+    console.log(`[stage] ${eventName} ${msg}`, e);
+    this.sendToMonitor(eventName, msg);
   }
 
   stagePointerTap(e: StageEvent) {
-    console.log('[stage] PointerTap', e);
+    const eventName = 'PointerTap';
+    const msg = `${Math.round(e.data.global.x)} : ${Math.round(e.data.global.y)}`;
+    console.log(`[stage] ${eventName} ${msg}`, e);
+    this.sendToMonitor(eventName, msg);
   }
 
   stagePointerUp(e: StageEvent) {
-    console.log('[stage] PointerUp', e);
+    const eventName = 'PointerUp';
+    const msg = `${Math.round(e.data.global.x)} : ${Math.round(e.data.global.y)}`;
+    console.log(`[stage] ${eventName} ${msg}`, e);
+    this.sendToMonitor(eventName, msg);
   }
 
   stagePointerUpOutside(e: StageEvent) {
-    console.log('[stage] PointerUpOutside', e);
+    const eventName = 'PointerUpOutside';
+    const msg = `${Math.round(e.data.global.x)} : ${Math.round(e.data.global.y)}`;
+    console.log(`[stage] ${eventName} ${msg}`, e);
+    this.sendToMonitor(eventName, msg);
   }
 
   stageRemoved(e: StageEvent) {
