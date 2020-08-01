@@ -1,9 +1,16 @@
+import FlowApp from '../FlowApp';
 import PIXI from 'pixi.js';
 import DevMonitor from '../DevMonitor';
 import { ClickEventData, MovedEventData, Viewport as PixiViewport } from 'pixi-viewport';
 
 export default class ViewportEvents {
-  constructor(public viewport: PixiViewport, public eventMonitor: DevMonitor | null) {
+  eventMonitor: DevMonitor | null;
+  viewport: PixiViewport;
+
+  constructor(public app: FlowApp) {
+    this.viewport = this.app.viewport.instance;
+    this.eventMonitor = this.app.devMonitor;
+
     if (this.eventMonitor instanceof DevMonitor) {
       this.eventMonitor.addDevMonitor('viewportEvents');
     }
@@ -54,13 +61,13 @@ export default class ViewportEvents {
   viewportPointerTap(e: PIXI.InteractionEvent) {
     const eventName = 'Pointer Tap';
     const msg = ``;
-    console.log(`[container] ${eventName} ${msg}`, e);
+    console.log(`[viewport] ${eventName} ${msg}`);
     this.sendToMonitor(eventName, msg);
   }
 
   viewportClicked(e: ClickEventData) {
     const eventName = 'Clicked';
-    const msg = `${Math.round(e.event.data.global.x)} : ${Math.round(e.event.data.global.y)}`;
+    const msg = `${eventName} ${Math.round(e.world.x)} : ${Math.round(e.world.y)} `;
     console.log(`[viewport] ${eventName} ${msg}`, e);
     this.sendToMonitor(eventName, msg);
   }

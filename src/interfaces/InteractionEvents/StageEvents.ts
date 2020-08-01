@@ -1,10 +1,17 @@
 import * as PIXI from 'pixi.js';
+import FlowApp from '../FlowApp';
 import DevMonitor from '../DevMonitor';
 
 type StageEvent = PIXI.InteractionEvent;
 
 export default class StageEvents {
-  constructor(public stage: PIXI.Container, public eventMonitor: DevMonitor | null) {
+  eventMonitor: DevMonitor | null;
+  stage: PIXI.Container;
+
+  constructor(public app: FlowApp) {
+    this.stage = this.app.stage;
+    this.eventMonitor = this.app.devMonitor;
+
     if (this.eventMonitor instanceof DevMonitor) {
       this.eventMonitor.addDevMonitor('stageEvents');
     }
@@ -107,6 +114,8 @@ export default class StageEvents {
     const msg = `${Math.round(e.data.global.x)} : ${Math.round(e.data.global.y)}`;
     console.log(`[stage] ${eventName} ${msg}`, e);
     this.sendToMonitor(eventName, msg);
+    const { x, y } = this.app.viewport.instance.toWorld(e.data.global.x, e.data.global.y);
+    this.app.putFocusPoint(x, y);
   }
 
   stagePointerMove(e: StageEvent) {

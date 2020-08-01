@@ -20,6 +20,7 @@ export default class Memos {
     const memo = new Memo(resource, this.app);
     this.list.push(memo);
     this.app.viewport.addToViewport(memo);
+    this.app.viewport.instance.setChildIndex(memo, 0);
   }
 
   sendEventToMonitor(memo: Memo, eventName: string, msg: string = '') {
