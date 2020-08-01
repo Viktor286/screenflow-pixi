@@ -13,6 +13,7 @@ export default class DevMonitor {
     this.eventMonitorStreams = {};
 
     this.eventMonitorHost = this.createEventMonitorHost();
+    // TODO: display viewport params: move, w, h, center, corner, zoom %, scale
 
     window.document.body.appendChild(this.eventMonitorHost);
   }

@@ -253,7 +253,7 @@ export declare class Viewport extends PIXI.Container {
   pause: boolean;
 
   moving: boolean;
-  lastViewport: any;
+  lastViewport: lastViewport;
 
   constructor(options?: ViewportOptions);
 

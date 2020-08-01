@@ -19,6 +19,18 @@ export class MemoEvents {
   }
 
   initStageEvents() {
+    // TODO: we need to define list of universal events
+
+    // Singe Press
+    // Double Press
+    // Triple Press
+
+    // Singe Press + hold timer
+    // Double Press + hold timer
+
+    // Slide -- very unnatural for focus
+    // maybe could be removed to slide-jump or edge-slide
+
     // Activate only required events for optimization purposes
 
     // Events for PIXI.Container: https://pixijs.download/dev/docs/PIXI.Container.html
@@ -27,7 +39,7 @@ export class MemoEvents {
     // the pointer* events for handling different button events.
     this.memo.interactive = true;
 
-    // Button events
+    // Normalized "pointer" events
     // this.memo.on('pointermove', (e: MemoEvent) => this.memoPointerMove(e));
     this.memo.on('pointercancel', (e: MemoEvent) => this.memoPointerCancel(e));
     this.memo.on('pointerdown', (e: MemoEvent) => this.memoPointerDown(e));
@@ -36,6 +48,16 @@ export class MemoEvents {
     this.memo.on('pointertap', (e: MemoEvent) => this.memoPointerTap(e));
     this.memo.on('pointerup', (e: MemoEvent) => this.memoPointerUp(e));
     this.memo.on('pointerupoutside', (e: MemoEvent) => this.memoPointerUpOutside(e));
+
+    // Touch-device specific events
+    // this.memo.on('tap', (e: MemoEvent) => this.memoTap(e));
+    // this.memo.on('touchstart', (e: MemoEvent) => this.memoTouchStart(e));
+    // this.memo.on('touchend', (e: MemoEvent) => this.memoTouchEnd(e));
+    // touchcancel
+    // touchend
+    // touchendoutside
+    // touchmove
+    // touchstart
   }
 
   sendToMonitor(eventName: string, msg: string = '') {
@@ -46,35 +68,56 @@ export class MemoEvents {
 
   memoPointerCancel(e: MemoEvent) {
     console.log('[memo] PointerCancel', e);
+    this.sendToMonitor('Pointer Cancel');
   }
 
   memoPointerDown(e: MemoEvent) {
     console.log('[memo] PointerDown', e);
+    this.sendToMonitor('Pointer Down');
   }
 
   memoPointerMove(e: MemoEvent) {
     console.log('[memo] PointerMove', e);
+    this.sendToMonitor('Pointer Move');
   }
 
   memoPointerOut(e: MemoEvent) {
     console.log('[memo] PointerOut', e);
+    this.sendToMonitor('Pointer Out');
   }
 
   memoPointerOver(e: MemoEvent) {
     console.log('[memo] PointerOver', e);
-    this.sendToMonitor('PointerOver');
+    this.sendToMonitor('Pointer Over');
   }
 
   memoPointerTap(e: MemoEvent) {
     console.log('[memo] PointerTap', e);
-    this.sendToMonitor('PointerTap');
+    this.sendToMonitor('Pointer Tap');
   }
 
   memoPointerUp(e: MemoEvent) {
     console.log('[memo] PointerUp', e);
+    this.sendToMonitor('Pointer Up');
   }
 
   memoPointerUpOutside(e: MemoEvent) {
     console.log('[memo] PointerUpOutside', e);
+    this.sendToMonitor('Pointer UpOutside');
   }
+
+  // memoTap(e: MemoEvent) {
+  //   console.log('[memo] Tap', e);
+  //   this.sendToMonitor('Tap');
+  // }
+  //
+  // memoTouchStart(e: MemoEvent) {
+  //   console.log('[memo] PointerTap', e);
+  //   this.sendToMonitor('PointerTap');
+  // }
+  //
+  // memoTouchEnd(e: MemoEvent) {
+  //   this.sendToMonitor('TouchEnd');
+  //   console.log('[memo] TouchEnd', e);
+  // }
 }

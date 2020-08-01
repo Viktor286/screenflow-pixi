@@ -1,3 +1,4 @@
+import PIXI from 'pixi.js';
 import DevMonitor from '../DevMonitor';
 import { ClickEventData, MovedEventData, Viewport as PixiViewport } from 'pixi-viewport';
 
@@ -20,6 +21,9 @@ export default class ViewportEvents {
   // https://davidfig.github.io/pixi-viewport/jsdoc/Viewport.html#event:frame-end
   initViewportEvents() {
     // Activate only required events for optimization purposes
+
+    // Container events
+    this.viewport.on('pointertap', (e) => this.viewportPointerTap(e));
 
     // Viewport
     this.viewport.on('clicked', (e) => this.viewportClicked(e));
@@ -45,6 +49,13 @@ export default class ViewportEvents {
     // viewport.on('snap-end', (e) => this.viewportSnapEnd(e));
     // viewport.on('snap-zoom-start', (e) => this.viewportSnapZoomStart(e));
     // viewport.on('snap-zoom-end', (e) => this.viewportSnapZoomEnd(e));
+  }
+
+  viewportPointerTap(e: PIXI.InteractionEvent) {
+    const eventName = 'Pointer Tap';
+    const msg = ``;
+    console.log(`[container] ${eventName} ${msg}`, e);
+    this.sendToMonitor(eventName, msg);
   }
 
   viewportClicked(e: ClickEventData) {
