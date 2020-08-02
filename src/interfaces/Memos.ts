@@ -24,7 +24,9 @@ export default class Memos {
   }
 
   sendEventToMonitor(memo: Memo, eventName: string, msg: string = '') {
-    this.app.devMonitor.dispatchMonitor('memoEvents', `[${memo.id}] ${eventName}`, msg);
+    if (this.app.devMonitor) {
+      this.app.devMonitor.dispatchMonitor('memoEvents', `[${memo.id}] ${eventName}`, msg);
+    }
   }
 }
 

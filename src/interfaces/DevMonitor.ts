@@ -25,6 +25,7 @@ export default class DevMonitor {
     div.style.position = 'absolute';
     div.style.bottom = '0';
     div.style.background = '#16171c';
+    div.style.opacity = '0.65';
     div.style.color = '#91b6e3';
     div.style.fontSize = '12px';
     div.style.maxHeight = '50vh';

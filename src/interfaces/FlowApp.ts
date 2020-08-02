@@ -13,7 +13,7 @@ export default class FlowApp {
   engine: GraphicsEngine;
   stage: PIXI.Container;
   viewport: Viewport;
-  devMonitor: DevMonitor; // TODO: replace for "Debug" with included prod logic
+  devMonitor: DevMonitor | null; // TODO: replace for "Debug" with included prod logic
   memos: Memos;
   pixiApp: PIXI.Application;
   screen: PIXI.Rectangle;
@@ -54,6 +54,7 @@ export default class FlowApp {
 
     // Handler for "pixiApp and Viewport" dimensions dependency on window size
     window.addEventListener('resize', this.resizeViewportHandler);
+    // window.addEventListener('orientationchange', this.orientationchangeViewportHandler, false);
 
     // For preventing page zoom you should prevent wheel event:
     window.addEventListener(
@@ -70,11 +71,14 @@ export default class FlowApp {
   }
 
   resizeViewportHandler = () => {
+    console.log('!!resizeViewportHandler');
     // solution ref: https://github.com/davidfig/pixi-viewport/issues/212#issuecomment-608231281
     const hostHTMLWidth = this.engine.hostHTML.clientWidth;
     const hostHTMLHeight = this.engine.hostHTML.clientHeight;
-    this.pixiApp.renderer.resize(hostHTMLWidth, hostHTMLHeight);
-    this.viewport.instance.resize(hostHTMLWidth, hostHTMLHeight);
+    if (this.pixiApp.screen.width !== hostHTMLWidth) {
+      this.pixiApp.renderer.resize(hostHTMLWidth, hostHTMLHeight);
+      this.viewport.instance.resize(hostHTMLWidth, hostHTMLHeight);
+    }
   };
 
   initFocusPoint() {

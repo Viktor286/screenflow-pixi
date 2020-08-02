@@ -1,6 +1,7 @@
 import * as PIXI from 'pixi.js';
 import FlowApp from '../FlowApp';
 import DevMonitor from '../DevMonitor';
+import { AnimateUiControls } from '../Animations';
 
 type StageEvent = PIXI.InteractionEvent;
 
@@ -114,8 +115,11 @@ export default class StageEvents {
     const msg = `${Math.round(e.data.global.x)} : ${Math.round(e.data.global.y)}`;
     console.log(`[stage] ${eventName} ${msg}`, e);
     this.sendToMonitor(eventName, msg);
+
     const { x, y } = this.app.viewport.instance.toWorld(e.data.global.x, e.data.global.y);
     this.app.putFocusPoint(x, y);
+
+    AnimateUiControls.slideViewport(this.app.viewport.instance, x, y);
   }
 
   stagePointerMove(e: StageEvent) {
