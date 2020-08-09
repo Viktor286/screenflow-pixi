@@ -35,7 +35,8 @@ export default class FlowApp {
     gsap.registerPlugin(PixiPlugin);
     PixiPlugin.registerPIXI(PIXI);
 
-    this.devMonitor = new DevMonitor();
+    // this.devMonitor = new DevMonitor();
+    this.devMonitor = null;
 
     // Setup stage
     this.stage.interactive = true;
@@ -71,7 +72,6 @@ export default class FlowApp {
   }
 
   resizeViewportHandler = () => {
-    console.log('!!resizeViewportHandler');
     // solution ref: https://github.com/davidfig/pixi-viewport/issues/212#issuecomment-608231281
     const hostHTMLWidth = this.engine.hostHTML.clientWidth;
     const hostHTMLHeight = this.engine.hostHTML.clientHeight;

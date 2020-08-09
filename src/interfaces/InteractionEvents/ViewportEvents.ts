@@ -21,6 +21,7 @@ export default class ViewportEvents {
   sendToMonitor(eventName: string, msg: string = '') {
     if (this.eventMonitor instanceof DevMonitor) {
       this.eventMonitor.dispatchMonitor('viewportEvents', eventName, msg);
+      console.log(`[viewport] ${eventName} ${msg}`);
     }
   }
 
@@ -61,28 +62,24 @@ export default class ViewportEvents {
   viewportPointerTap(e: PIXI.InteractionEvent) {
     const eventName = 'Pointer Tap';
     const msg = ``;
-    console.log(`[viewport] ${eventName} ${msg}`);
     this.sendToMonitor(eventName, msg);
   }
 
   viewportClicked(e: ClickEventData) {
     const eventName = 'Clicked';
     const msg = `${eventName} ${Math.round(e.world.x)} : ${Math.round(e.world.y)} `;
-    console.log(`[viewport] ${eventName} ${msg}`, e);
     this.sendToMonitor(eventName, msg);
   }
 
   viewportDragStart(e: ClickEventData) {
     const eventName = 'DragStart';
     const msg = `${Math.round(e.event.data.global.x)} : ${Math.round(e.event.data.global.y)}`;
-    console.log(`[viewport] ${eventName} ${msg}`, e);
     this.sendToMonitor(eventName, msg);
   }
 
   viewportDragEnd(e: ClickEventData) {
     const eventName = 'DragEnd';
     const msg = `${Math.round(e.event.data.global.x)} : ${Math.round(e.event.data.global.y)}`;
-    console.log(`[viewport] ${eventName} ${msg}`, e);
     this.sendToMonitor(eventName, msg);
   }
 
@@ -95,14 +92,12 @@ export default class ViewportEvents {
   viewportMoved(e: MovedEventData) {
     const eventName = 'Moved';
     const msg = this.getViewportLogMsg(e.viewport);
-    console.log(`[viewport] ${eventName} ${msg}`);
     this.sendToMonitor(eventName, msg);
   }
 
   viewportMovedEnd(e: PixiViewport) {
     const eventName = 'MovedEnd';
     const msg = this.getViewportLogMsg(e);
-    console.log(`[viewport] ${eventName} ${msg}`, e);
     this.sendToMonitor(eventName, msg);
   }
 
@@ -115,7 +110,6 @@ export default class ViewportEvents {
   viewportZoomedEnd(e: PixiViewport) {
     const eventName = 'ZoomedEnd';
     const msg = this.getViewportLogMsg(e);
-    console.log(`[viewport] ${eventName} ${msg}`, e);
     this.sendToMonitor(eventName, msg);
   }
 
@@ -123,14 +117,12 @@ export default class ViewportEvents {
   viewportMouseEdgeStart(e: PixiViewport) {
     const eventName = 'MouseEdgeStart';
     const msg = ``;
-    console.log(`[viewport] ${eventName} ${msg}`, e);
     this.sendToMonitor(eventName, msg);
   }
 
   viewportMouseEdgeEnd(e: PixiViewport) {
     const eventName = 'MouseEdgeEnd';
     const msg = ``;
-    console.log(`[viewport] ${eventName} ${msg}`, e);
     this.sendToMonitor(eventName, msg);
   }
   //

@@ -67,42 +67,34 @@ export class MemoEvents {
   // Event assignments
 
   memoPointerCancel(e: MemoEvent) {
-    console.log('[memo] PointerCancel', e);
     this.sendToMonitor('Pointer Cancel');
   }
 
   memoPointerDown(e: MemoEvent) {
-    console.log('[memo] PointerDown', e);
     this.sendToMonitor('Pointer Down');
   }
 
   memoPointerMove(e: MemoEvent) {
-    console.log('[memo] PointerMove', e);
     this.sendToMonitor('Pointer Move');
   }
 
   memoPointerOut(e: MemoEvent) {
-    console.log('[memo] PointerOut', e);
     this.sendToMonitor('Pointer Out');
   }
 
   memoPointerOver(e: MemoEvent) {
-    console.log('[memo] PointerOver', e);
     this.sendToMonitor('Pointer Over');
   }
 
   memoPointerTap(e: MemoEvent) {
-    console.log('[memo] PointerTap', e);
     this.sendToMonitor('Pointer Tap');
   }
 
   memoPointerUp(e: MemoEvent) {
-    console.log('[memo] PointerUp', e);
     this.sendToMonitor('Pointer Up');
   }
 
   memoPointerUpOutside(e: MemoEvent) {
-    console.log('[memo] PointerUpOutside', e);
     this.sendToMonitor('Pointer UpOutside');
   }
 
