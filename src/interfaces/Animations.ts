@@ -56,8 +56,8 @@ export class ViewportAnimations {
       scale: targetScale,
       duration: 0.7,
       ease: 'power3.out',
-      onUpdate: () => {
-        if (this.viewport.instance.interactive) this.viewport.instance.interactive = false;
+      onStart: () => {
+        this.viewport.instance.interactive = false;
       },
       onComplete: () => {
         this.viewport.instance.interactive = true;
