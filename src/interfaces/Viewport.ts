@@ -36,4 +36,23 @@ export default class Viewport {
   addToViewport(displayObject: PIXI.DisplayObject) {
     return this.instance.addChild(displayObject);
   }
+
+  // getZoom() {
+  //   return this.instance.scale.x * 100;
+  // }
+  //
+  // setZoom(absPercent: number) {
+  //   this.instance.setZoom(absPercent / 100, true);
+  // }
+
+  screenToWorld(sX: number, sY: number) {
+    return this.instance.toWorld(sX, sY);
+  }
+
+  // screeCenterInWord() {
+  //   return {
+  //     wX: this.instance.worldScreenWidth / 2 - this.instance.x / this.instance.scale.x,
+  //     wY: this.instance.worldScreenHeight / 2 - this.instance.y / this.instance.scale.y,
+  //   };
+  // }
 }

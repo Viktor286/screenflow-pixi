@@ -38,14 +38,14 @@ export default class FlowApp {
     // this.devMonitor = new DevMonitor();
     this.devMonitor = null;
 
-    // Setup stage
-    this.stage.interactive = true;
-    new StageEvents(this);
-
     // Setup viewport
     this.viewport = new Viewport(this);
     new ViewportEvents(this);
     this.stage.addChild(this.viewport.instance);
+
+    // Setup stage
+    this.stage.interactive = true;
+    new StageEvents(this);
 
     // Setup Memos
     this.memos = new Memos(this);

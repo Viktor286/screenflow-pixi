@@ -1,12 +1,14 @@
 import * as PIXI from 'pixi.js';
 import FlowApp from '../FlowApp';
 import DevMonitor from '../DevMonitor';
-import { AnimateUiControls } from '../Animations';
+import { ViewportAnimations } from '../Animations';
 
 type StageEvent = PIXI.InteractionEvent;
 type pressEvent = {
-  cX: number;
-  cY: number;
+  worldClick: {
+    x: number;
+    y: number;
+  };
 };
 
 export default class StageEvents {
@@ -15,6 +17,7 @@ export default class StageEvents {
   awaiting: boolean | string;
   timer: ReturnType<typeof setTimeout> | null;
   clickCnt: number;
+  viewportAnimations: ViewportAnimations;
 
   constructor(public app: FlowApp) {
     this.stage = this.app.stage;
@@ -31,6 +34,7 @@ export default class StageEvents {
     }
 
     this.initStageEvents();
+    this.viewportAnimations = new ViewportAnimations(this.app.viewport);
   }
 
   sendToMonitor(eventName: string, msg: string = '') {
@@ -48,53 +52,57 @@ export default class StageEvents {
 
   // Timed-gestures special events
   // Press Down events
-  stageImmediatePressDown({ cX, cY }: pressEvent) {
+  stageImmediatePressDown({ worldClick }: pressEvent) {
     // ImmediatePressDown event could be too frequent,
     // its probably best choice to use ImmediatePressUp
-    this.app.putFocusPoint(cX, cY);
-    this.sendToMonitor('Immediate Press Down', `${Math.round(cX)} : ${Math.round(cY)}`);
+    this.app.putFocusPoint(worldClick.x, worldClick.y);
+    this.sendToMonitor('Immediate Press Down', `${Math.round(worldClick.x)} : ${Math.round(worldClick.y)}`);
   }
 
-  stageQuickPressDown({ cX, cY }: pressEvent) {
-    this.app.putFocusPoint(cX, cY);
-    this.sendToMonitor('Quick Press Down', `${Math.round(cX)} : ${Math.round(cY)}`);
+  stageQuickPressDown({ worldClick }: pressEvent) {
+    this.app.putFocusPoint(worldClick.x, worldClick.y);
+    this.sendToMonitor('Quick Press Down', `${Math.round(worldClick.x)} : ${Math.round(worldClick.y)}`);
   }
 
-  stageMediumPressDown({ cX, cY }: pressEvent) {
-    this.app.putFocusPoint(cX, cY);
-    this.sendToMonitor('Medium Press Down', `${Math.round(cX)} : ${Math.round(cY)}`);
+  stageMediumPressDown({ worldClick }: pressEvent) {
+    this.app.putFocusPoint(worldClick.x, worldClick.y);
+    this.sendToMonitor('Medium Press Down', `${Math.round(worldClick.x)} : ${Math.round(worldClick.y)}`);
   }
 
-  stageLongPressDown({ cX, cY }: pressEvent) {
-    this.app.putFocusPoint(cX, cY);
-    this.sendToMonitor('Long Press Down', `${Math.round(cX)} : ${Math.round(cY)}`);
+  stageLongPressDown({ worldClick }: pressEvent) {
+    this.app.putFocusPoint(worldClick.x, worldClick.y);
+    this.sendToMonitor('Long Press Down', `${Math.round(worldClick.x)} : ${Math.round(worldClick.y)}`);
   }
 
   // Press Up events
-  stageImmediatePressUp({ cX, cY }: pressEvent) {
+  stageImmediatePressUp({ worldClick }: pressEvent) {
     // Workaround for the case when ImmediatePressUp will be triggered as part of double click event
     // (approach when stageImmediatePressUp set with timeout 200
     if (this.clickCnt < 2) {
-      this.sendToMonitor('Immediate Press Up', `${Math.round(cX)} : ${Math.round(cY)}`);
+      this.sendToMonitor('Immediate Press Up', `${Math.round(worldClick.x)} : ${Math.round(worldClick.y)}`);
     }
   }
 
-  stageQuickPressUp({ cX, cY }: pressEvent) {
-    AnimateUiControls.slideViewport(this.app.viewport.instance, cX, cY);
-    this.sendToMonitor('Quick Press Up', `${Math.round(cX)} : ${Math.round(cY)}`);
+  stageQuickPressUp({ worldClick }: pressEvent) {
+    this.viewportAnimations.moveCameraTo({ wX: worldClick.x, wY: worldClick.y });
+    this.sendToMonitor('Quick Press Up', `${Math.round(worldClick.x)} : ${Math.round(worldClick.y)}`);
   }
 
-  stageMediumPressUp({ cX, cY }: pressEvent) {
-    this.sendToMonitor('Medium Press Up', `${Math.round(cX)} : ${Math.round(cY)}`);
+  stageMediumPressUp({ worldClick }: pressEvent) {
+    this.sendToMonitor('Medium Press Up', `${Math.round(worldClick.x)} : ${Math.round(worldClick.y)}`);
   }
 
-  stageLongPressUp({ cX, cY }: pressEvent) {
-    this.sendToMonitor('Long Press Up', `${Math.round(cX)} : ${Math.round(cY)}`);
+  stageLongPressUp({ worldClick }: pressEvent) {
+    this.sendToMonitor('Long Press Up', `${Math.round(worldClick.x)} : ${Math.round(worldClick.y)}`);
   }
 
   // Additional events
-  stageDoubleClick({ cX, cY }: pressEvent) {
-    this.sendToMonitor('DoubleClick', `${Math.round(cX)} : ${Math.round(cY)}`);
+  stageDoubleClick({ worldClick }: pressEvent) {
+    this.sendToMonitor('DoubleClick', `${Math.round(worldClick.x)} : ${Math.round(worldClick.y)}`);
+
+    // Zoom functionality
+    const zoom = this.app.viewport.instance.scale.x;
+    this.viewportAnimations.moveCameraTo({ wX: worldClick.x, wY: worldClick.y }, zoom + 0.5);
   }
 
   // Original events
@@ -105,8 +113,9 @@ export default class StageEvents {
     setTimeout(() => (this.clickCnt = 0), 400);
 
     // Prepare pressEvent data
-    const { x: cX, y: cY } = this.app.viewport.instance.toWorld(e.data.global.x, e.data.global.y);
-    const pressEvent = { cX, cY };
+    const screenClick = { x: e.data.global.x, y: e.data.global.y };
+    const { x: wX, y: wY } = this.app.viewport.screenToWorld(screenClick.x, screenClick.y);
+    const pressEvent = { worldClick: { x: wX, y: wY } };
 
     // Tier 0: Immediate "select" press
     // Block second immediate click for double-click case
@@ -140,8 +149,9 @@ export default class StageEvents {
     // Timed-gestures handlers
     //
     // Prepare pressEvent data
-    const { x: cX, y: cY } = this.app.viewport.instance.toWorld(e.data.global.x, e.data.global.y);
-    const pressEvent = { cX, cY };
+    const screenClick = { x: e.data.global.x, y: e.data.global.y };
+    const { x: wX, y: wY } = this.app.viewport.screenToWorld(screenClick.x, screenClick.y);
+    const pressEvent = { worldClick: { x: wX, y: wY } };
 
     // Distinguish single click and double click handlers
     // filter out timed gestures while double-click
