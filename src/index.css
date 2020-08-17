@@ -6,20 +6,19 @@
   }
 }
 
+body,
 html {
+  position: fixed;
+  overflow: hidden;
   height: 100vh;
   width: 100vw;
-  overflow: hidden;
+  margin: 0;
+  padding: 0;
 }
+
 
 body {
   /*user-select: none;*/
-  margin: 0;
-  padding: 0;
-  height: 100vh;
-  width: 100vw;
-  position: fixed;
-  overflow: hidden;
   background-color: #232429;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
