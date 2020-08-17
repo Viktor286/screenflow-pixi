@@ -1,6 +1,7 @@
 import { gsap } from 'gsap';
 import PIXI from 'pixi.js';
 import Viewport from './Viewport';
+import { WordScreenCoords } from './Viewport';
 
 type cameraControls = {
   x: number;
@@ -39,7 +40,7 @@ export class ViewportAnimations {
     };
   }
 
-  moveCameraTo(targetPoint = { wX: 0, wY: 0 }, targetScale?: number) {
+  moveCameraTo(targetPoint: WordScreenCoords, targetScale?: number) {
     if (!targetScale) {
       targetScale = this.cameraControls.scale;
     }
@@ -52,7 +53,7 @@ export class ViewportAnimations {
 
     gsap.to(this.cameraControls, {
       x: (this.viewport.instance.screenWidth / targetScale / 2 - targetPoint.wX) * targetScale,
-      y: (this.viewport.instance.screenHeight / targetScale / 2.5 - targetPoint.wY) * targetScale,
+      y: (this.viewport.instance.screenHeight / targetScale / 2 - targetPoint.wY) * targetScale,
       scale: targetScale,
       duration: 0.7,
       ease: 'power3.out',

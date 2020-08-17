@@ -5,6 +5,8 @@ import StageEvents from './InteractionEvents/StageEvents';
 import ViewportEvents from './InteractionEvents/ViewportEvents';
 import DevMonitor from './DevMonitor';
 import Memos from './Memos';
+import { WebUi } from './WebUi';
+import { Actions } from './Actions';
 import { AnimateUiControls } from './Animations';
 import { gsap } from 'gsap';
 import { PixiPlugin } from 'gsap/PixiPlugin';
@@ -18,12 +20,34 @@ export default class FlowApp {
   pixiApp: PIXI.Application;
   screen: PIXI.Rectangle;
   focusPoint: PIXI.Graphics;
+  webUi: WebUi;
+  actions: Actions;
 
   constructor(mainEngine: GraphicsEngine) {
     this.engine = mainEngine;
     this.pixiApp = this.engine.instance;
     this.screen = this.engine.instance.screen;
     this.stage = this.pixiApp.stage;
+    new StageEvents(this);
+
+    // this.devMonitor = new DevMonitor();
+    this.devMonitor = null;
+
+    // Setup viewport
+    this.viewport = new Viewport(this);
+    new ViewportEvents(this);
+
+    // Setup Memos
+    this.memos = new Memos(this);
+
+    // UI
+    this.focusPoint = this.initFocusPoint();
+
+    // Actions
+    this.actions = new Actions(this);
+
+    // Browser UI
+    this.webUi = new WebUi(this);
 
     // // We stop Pixi ticker using stop() function because autoStart = false does NOT stop the shared ticker:
     // // doc: http://pixijs.download/release/docs/PIXI.Application.html
@@ -34,24 +58,6 @@ export default class FlowApp {
     // });
     gsap.registerPlugin(PixiPlugin);
     PixiPlugin.registerPIXI(PIXI);
-
-    // this.devMonitor = new DevMonitor();
-    this.devMonitor = null;
-
-    // Setup viewport
-    this.viewport = new Viewport(this);
-    new ViewportEvents(this);
-    this.stage.addChild(this.viewport.instance);
-
-    // Setup stage
-    this.stage.interactive = true;
-    new StageEvents(this);
-
-    // Setup Memos
-    this.memos = new Memos(this);
-
-    // UI
-    this.focusPoint = this.initFocusPoint();
 
     // Handler for "pixiApp and Viewport" dimensions dependency on window size
     window.addEventListener('resize', this.resizeViewportHandler);

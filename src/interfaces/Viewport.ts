@@ -2,6 +2,12 @@ import PIXI from 'pixi.js';
 import { GraphicsEngine } from './GraphicsEngine';
 import { Viewport as PixiViewport } from 'pixi-viewport';
 import FlowApp from './FlowApp';
+import { ViewportAnimations } from './Animations';
+
+export type WordScreenCoords = {
+  wX: number;
+  wY: number;
+};
 
 // Viewport documentation: https://davidfig.github.io/pixi-viewport/jsdoc/Viewport.html
 // Module: node_modules/pixi-viewport/dist/viewport.es.js
@@ -9,10 +15,13 @@ import FlowApp from './FlowApp';
 export default class Viewport {
   instance: PixiViewport;
   engine: GraphicsEngine;
+  animations: ViewportAnimations;
 
   constructor(public app: FlowApp) {
     this.engine = app.engine;
     this.instance = this.setupViewport(this.engine.hostHTML.clientWidth, this.engine.hostHTML.clientHeight);
+    this.animations = new ViewportAnimations(this);
+    app.stage.addChild(this.instance);
   }
 
   setupViewport(hostHTMLWidth: number, hostHTMLHeight: number) {
@@ -49,10 +58,10 @@ export default class Viewport {
     return this.instance.toWorld(sX, sY);
   }
 
-  // screeCenterInWord() {
-  //   return {
-  //     wX: this.instance.worldScreenWidth / 2 - this.instance.x / this.instance.scale.x,
-  //     wY: this.instance.worldScreenHeight / 2 - this.instance.y / this.instance.scale.y,
-  //   };
-  // }
+  getScreeCenterInWord(): WordScreenCoords {
+    return {
+      wX: this.instance.worldScreenWidth / 2 - this.instance.x / this.instance.scale.x,
+      wY: this.instance.worldScreenHeight / 2 - this.instance.y / this.instance.scale.y,
+    };
+  }
 }

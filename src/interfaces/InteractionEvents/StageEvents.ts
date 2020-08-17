@@ -1,7 +1,6 @@
 import * as PIXI from 'pixi.js';
 import FlowApp from '../FlowApp';
 import DevMonitor from '../DevMonitor';
-import { ViewportAnimations } from '../Animations';
 
 type StageEvent = PIXI.InteractionEvent;
 type pressEvent = {
@@ -17,10 +16,12 @@ export default class StageEvents {
   awaiting: boolean | string;
   timer: ReturnType<typeof setTimeout> | null;
   clickCnt: number;
-  viewportAnimations: ViewportAnimations;
 
   constructor(public app: FlowApp) {
     this.stage = this.app.stage;
+
+    this.stage.interactive = true;
+
     this.eventMonitor = this.app.devMonitor;
 
     // Timed-gestures event manager
@@ -34,7 +35,6 @@ export default class StageEvents {
     }
 
     this.initStageEvents();
-    this.viewportAnimations = new ViewportAnimations(this.app.viewport);
   }
 
   sendToMonitor(eventName: string, msg: string = '') {
@@ -84,7 +84,7 @@ export default class StageEvents {
   }
 
   stageQuickPressUp({ worldClick }: pressEvent) {
-    this.viewportAnimations.moveCameraTo({ wX: worldClick.x, wY: worldClick.y });
+    this.app.actions.viewportMoveTo({ wX: worldClick.x, wY: worldClick.y });
     this.sendToMonitor('Quick Press Up', `${Math.round(worldClick.x)} : ${Math.round(worldClick.y)}`);
   }
 
@@ -99,10 +99,7 @@ export default class StageEvents {
   // Additional events
   stageDoubleClick({ worldClick }: pressEvent) {
     this.sendToMonitor('DoubleClick', `${Math.round(worldClick.x)} : ${Math.round(worldClick.y)}`);
-
-    // Zoom functionality
-    const zoom = this.app.viewport.instance.scale.x;
-    this.viewportAnimations.moveCameraTo({ wX: worldClick.x, wY: worldClick.y }, zoom + 0.5);
+    this.app.actions.viewportZoomIn({ wX: worldClick.x, wY: worldClick.y });
   }
 
   // Original events
