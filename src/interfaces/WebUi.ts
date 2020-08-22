@@ -35,7 +35,7 @@ export class WebUi {
         // background: 'blue',
         left: '50%',
         transform: 'translateX(-50%)',
-        margin: '0 auto',
+        margin: '10px auto 0 ',
         position: 'absolute',
         justifyContent: 'center',
       },
@@ -43,8 +43,8 @@ export class WebUi {
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        width: '3vw',
-        height: '3vw',
+        width: '45px',
+        height: '45px',
         margin: '0 4px',
         opacity: '.6',
         color: 'white',
@@ -61,12 +61,15 @@ export class WebUi {
       buttonIcon: {
         padding: 0,
         margin: 0,
-        height: '1vw',
-        fontSize: '2vw',
+        height: '21px',
+        fontSize: '21px',
+        fontFamily: 'Georgia',
         textAlign: 'center',
         // background: 'blue',
-        lineHeight: 0,
-        transform: 'translateY(40%)',
+        lineHeight: '100%',
+        transform: 'translateY(-50%)',
+        position: 'absolute',
+        top: '50%',
         userSelect: 'none',
         '-webkit-user-select': 'none',
         '-moz-user-select': 'none',
@@ -97,13 +100,18 @@ export class WebUi {
     const elmIcon = document.createElement('div');
     elmIcon.classList.add('icon');
     elmIcon.innerHTML = this.app.viewport.getZoom();
-    Object.assign(elmIcon.style, { ...this.styles.buttonIcon, fontSize: '1.3vw' });
+    Object.assign(elmIcon.style, {
+      ...this.styles.buttonIcon,
+      fontSize: '14px',
+      height: '14px',
+      fontFamily: 'Verdana',
+    });
     return elmIcon;
   };
 
   initZoom100Btn = () => {
     const zoomBtn = document.createElement('div');
-    Object.assign(zoomBtn.style, { ...this.styles.squareButton, width: '3.5vw' });
+    Object.assign(zoomBtn.style, { ...this.styles.squareButton, width: '55px' });
 
     zoomBtn.addEventListener('click', () => {
       this.app.actions.viewportZoom100();
