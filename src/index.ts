@@ -2,7 +2,7 @@ import * as PIXI from 'pixi.js';
 import './index.css';
 import FlowApp from './interfaces/FlowApp';
 import { GraphicsEngine } from './interfaces/GraphicsEngine';
-import { urlSmallSet as imageSet } from './fixtures/imagesDataSet';
+import { getImageUrlSet } from './fixtures/imagesDataSet';
 import FilesIO from './interfaces/FilesIO';
 import { SpaceModifiers } from './modifiers/SpaceModifiers';
 
@@ -18,7 +18,7 @@ async function main() {
     app.viewport.addToViewport(rectangle);
 
     /** Load test images **/
-    const loader = await FilesIO.loadUrlSet(imageSet);
+    const loader = await FilesIO.loadUrlSet(getImageUrlSet(60));
 
     for (const resource of Object.values(loader.resources)) {
       app.memos.addMemo(resource.texture);

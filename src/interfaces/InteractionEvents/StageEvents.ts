@@ -107,7 +107,7 @@ export default class StageEvents {
     // Timed-gestures manager
     this.awaiting = true;
     this.clickCnt += 1;
-    setTimeout(() => (this.clickCnt = 0), 400);
+    setTimeout(() => (this.clickCnt = 0), 300); // double click threshold
 
     // Prepare pressEvent data
     const screenClick = { x: e.data.global.x, y: e.data.global.y };
