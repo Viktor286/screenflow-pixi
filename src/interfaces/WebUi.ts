@@ -4,6 +4,7 @@ export class WebUi {
   webUi: HTMLElement;
   zoomInBtn: HTMLElement;
   zoomOutBtn: HTMLElement;
+  zoom100Btn: HTMLElement;
 
   constructor(public app: FlowApp) {
     this.webUi = document.createElement('div');
@@ -12,6 +13,9 @@ export class WebUi {
 
     this.zoomOutBtn = this.initZoomOutBtn();
     this.webUi.appendChild(this.zoomOutBtn);
+
+    this.zoom100Btn = this.initZoom100Btn();
+    this.webUi.appendChild(this.zoom100Btn);
 
     this.zoomInBtn = this.initZoomInBtn();
     this.webUi.appendChild(this.zoomInBtn);
@@ -22,19 +26,24 @@ export class WebUi {
   get styles() {
     return {
       mainContainer: {
-        width: '100%',
         display: 'flex',
+        width: 'auto',
+        // background: 'blue',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        margin: '0 auto',
         position: 'absolute',
         justifyContent: 'center',
       },
       squareButton: {
         width: '3vw',
         height: '3vw',
-        userSelect: 'none',
         opacity: '.6',
         lineHeight: '100%',
         fontSize: '1.5rem',
         borderRadius: '.5rem',
+        userSelect: 'none',
+        '-webkit-touch-callout': 'none',
       },
     };
   }
@@ -47,6 +56,19 @@ export class WebUi {
 
     zoomBtn.addEventListener('click', () => {
       this.app.actions.viewportZoomOut();
+    });
+
+    return zoomBtn;
+  };
+
+  initZoom100Btn = () => {
+    const zoomBtn = document.createElement('button');
+    zoomBtn.innerHTML = '100%';
+
+    Object.assign(zoomBtn.style, { ...this.styles.squareButton, width: '3.5vw', fontSize: '.9rem' });
+
+    zoomBtn.addEventListener('click', () => {
+      this.app.actions.viewportZoom100();
     });
 
     return zoomBtn;

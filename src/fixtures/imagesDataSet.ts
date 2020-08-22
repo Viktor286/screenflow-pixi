@@ -1,8 +1,6 @@
 export const smallSet = ['vlc_1wg8lrOxvM', 'vlc_2E3NKGFlYF', 'vlc_2g16Vd36rh'];
 
-export const urlSmallSet = smallSet.map(
-  (img) => `http://192.168.1.152:5000/LargePNGCosmos/${img}.png`,
-);
+export const urlSmallSet = smallSet.map((img) => `http://192.168.1.152:5000/LargePNGCosmos/${img}.png`);
 
 export const largeSet = [
   'vlc_1wg8lrOxvM',
@@ -126,6 +124,4 @@ export const largeSet = [
   'vlc_ZSVtBocZnG',
 ];
 
-export const urlLargeSet = largeSet.map(
-  (img) => `http://localhost:5000/LargePNGCosmos/${img}.png`,
-);
+export const urlLargeSet = largeSet.map((img) => `http://localhost:5000/LargePNGCosmos/${img}.png`);

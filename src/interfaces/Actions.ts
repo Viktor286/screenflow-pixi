@@ -25,6 +25,10 @@ export class Actions {
     this.viewportMoveCamera(zoomPoint, currentZoom + 0.5);
   }
 
+  viewportZoom100(zoomPoint?: WordScreenCoords) {
+    this.viewportMoveCamera(zoomPoint, 1);
+  }
+
   viewportZoomOut(zoomPoint?: WordScreenCoords) {
     const currentZoom = this.app.viewport.instance.scale.x;
     this.viewportMoveCamera(zoomPoint, currentZoom - 0.5);
