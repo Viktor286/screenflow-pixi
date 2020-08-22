@@ -63,7 +63,7 @@ export class WebUi {
 
   initZoom100Btn = () => {
     const zoomBtn = document.createElement('button');
-    zoomBtn.innerHTML = '100%';
+    zoomBtn.innerHTML = this.app.viewport.getZoom();
 
     Object.assign(zoomBtn.style, { ...this.styles.squareButton, width: '3.5vw', fontSize: '.9rem' });
 

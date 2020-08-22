@@ -41,7 +41,7 @@ export class ViewportAnimations {
   }
 
   moveCameraTo(targetPoint: WordScreenCoords, targetScale?: number) {
-    if (!targetScale) {
+    if (targetScale === undefined) {
       targetScale = this.cameraControls.scale;
     }
 
@@ -51,8 +51,8 @@ export class ViewportAnimations {
     // get worldScreenWidth()
     // worldScreenWidth = screenWidth / scale
 
-    if (targetScale > 8) targetScale = 8;
-    if (targetScale < 0.1) targetScale = 0.1;
+    if (targetScale >= 16) targetScale = 16;
+    if (targetScale <= 0.01) targetScale = 0.01;
 
     gsap.to(this.cameraControls, {
       x: (this.viewport.instance.screenWidth / targetScale / 2 - targetPoint.wX) * targetScale,
@@ -65,6 +65,7 @@ export class ViewportAnimations {
       },
       onComplete: () => {
         this.viewport.instance.interactive = true;
+        this.viewport.onCameraAnimationEnds();
       },
     });
   }

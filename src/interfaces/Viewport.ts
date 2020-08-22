@@ -16,12 +16,58 @@ export default class Viewport {
   instance: PixiViewport;
   engine: GraphicsEngine;
   animations: ViewportAnimations;
+  zoomScale: number[];
 
   constructor(public app: FlowApp) {
     this.engine = app.engine;
     this.instance = this.setupViewport(this.engine.hostHTML.clientWidth, this.engine.hostHTML.clientHeight);
     this.animations = new ViewportAnimations(this);
+    this.zoomScale = [0.03125, 0.0625, 0.125, 0.25, 0.5, 1, 2, 4, 8, 16];
     app.stage.addChild(this.instance);
+  }
+
+  getNextScaleStepDown() {
+    const currentScale = this.instance.scale.x;
+
+    for (let i = 0; i < this.zoomScale.length; i++) {
+      if (currentScale <= this.zoomScale[0]) {
+        return this.zoomScale[0];
+      }
+
+      if (currentScale > this.zoomScale[this.zoomScale.length - 1]) {
+        return this.zoomScale[this.zoomScale.length - 1];
+      }
+
+      if (currentScale === this.zoomScale[i]) {
+        return this.zoomScale[i - 1];
+      }
+
+      if (currentScale > this.zoomScale[i] && currentScale < this.zoomScale[i + 1]) {
+        return this.zoomScale[i];
+      }
+    }
+  }
+
+  getNextScaleStepUp() {
+    const currentScale = this.instance.scale.x;
+
+    for (let i = 0; i < this.zoomScale.length; i++) {
+      if (currentScale < this.zoomScale[0]) {
+        return this.zoomScale[0];
+      }
+
+      if (currentScale >= this.zoomScale[this.zoomScale.length - 1]) {
+        return this.zoomScale[this.zoomScale.length - 1];
+      }
+
+      if (currentScale === this.zoomScale[i]) {
+        return this.zoomScale[i + 1];
+      }
+
+      if (currentScale > this.zoomScale[i] && currentScale < this.zoomScale[i + 1]) {
+        return this.zoomScale[i + 1];
+      }
+    }
   }
 
   setupViewport(hostHTMLWidth: number, hostHTMLHeight: number) {
@@ -46,9 +92,9 @@ export default class Viewport {
     return this.instance.addChild(displayObject);
   }
 
-  // getZoom() {
-  //   return this.instance.scale.x * 100;
-  // }
+  getZoom(): string {
+    return Math.round(this.instance.scale.x * 100).toString();
+  }
   //
   // setZoom(absPercent: number) {
   //   this.instance.setZoom(absPercent / 100, true);
@@ -64,4 +110,8 @@ export default class Viewport {
       wY: this.instance.worldScreenHeight / 2 - this.instance.y / this.instance.scale.y,
     };
   }
+
+  onCameraAnimationEnds = () => {
+    this.app.actions.updateZoomBtn();
+  };
 }

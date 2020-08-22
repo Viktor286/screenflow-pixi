@@ -24,7 +24,7 @@ async function main() {
       app.memos.addMemo(resource.texture);
     }
 
-    SpaceModifiers.setPositionGrid(app.memos.list, 8, 240, 120, 0.1);
+    SpaceModifiers.setPositionGrid(app.memos.list, 8, 400, 230, 0.2);
 
     // /** Auto update from store **/
     // app.state.snapshots.store.forEach((snapShot, i) => {

@@ -9,7 +9,7 @@ export class Actions {
       targetPoint = this.app.viewport.getScreeCenterInWord();
     }
 
-    if (!targetScale) {
+    if (targetScale === undefined) {
       targetScale = this.app.viewport.instance.scale.x;
     }
 
@@ -21,8 +21,7 @@ export class Actions {
   }
 
   viewportZoomIn(zoomPoint?: WordScreenCoords) {
-    const currentZoom = this.app.viewport.instance.scale.x;
-    this.viewportMoveCamera(zoomPoint, currentZoom + 0.5);
+    this.viewportMoveCamera(zoomPoint, this.app.viewport.getNextScaleStepUp());
   }
 
   viewportZoom100(zoomPoint?: WordScreenCoords) {
@@ -30,7 +29,10 @@ export class Actions {
   }
 
   viewportZoomOut(zoomPoint?: WordScreenCoords) {
-    const currentZoom = this.app.viewport.instance.scale.x;
-    this.viewportMoveCamera(zoomPoint, currentZoom - 0.5);
+    this.viewportMoveCamera(zoomPoint, this.app.viewport.getNextScaleStepDown());
+  }
+
+  updateZoomBtn() {
+    this.app.webUi.zoom100Btn.innerHTML = this.app.viewport.getZoom();
   }
 }
