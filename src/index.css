@@ -14,6 +14,10 @@ html {
   width: 100vw;
   margin: 0;
   padding: 0;
+  user-select: none;
+  '-webkit-user-select': none;
+  '-moz-user-select': none;
+  '-ms-user-select': none;
 }
 
 
@@ -40,7 +44,7 @@ button {
 
 button:active {
   border: 1px solid #5f9ae2;
-  background: #d6ecff;
+  background: #395062;
 }
 
 .app {

@@ -55,6 +55,6 @@ export class Actions {
   }
 
   updateZoomBtn() {
-    this.app.webUi.zoom100Btn.innerHTML = this.app.viewport.getZoom();
+    this.app.webUi.zoomIndicator.innerHTML = this.app.viewport.getZoom();
   }
 }

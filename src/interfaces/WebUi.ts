@@ -5,6 +5,7 @@ export class WebUi {
   zoomInBtn: HTMLElement;
   zoomOutBtn: HTMLElement;
   zoom100Btn: HTMLElement;
+  zoomIndicator: HTMLElement;
 
   constructor(public app: FlowApp) {
     this.webUi = document.createElement('div');
@@ -16,6 +17,9 @@ export class WebUi {
 
     this.zoom100Btn = this.initZoom100Btn();
     this.webUi.appendChild(this.zoom100Btn);
+
+    this.zoomIndicator = this.iniZoomIndicator();
+    this.zoom100Btn.appendChild(this.zoomIndicator);
 
     this.zoomInBtn = this.initZoomInBtn();
     this.webUi.appendChild(this.zoomInBtn);
@@ -36,21 +40,49 @@ export class WebUi {
         justifyContent: 'center',
       },
       squareButton: {
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
         width: '3vw',
         height: '3vw',
+        margin: '0 4px',
         opacity: '.6',
-        lineHeight: '100%',
-        fontSize: '1.5rem',
+        color: 'white',
         borderRadius: '.5rem',
-        userSelect: 'none',
+        background: '#395062',
+        border: '1px solid #5f9ae2',
+        cursor: 'pointer',
         '-webkit-touch-callout': 'none',
+        userSelect: 'none',
+        '-webkit-user-select': 'none',
+        '-moz-user-select': 'none',
+        '-ms-user-select': 'none',
+      },
+      buttonIcon: {
+        padding: 0,
+        margin: 0,
+        height: '1vw',
+        fontSize: '2vw',
+        textAlign: 'center',
+        // background: 'blue',
+        lineHeight: 0,
+        transform: 'translateY(40%)',
+        userSelect: 'none',
+        '-webkit-user-select': 'none',
+        '-moz-user-select': 'none',
+        '-ms-user-select': 'none',
       },
     };
   }
 
   initZoomOutBtn = () => {
-    const zoomBtn = document.createElement('button');
-    zoomBtn.innerHTML = '-';
+    const zoomBtn = document.createElement('div');
+    const elmIcon = document.createElement('div');
+
+    elmIcon.classList.add('icon');
+    elmIcon.innerHTML = '-';
+    Object.assign(elmIcon.style, this.styles.buttonIcon);
+    zoomBtn.appendChild(elmIcon);
 
     Object.assign(zoomBtn.style, this.styles.squareButton);
 
@@ -61,11 +93,17 @@ export class WebUi {
     return zoomBtn;
   };
 
-  initZoom100Btn = () => {
-    const zoomBtn = document.createElement('button');
-    zoomBtn.innerHTML = this.app.viewport.getZoom();
+  iniZoomIndicator = () => {
+    const elmIcon = document.createElement('div');
+    elmIcon.classList.add('icon');
+    elmIcon.innerHTML = this.app.viewport.getZoom();
+    Object.assign(elmIcon.style, { ...this.styles.buttonIcon, fontSize: '1.3vw' });
+    return elmIcon;
+  };
 
-    Object.assign(zoomBtn.style, { ...this.styles.squareButton, width: '3.5vw', fontSize: '.9rem' });
+  initZoom100Btn = () => {
+    const zoomBtn = document.createElement('div');
+    Object.assign(zoomBtn.style, { ...this.styles.squareButton, width: '3.5vw' });
 
     zoomBtn.addEventListener('click', () => {
       this.app.actions.viewportZoom100();
@@ -75,8 +113,13 @@ export class WebUi {
   };
 
   initZoomInBtn = () => {
-    const zoomBtn = document.createElement('button');
-    zoomBtn.innerHTML = '+';
+    const zoomBtn = document.createElement('div');
+    const elmIcon = document.createElement('div');
+
+    elmIcon.classList.add('icon');
+    elmIcon.innerHTML = '+';
+    Object.assign(elmIcon.style, this.styles.buttonIcon);
+    zoomBtn.appendChild(elmIcon);
 
     Object.assign(zoomBtn.style, this.styles.squareButton);
 
