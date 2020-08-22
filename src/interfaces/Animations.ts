@@ -51,7 +51,7 @@ export class ViewportAnimations {
     // get worldScreenWidth()
     // worldScreenWidth = screenWidth / scale
 
-    if (targetScale >= 16) targetScale = 16;
+    if (targetScale >= 32) targetScale = 32;
     if (targetScale <= 0.01) targetScale = 0.01;
 
     gsap.to(this.cameraControls, {

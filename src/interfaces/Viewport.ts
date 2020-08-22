@@ -22,11 +22,11 @@ export default class Viewport {
     this.engine = app.engine;
     this.instance = this.setupViewport(this.engine.hostHTML.clientWidth, this.engine.hostHTML.clientHeight);
     this.animations = new ViewportAnimations(this);
-    this.zoomScale = [0.03125, 0.0625, 0.125, 0.25, 0.5, 1, 2, 4, 8, 16];
+    this.zoomScale = [0.03125, 0.0625, 0.125, 0.25, 0.5, 1, 2, 4, 8, 16, 32];
     app.stage.addChild(this.instance);
   }
 
-  getNextScaleStepDown() {
+  getNextScaleStepDown(runAhead: number): number {
     const currentScale = this.instance.scale.x;
 
     for (let i = 0; i < this.zoomScale.length; i++) {
@@ -35,25 +35,27 @@ export default class Viewport {
       }
 
       if (currentScale > this.zoomScale[this.zoomScale.length - 1]) {
-        return this.zoomScale[this.zoomScale.length - 1];
+        return this.zoomScale[this.zoomScale.length - (1 - runAhead)];
       }
 
       if (currentScale === this.zoomScale[i]) {
-        return this.zoomScale[i - 1];
+        return this.zoomScale[i - (1 - runAhead)] || this.zoomScale[0];
       }
 
       if (currentScale > this.zoomScale[i] && currentScale < this.zoomScale[i + 1]) {
-        return this.zoomScale[i];
+        return this.zoomScale[i - runAhead] || this.zoomScale[0];
       }
     }
+
+    return 0;
   }
 
-  getNextScaleStepUp() {
+  getNextScaleStepUp(runAhead: number): number {
     const currentScale = this.instance.scale.x;
 
     for (let i = 0; i < this.zoomScale.length; i++) {
       if (currentScale < this.zoomScale[0]) {
-        return this.zoomScale[0];
+        return this.zoomScale[runAhead];
       }
 
       if (currentScale >= this.zoomScale[this.zoomScale.length - 1]) {
@@ -61,13 +63,15 @@ export default class Viewport {
       }
 
       if (currentScale === this.zoomScale[i]) {
-        return this.zoomScale[i + 1];
+        return this.zoomScale[i + (1 + runAhead)] || this.zoomScale[this.zoomScale.length - 1];
       }
 
       if (currentScale > this.zoomScale[i] && currentScale < this.zoomScale[i + 1]) {
-        return this.zoomScale[i + 1];
+        return this.zoomScale[i + (1 + runAhead)] || this.zoomScale[this.zoomScale.length - 1];
       }
     }
+
+    return 0;
   }
 
   setupViewport(hostHTMLWidth: number, hostHTMLHeight: number) {
