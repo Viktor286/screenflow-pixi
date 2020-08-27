@@ -1,9 +1,9 @@
 import * as PIXI from 'pixi.js';
 import './index.css';
-import FlowApp from './interfaces/FlowApp';
-import { GraphicsEngine } from './interfaces/GraphicsEngine';
+import FlowApp from './Interfaces/FlowApp';
+import { GraphicsEngine } from './Interfaces/GraphicsEngine';
 import { getImageUrlSet } from './fixtures/imagesDataSet';
-import FilesIO from './interfaces/FilesIO';
+import FilesIO from './Interfaces/FilesIO';
 import { SpaceModifiers } from './modifiers/SpaceModifiers';
 
 async function main() {

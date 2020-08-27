@@ -1,7 +1,7 @@
-import FlowApp from './FlowApp';
-import { WordScreenCoords } from './Viewport';
+import FlowApp from '../Interfaces/FlowApp';
+import { WordScreenCoords } from '../Interfaces/Viewport';
 
-export class Actions {
+export default class ViewportActions {
   runAheadZoomIn: number;
   runAheadZoomOut: number;
 

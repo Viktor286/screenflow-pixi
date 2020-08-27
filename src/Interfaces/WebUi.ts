@@ -1,5 +1,9 @@
 import FlowApp from './FlowApp';
 
+/**
+ * TODO: reconsider how build HTML+CSS UI
+ * (do we need emotion, preact, redux?)
+ */
 export class WebUi {
   webUi: HTMLElement;
   zoomInBtn: HTMLElement;

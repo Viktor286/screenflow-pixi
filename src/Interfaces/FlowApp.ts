@@ -6,7 +6,7 @@ import ViewportEvents from './InteractionEvents/ViewportEvents';
 import DevMonitor from './DevMonitor';
 import Memos from './Memos';
 import { WebUi } from './WebUi';
-import { Actions } from './Actions';
+import ViewportActions from '../Actions/Viewport';
 import { AnimateUiControls } from './Animations';
 import { gsap } from 'gsap';
 import { PixiPlugin } from 'gsap/PixiPlugin';
@@ -21,7 +21,7 @@ export default class FlowApp {
   screen: PIXI.Rectangle;
   focusPoint: PIXI.Graphics;
   webUi: WebUi;
-  actions: Actions;
+  actions: ViewportActions;
 
   constructor(mainEngine: GraphicsEngine) {
     this.engine = mainEngine;
@@ -44,7 +44,7 @@ export default class FlowApp {
     this.focusPoint = this.initFocusPoint();
 
     // Actions
-    this.actions = new Actions(this);
+    this.actions = new ViewportActions(this);
 
     // Browser UI
     this.webUi = new WebUi(this);
