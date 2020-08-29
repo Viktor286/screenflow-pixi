@@ -1,10 +1,5 @@
 import { Memo } from '../Interfaces/Memos';
 
-interface IPoint {
-  x: number;
-  y: number;
-}
-
 /** TODO: change modifier interface to matrix output (prev, next states for animation) **/
 export class SpaceModifiers {
   static setPositionGrid(

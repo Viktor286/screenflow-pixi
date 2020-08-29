@@ -1,5 +1,3 @@
-import { IUniScreenCoords } from './Viewport';
-
 type StreamMessage = string;
 type Monitor = 'stageEvents' | 'viewportEvents' | 'memoEvents';
 
@@ -56,28 +54,6 @@ export default class DevMonitor {
   dispatchMonitor(monitor: Monitor, eventType: string, eventMsg: string) {
     this.eventMonitorStreams[monitor].addStreamMessage(eventType, eventMsg);
     this.eventMonitorStreams[monitor].updateStreamView();
-  }
-
-  pointToStr(point: IUniScreenCoords) {
-    let x = 0;
-    let y = 0;
-
-    if (point.sX !== undefined && point.sY !== undefined) {
-      x = point.sX;
-      y = point.sY;
-    }
-
-    if (point.wX !== undefined && point.wY !== undefined) {
-      x = point.wX;
-      y = point.wY;
-    }
-
-    if (point.x !== undefined && point.y !== undefined) {
-      x = point.x;
-      y = point.y;
-    }
-
-    return `${Math.round(x)} : ${Math.round(y)}`;
   }
 }
 

@@ -50,7 +50,7 @@ export default class Viewport {
   }
 
   getWorldScreenCoordsFromEvent(e: StageEvent): IWorldScreenCoords {
-    const screenClick: IScreenCoords = { sX: e.data.global.x, sY: e.data.global.y };
+    const screenClick: IScreenCoords = this.getScreenCoordsFromEvent(e);
     const { x: wX, y: wY } = this.app.viewport.screenToWorld(screenClick);
     return { wX, wY };
   }

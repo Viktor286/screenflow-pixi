@@ -1,7 +1,12 @@
 import StageEvents, { StageEvent } from './StageEvents';
 import { Memo } from '../Memos';
-import PIXI from 'pixi.js';
 import FlowApp from '../FlowApp';
+import { IScreenCoords, IWorldScreenCoords } from '../Viewport';
+
+type IGestureEvent = {
+  screenClick: IScreenCoords;
+  wordScreenClick: IWorldScreenCoords;
+};
 
 export default class TimedGesture {
   app: FlowApp;
@@ -10,6 +15,7 @@ export default class TimedGesture {
   awaiting: boolean | string;
   timer: ReturnType<typeof setTimeout> | null;
   clickCnt: number;
+  doubleClickThreshold: number;
 
   constructor(public stageEvents: StageEvents) {
     this.app = stageEvents.app;
@@ -19,52 +25,73 @@ export default class TimedGesture {
     this.clickCnt = 0;
     this.awaiting = false;
     this.timer = null;
+
+    // touchpad handle < 400 badly, but with that amount desktop mouse shows dbclick too soon
+    //  desktop mouse show fine result < 300
+    this.doubleClickThreshold = 320;
   }
 
   // TODO: this helper belongs to eventMonitor class?
   //  we need figure out what scope can use this TimedGesture controller
-  getClickInfoStr(e: StageEvent) {
+  getClickInfoStr(e: IGestureEvent) {
     if (this.app.stageEvents.eventMonitor) {
-      return this.app.stageEvents.eventMonitor.pointToStr(this.app.viewport.getWorldScreenCoordsFromEvent(e));
+      return `${Math.round(e.screenClick.sX)} : ${Math.round(e.screenClick.sY)}`;
     }
   }
 
-  pointerDownGate(e: PIXI.InteractionEvent) {
+  getGestureEvent(e: StageEvent): IGestureEvent {
+    return {
+      screenClick: this.app.viewport.getScreenCoordsFromEvent(e),
+      wordScreenClick: this.app.viewport.getWorldScreenCoordsFromEvent(e),
+    };
+  }
+
+  pointerDownGate(e: StageEvent) {
     // Timed-gestures manager
     this.awaiting = true;
     this.clickCnt += 1;
-    setTimeout(() => (this.clickCnt = 0), 400); // double click threshold (touchpad handle < 400 badly)
+
+    // reset for doubleClick
+    setTimeout(() => (this.clickCnt = 0), this.doubleClickThreshold);
 
     // Tier 0: Immediate "select" press
     // Block second immediate click for double-click case
     if (this.clickCnt < 2) {
-      this.pressDownImmediate(e);
+      // Required data from the input event should be preserved here
+      // otherwise event data will be obtained respecting the Gestures delay state (not state from a click)
+      const gestureEvent = this.getGestureEvent(e);
+
+      this.pressDownImmediate(gestureEvent);
       this.timer = setTimeout(() => {
         if (this.awaiting) {
           // Tier 1: quick-press
           this.awaiting = 'quick';
-          this.pressDownQuick(e);
+          this.pressDownQuick(gestureEvent);
           this.timer = setTimeout(() => {
             if (this.awaiting) {
               // Tier 2: medium-press
               this.awaiting = 'medium';
-              this.pressDownMedium(e);
+              this.pressDownMedium(gestureEvent);
               this.timer = setTimeout(() => {
                 if (this.awaiting) {
                   // Tier 3: long-press
                   this.awaiting = 'long';
-                  this.pressDownLong(e);
+                  this.pressDownLong(gestureEvent);
                 }
               }, 1000);
             }
           }, 800);
         }
-      }, 250);
+      }, 200);
     }
   }
 
   pointerUpGate(e: StageEvent) {
     // Timed-gestures handlers
+
+    // Required data from the input event should be preserved here
+    // otherwise event data will be obtained respecting the Gestures delay state (not state from a click)
+    const gestureEvent = this.getGestureEvent(e);
 
     // Distinguish single click and double click handlers
     // filter out timed gestures while double-click
@@ -77,22 +104,22 @@ export default class TimedGesture {
           // Workaround for the case when ImmediatePressUp will be triggered as part of double click event
           // (approach when stageImmediatePressUp set with timeout 200
           if (this.clickCnt < 2) {
-            this.pressUpImmediate(e);
+            this.pressUpImmediate(gestureEvent);
           }
         }, 200);
       }
 
       // Tier 1: quick-press
-      if (this.awaiting === 'quick') this.pressUpQuick(e);
+      if (this.awaiting === 'quick') this.pressUpQuick(gestureEvent);
 
       // Tier 2: medium-press
-      if (this.awaiting === 'medium') this.pressUpMedium(e);
+      if (this.awaiting === 'medium') this.pressUpMedium(gestureEvent);
 
       // Tier 3: long-press
-      if (this.awaiting === 'long') this.pressUpLong(e);
+      if (this.awaiting === 'long') this.pressUpLong(gestureEvent);
     } else {
       // Double click handlers
-      this.doubleClick(e);
+      this.doubleClick(gestureEvent);
     }
 
     this.awaiting = false;
@@ -101,14 +128,12 @@ export default class TimedGesture {
 
   // Timed-gestures special events
   // Press Up events
-  pressUpImmediate(e: StageEvent) {
-    const screenClick = this.app.viewport.getScreenCoordsFromEvent(e);
-
+  pressUpImmediate(e: IGestureEvent) {
     const hit = this.app.pixiApp.renderer.plugins.interaction.hitTest({
-      x: screenClick.sX,
-      y: screenClick.sY,
+      x: e.screenClick.sX,
+      y: e.screenClick.sY,
     });
-    console.log('hit', hit);
+
     if (hit instanceof Memo) {
       const memo = hit;
       memo.select();
@@ -118,51 +143,45 @@ export default class TimedGesture {
     this.sendToMonitor('Immediate Press Up', this.getClickInfoStr(e));
   }
 
-  pressUpQuick(e: StageEvent) {
-    const worldClick = this.app.viewport.getWorldScreenCoordsFromEvent(e);
-    this.app.actions.viewportMoveTo(worldClick);
+  pressUpQuick(e: IGestureEvent) {
+    this.app.actions.viewportMoveTo(e.wordScreenClick);
     this.sendToMonitor('Quick Press Up', this.getClickInfoStr(e));
   }
 
-  pressUpMedium(e: StageEvent) {
+  pressUpMedium(e: IGestureEvent) {
     this.sendToMonitor('Medium Press Up', this.getClickInfoStr(e));
   }
 
-  pressUpLong(e: StageEvent) {
+  pressUpLong(e: IGestureEvent) {
     this.sendToMonitor('Long Press Up', this.getClickInfoStr(e));
   }
 
   // Additional events
-  doubleClick(e: StageEvent) {
-    const worldClick = this.app.viewport.getWorldScreenCoordsFromEvent(e);
+  doubleClick(e: IGestureEvent) {
     this.sendToMonitor('DoubleClick', this.getClickInfoStr(e));
-    this.app.actions.viewportZoomIn(worldClick);
+    this.app.actions.viewportZoomIn(e.wordScreenClick);
   }
 
   // Press Down events
-  pressDownImmediate(e: StageEvent) {
+  pressDownImmediate(e: IGestureEvent) {
     // ImmediatePressDown event could be too frequent,
     // its probably best choice to use ImmediatePressUp
-    const worldClick = this.app.viewport.getWorldScreenCoordsFromEvent(e);
-    this.app.putFocusPoint(worldClick);
+    this.app.putFocusPoint(e.wordScreenClick);
     this.sendToMonitor('Immediate Press Down', this.getClickInfoStr(e));
   }
 
-  pressDownQuick(e: StageEvent) {
-    const worldClick = this.app.viewport.getWorldScreenCoordsFromEvent(e);
-    this.app.putFocusPoint(worldClick);
+  pressDownQuick(e: IGestureEvent) {
+    this.app.putFocusPoint(e.wordScreenClick);
     this.sendToMonitor('Quick Press Down', this.getClickInfoStr(e));
   }
 
-  pressDownMedium(e: StageEvent) {
-    const worldClick = this.app.viewport.getWorldScreenCoordsFromEvent(e);
-    this.app.putFocusPoint(worldClick);
+  pressDownMedium(e: IGestureEvent) {
+    this.app.putFocusPoint(e.wordScreenClick);
     this.sendToMonitor('Medium Press Down', this.getClickInfoStr(e));
   }
 
-  pressDownLong(e: StageEvent) {
-    const worldClick = this.app.viewport.getWorldScreenCoordsFromEvent(e);
-    this.app.putFocusPoint(worldClick);
+  pressDownLong(e: IGestureEvent) {
+    this.app.putFocusPoint(e.wordScreenClick);
     this.sendToMonitor('Long Press Down', this.getClickInfoStr(e));
   }
 }
