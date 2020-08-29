@@ -18,7 +18,7 @@ async function main() {
     app.viewport.addToViewport(rectangle);
 
     /** Load test images **/
-    const loader = await FilesIO.loadUrlSet(getImageUrlSet(60));
+    const loader = await FilesIO.loadUrlSet(getImageUrlSet(30));
 
     for (const resource of Object.values(loader.resources)) {
       app.memos.addMemo(resource.texture);
