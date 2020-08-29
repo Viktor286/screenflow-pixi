@@ -1,33 +1,25 @@
 import * as PIXI from 'pixi.js';
 import FlowApp from '../FlowApp';
 import DevMonitor from '../DevMonitor';
+import TimedGesture from './TimedGesture';
 
-type StageEvent = PIXI.InteractionEvent;
-type pressEvent = {
-  worldClick: {
-    x: number;
-    y: number;
-  };
-};
+// TODO: Would it be better for performance to make all events under PIXI.InteractionManager?
+// const IM = new PIXI.InteractionManager(this.app.pixiApp.renderer);
+// IM.on('pointerdown', (e: StageEvent) => console.log('!!! InteractionManager', e));
+
+export type StageEvent = PIXI.InteractionEvent;
 
 export default class StageEvents {
   eventMonitor: DevMonitor | null;
   stage: PIXI.Container;
-  awaiting: boolean | string;
-  timer: ReturnType<typeof setTimeout> | null;
-  clickCnt: number;
+  timedGesture: TimedGesture;
 
   constructor(public app: FlowApp) {
     this.stage = this.app.stage;
 
     this.stage.interactive = true;
-
     this.eventMonitor = this.app.devMonitor;
-
-    // Timed-gestures event manager
-    this.clickCnt = 0;
-    this.awaiting = false;
-    this.timer = null;
+    this.timedGesture = new TimedGesture(this);
 
     // Monitoring
     if (this.eventMonitor instanceof DevMonitor) {
@@ -50,131 +42,13 @@ export default class StageEvents {
     this.stage.on('pointerup', (e: StageEvent) => this.stagePointerUp(e));
   }
 
-  // Timed-gestures special events
-  // Press Down events
-  stageImmediatePressDown({ worldClick }: pressEvent) {
-    // ImmediatePressDown event could be too frequent,
-    // its probably best choice to use ImmediatePressUp
-    this.app.putFocusPoint(worldClick.x, worldClick.y);
-    this.sendToMonitor('Immediate Press Down', `${Math.round(worldClick.x)} : ${Math.round(worldClick.y)}`);
-  }
-
-  stageQuickPressDown({ worldClick }: pressEvent) {
-    this.app.putFocusPoint(worldClick.x, worldClick.y);
-    this.sendToMonitor('Quick Press Down', `${Math.round(worldClick.x)} : ${Math.round(worldClick.y)}`);
-  }
-
-  stageMediumPressDown({ worldClick }: pressEvent) {
-    this.app.putFocusPoint(worldClick.x, worldClick.y);
-    this.sendToMonitor('Medium Press Down', `${Math.round(worldClick.x)} : ${Math.round(worldClick.y)}`);
-  }
-
-  stageLongPressDown({ worldClick }: pressEvent) {
-    this.app.putFocusPoint(worldClick.x, worldClick.y);
-    this.sendToMonitor('Long Press Down', `${Math.round(worldClick.x)} : ${Math.round(worldClick.y)}`);
-  }
-
-  // Press Up events
-  stageImmediatePressUp({ worldClick }: pressEvent) {
-    // Workaround for the case when ImmediatePressUp will be triggered as part of double click event
-    // (approach when stageImmediatePressUp set with timeout 200
-    if (this.clickCnt < 2) {
-      this.sendToMonitor('Immediate Press Up', `${Math.round(worldClick.x)} : ${Math.round(worldClick.y)}`);
-    }
-  }
-
-  stageQuickPressUp({ worldClick }: pressEvent) {
-    this.app.actions.viewportMoveTo({ wX: worldClick.x, wY: worldClick.y });
-    this.sendToMonitor('Quick Press Up', `${Math.round(worldClick.x)} : ${Math.round(worldClick.y)}`);
-  }
-
-  stageMediumPressUp({ worldClick }: pressEvent) {
-    this.sendToMonitor('Medium Press Up', `${Math.round(worldClick.x)} : ${Math.round(worldClick.y)}`);
-  }
-
-  stageLongPressUp({ worldClick }: pressEvent) {
-    this.sendToMonitor('Long Press Up', `${Math.round(worldClick.x)} : ${Math.round(worldClick.y)}`);
-  }
-
-  // Additional events
-  stageDoubleClick({ worldClick }: pressEvent) {
-    this.sendToMonitor('DoubleClick', `${Math.round(worldClick.x)} : ${Math.round(worldClick.y)}`);
-    this.app.actions.viewportZoomIn({ wX: worldClick.x, wY: worldClick.y });
-  }
-
   // Original events
   stagePointerDown(e: StageEvent) {
-    // Timed-gestures manager
-    this.awaiting = true;
-    this.clickCnt += 1;
-    setTimeout(() => (this.clickCnt = 0), 300); // double click threshold
-
-    // Prepare pressEvent data
-    const screenClick = { x: e.data.global.x, y: e.data.global.y };
-    const { x: wX, y: wY } = this.app.viewport.screenToWorld(screenClick.x, screenClick.y);
-    const pressEvent = { worldClick: { x: wX, y: wY } };
-
-    // Tier 0: Immediate "select" press
-    // Block second immediate click for double-click case
-    if (this.clickCnt < 2) {
-      this.stageImmediatePressDown(pressEvent);
-      this.timer = setTimeout(() => {
-        if (this.awaiting) {
-          // Tier 1: quick-press
-          this.awaiting = 'quick';
-          this.stageQuickPressDown(pressEvent);
-          this.timer = setTimeout(() => {
-            if (this.awaiting) {
-              // Tier 2: medium-press
-              this.awaiting = 'medium';
-              this.stageMediumPressDown(pressEvent);
-              this.timer = setTimeout(() => {
-                if (this.awaiting) {
-                  // Tier 3: long-press
-                  this.awaiting = 'long';
-                  this.stageLongPressDown(pressEvent);
-                }
-              }, 1000);
-            }
-          }, 800);
-        }
-      }, 250);
-    }
+    this.timedGesture.pointerDownGate(e);
   }
 
   stagePointerUp(e: StageEvent) {
-    // Timed-gestures handlers
-    //
-    // Prepare pressEvent data
-    const screenClick = { x: e.data.global.x, y: e.data.global.y };
-    const { x: wX, y: wY } = this.app.viewport.screenToWorld(screenClick.x, screenClick.y);
-    const pressEvent = { worldClick: { x: wX, y: wY } };
-
-    // Distinguish single click and double click handlers
-    // filter out timed gestures while double-click
-    if (this.clickCnt < 2) {
-      // Tier 0: Immediate "select" press
-      // No ImmediatePressUp while timed gestures are active
-      if (this.awaiting !== 'quick' && this.awaiting !== 'medium' && this.awaiting !== 'long') {
-        // this is experimental hack to workaround stageImmediatePressUp intersection with double click
-        setTimeout(() => this.stageImmediatePressUp(pressEvent), 200);
-      }
-
-      // Tier 1: quick-press
-      if (this.awaiting === 'quick') this.stageQuickPressUp(pressEvent);
-
-      // Tier 2: medium-press
-      if (this.awaiting === 'medium') this.stageMediumPressUp(pressEvent);
-
-      // Tier 3: long-press
-      if (this.awaiting === 'long') this.stageLongPressUp(pressEvent);
-    } else {
-      // Double click handlers
-      this.stageDoubleClick(pressEvent);
-    }
-
-    this.awaiting = false;
-    if (this.timer) clearTimeout(this.timer);
+    this.timedGesture.pointerUpGate(e);
   }
 
   // Assignable stage events (note)
