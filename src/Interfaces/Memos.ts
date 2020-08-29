@@ -1,15 +1,16 @@
 import * as PIXI from 'pixi.js';
 import { Snapshot } from './Snapshot';
-import { MemoEvents } from './InteractionEvents/MemoEvents';
 import FlowApp from './FlowApp';
 
 export default class Memos {
   list: Memo[];
-  selected: Memo[];
+  selected: Map<string, Memo>;
+  isMultiSelect: boolean;
 
   constructor(public app: FlowApp) {
     this.list = [];
-    this.selected = [];
+    this.selected = new Map();
+    this.isMultiSelect = false;
 
     if (this.app.devMonitor) {
       this.app.devMonitor.addDevMonitor('memoEvents');
@@ -22,6 +23,39 @@ export default class Memos {
     this.app.viewport.addToViewport(memo);
     this.app.viewport.instance.setChildIndex(memo, 0);
   }
+
+  addMemoToSelected(memo: Memo) {
+    if (this.isMultiSelect) {
+      this.selectMemo(memo);
+    } else {
+      this.clearSelectedMemos();
+      this.selectMemo(memo);
+    }
+  }
+
+  selectMemo(memo: Memo) {
+    memo.drawSelection();
+    this.selected.set(memo.id, memo);
+    memo.selected = false;
+  }
+
+  deselectMemo(memo: Memo) {
+    memo.eraseSelection();
+    this.selected.delete(memo.id);
+    memo.selected = false;
+  }
+
+  clearSelectedMemos() {
+    this.selected.forEach((memo) => {
+      this.deselectMemo(memo);
+    });
+  }
+
+  // redrawSelected() {
+  //   this.selected.forEach((memo) => {
+  //     memo.drawSelection();
+  //   });
+  // }
 
   sendEventToMonitor(memo: Memo, eventName: string, msg: string = '') {
     if (this.app.devMonitor) {
@@ -54,26 +88,23 @@ export class Memo extends PIXI.Container {
     this.addChild(this.snapshot.sprite);
     this.addChild(this.selectionDrawing);
 
-    new MemoEvents(this);
+    // new MemoEvents(this);
+    this.interactive = true;
   }
 
   select() {
-    this.selected = true;
-    // clear list, add current
-    this.drawSelection();
+    this.memos.addMemoToSelected(this);
   }
 
   deselect() {
-    this.selected = false;
-    // clear list, rm current
-    this.eraseSelection();
+    // pass
   }
 
-  drawSelection(zoomLevel: number = 1): void {
+  drawSelection(): void {
     this.selectionDrawing
       .clear()
-      .lineStyle(1.1 / zoomLevel / this.parent.transform.scale.x, 0x73b2ff)
-      .drawRect(0, 0, this.width, this.height);
+      .lineStyle(5 / this.app.viewport.getScale(), 0x73b2ff)
+      .drawRect(0, 0, this.snapshot.width, this.snapshot.height);
   }
 
   eraseSelection() {

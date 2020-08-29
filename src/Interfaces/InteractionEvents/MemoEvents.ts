@@ -41,13 +41,13 @@ export class MemoEvents {
 
     // Normalized "pointer" events
     // this.memo.on('pointermove', (e: MemoEvent) => this.memoPointerMove(e));
-    this.memo.on('pointercancel', (e: MemoEvent) => this.memoPointerCancel(e));
+    // this.memo.on('pointercancel', (e: MemoEvent) => this.memoPointerCancel(e));
     this.memo.on('pointerdown', (e: MemoEvent) => this.memoPointerDown(e));
-    this.memo.on('pointerout', (e: MemoEvent) => this.memoPointerOut(e));
-    this.memo.on('pointerover', (e: MemoEvent) => this.memoPointerOver(e));
-    this.memo.on('pointertap', (e: MemoEvent) => this.memoPointerTap(e));
+    // this.memo.on('pointerout', (e: MemoEvent) => this.memoPointerOut(e));
+    // this.memo.on('pointerover', (e: MemoEvent) => this.memoPointerOver(e));
+    // this.memo.on('pointertap', (e: MemoEvent) => this.memoPointerTap(e));
     this.memo.on('pointerup', (e: MemoEvent) => this.memoPointerUp(e));
-    this.memo.on('pointerupoutside', (e: MemoEvent) => this.memoPointerUpOutside(e));
+    // this.memo.on('pointerupoutside', (e: MemoEvent) => this.memoPointerUpOutside(e));
 
     // Touch-device specific events
     // this.memo.on('tap', (e: MemoEvent) => this.memoTap(e));
@@ -66,50 +66,40 @@ export class MemoEvents {
 
   // Event assignments
 
-  memoPointerCancel(e: MemoEvent) {
-    this.sendToMonitor('Pointer Cancel');
-  }
-
   memoPointerDown(e: MemoEvent) {
     this.sendToMonitor('Pointer Down');
-  }
-
-  memoPointerMove(e: MemoEvent) {
-    this.sendToMonitor('Pointer Move');
-  }
-
-  memoPointerOut(e: MemoEvent) {
-    this.sendToMonitor('Pointer Out');
-  }
-
-  memoPointerOver(e: MemoEvent) {
-    this.sendToMonitor('Pointer Over');
-  }
-
-  memoPointerTap(e: MemoEvent) {
-    this.sendToMonitor('Pointer Tap');
+    // console.log('Pointer Down e.currentTarget', e.currentTarget);
+    // console.log('Pointer Down e.target', e.target);
+    // This was a try to pass event to stage handlers (no way to avoid double click without turn off stage)
+    // this.memo.app.stage.emit('pointerdown', e);
   }
 
   memoPointerUp(e: MemoEvent) {
     this.sendToMonitor('Pointer Up');
+    // console.log('Pointer Up', e);
   }
 
-  memoPointerUpOutside(e: MemoEvent) {
-    this.sendToMonitor('Pointer UpOutside');
-  }
-
-  // memoTap(e: MemoEvent) {
-  //   console.log('[memo] Tap', e);
-  //   this.sendToMonitor('Tap');
+  // memoPointerCancel(e: MemoEvent) {
+  //   this.sendToMonitor('Pointer Cancel');
   // }
   //
-  // memoTouchStart(e: MemoEvent) {
-  //   console.log('[memo] PointerTap', e);
-  //   this.sendToMonitor('PointerTap');
+  // memoPointerMove(e: MemoEvent) {
+  //   this.sendToMonitor('Pointer Move');
   // }
   //
-  // memoTouchEnd(e: MemoEvent) {
-  //   this.sendToMonitor('TouchEnd');
-  //   console.log('[memo] TouchEnd', e);
+  // memoPointerOut(e: MemoEvent) {
+  //   this.sendToMonitor('Pointer Out');
+  // }
+  //
+  // memoPointerOver(e: MemoEvent) {
+  //   this.sendToMonitor('Pointer Over');
+  // }
+  //
+  // memoPointerTap(e: MemoEvent) {
+  //   this.sendToMonitor('Pointer Tap');
+  // }
+  //
+  // memoPointerUpOutside(e: MemoEvent) {
+  //   this.sendToMonitor('Pointer UpOutside');
   // }
 }
