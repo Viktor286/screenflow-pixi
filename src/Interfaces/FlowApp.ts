@@ -1,8 +1,7 @@
 import * as PIXI from 'pixi.js';
 import { GraphicsEngine } from './GraphicsEngine';
-import Viewport from './Viewport';
+import Viewport, { IWorldScreenCoords } from './Viewport';
 import StageEvents from './InteractionEvents/StageEvents';
-import ViewportEvents from './InteractionEvents/ViewportEvents';
 import DevMonitor from './DevMonitor';
 import Memos from './Memos';
 import { WebUi } from './WebUi';
@@ -22,29 +21,30 @@ export default class FlowApp {
   focusPoint: PIXI.Graphics;
   webUi: WebUi;
   actions: ViewportActions;
+  stageEvents: StageEvents;
 
   constructor(mainEngine: GraphicsEngine) {
     this.engine = mainEngine;
     this.pixiApp = this.engine.instance;
     this.screen = this.engine.instance.screen;
     this.stage = this.pixiApp.stage;
-    new StageEvents(this);
 
     // this.devMonitor = new DevMonitor();
     this.devMonitor = null;
 
+    this.stageEvents = new StageEvents(this);
+
     // Setup viewport
     this.viewport = new Viewport(this);
-    new ViewportEvents(this);
 
     // Setup Memos
     this.memos = new Memos(this);
 
-    // UI
-    this.focusPoint = this.initFocusPoint();
-
     // Actions
     this.actions = new ViewportActions(this);
+
+    // UI
+    this.focusPoint = this.initFocusPoint();
 
     // Browser UI
     this.webUi = new WebUi(this);
@@ -100,9 +100,9 @@ export default class FlowApp {
     return circle;
   }
 
-  putFocusPoint(x: number, y: number) {
+  putFocusPoint({ wX, wY }: IWorldScreenCoords) {
     this.focusPoint.alpha = 0;
-    this.focusPoint.position.set(x, y);
+    this.focusPoint.position.set(wX, wY);
     AnimateUiControls.pressFocusPoint(this.focusPoint);
   }
 }

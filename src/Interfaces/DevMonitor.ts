@@ -1,3 +1,5 @@
+import { IUniScreenCoords } from './Viewport';
+
 type StreamMessage = string;
 type Monitor = 'stageEvents' | 'viewportEvents' | 'memoEvents';
 
@@ -6,19 +8,19 @@ interface IMonitorStreams {
 }
 
 export default class DevMonitor {
-  eventMonitorHost: HTMLElement;
+  eventMonitorDiv: HTMLElement;
   eventMonitorStreams: IMonitorStreams;
 
   constructor() {
     this.eventMonitorStreams = {};
 
-    this.eventMonitorHost = this.createEventMonitorHost();
+    this.eventMonitorDiv = this.createEventMonitorDiv();
     // TODO: display viewport params: move, w, h, center, corner, zoom %, scale
 
-    window.document.body.appendChild(this.eventMonitorHost);
+    window.document.body.appendChild(this.eventMonitorDiv);
   }
 
-  createEventMonitorHost() {
+  createEventMonitorDiv() {
     const div = document.createElement('div');
     div.id = 'EventMonitor';
     div.style.width = '100%';
@@ -47,13 +49,35 @@ export default class DevMonitor {
     const mStream = new MonitoringStream(title);
     const mSection = this.createDevMonitorElement(title);
     mStream.initStreamUiContainer(mSection);
-    this.eventMonitorHost.appendChild(mSection);
+    this.eventMonitorDiv.appendChild(mSection);
     this.eventMonitorStreams[title] = mStream;
   }
 
   dispatchMonitor(monitor: Monitor, eventType: string, eventMsg: string) {
     this.eventMonitorStreams[monitor].addStreamMessage(eventType, eventMsg);
     this.eventMonitorStreams[monitor].updateStreamView();
+  }
+
+  pointToStr(point: IUniScreenCoords) {
+    let x = 0;
+    let y = 0;
+
+    if (point.sX !== undefined && point.sY !== undefined) {
+      x = point.sX;
+      y = point.sY;
+    }
+
+    if (point.wX !== undefined && point.wY !== undefined) {
+      x = point.wX;
+      y = point.wY;
+    }
+
+    if (point.x !== undefined && point.y !== undefined) {
+      x = point.x;
+      y = point.y;
+    }
+
+    return `${Math.round(x)} : ${Math.round(y)}`;
   }
 }
 

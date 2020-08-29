@@ -1,5 +1,5 @@
 import FlowApp from '../Interfaces/FlowApp';
-import { WordScreenCoords } from '../Interfaces/Viewport';
+import { IWorldScreenCoords } from '../Interfaces/Viewport';
 
 export default class ViewportActions {
   runAheadZoomIn: number;
@@ -10,7 +10,7 @@ export default class ViewportActions {
     this.runAheadZoomOut = 0;
   }
 
-  viewportMoveCamera(targetPoint?: WordScreenCoords, targetScale?: number) {
+  viewportMoveCamera(targetPoint?: IWorldScreenCoords, targetScale?: number) {
     if (!targetPoint) {
       targetPoint = this.app.viewport.getScreeCenterInWord();
     }
@@ -22,11 +22,11 @@ export default class ViewportActions {
     this.app.viewport.animations.moveCameraTo(targetPoint, targetScale);
   }
 
-  viewportMoveTo(target: WordScreenCoords) {
+  viewportMoveTo(target: IWorldScreenCoords) {
     this.viewportMoveCamera(target);
   }
 
-  viewportZoomIn(zoomPoint?: WordScreenCoords) {
+  viewportZoomIn(zoomPoint?: IWorldScreenCoords) {
     if (this.runAheadZoomIn > 1) this.runAheadZoomIn = 1;
 
     this.viewportMoveCamera(zoomPoint, this.app.viewport.getNextScaleStepUp(this.runAheadZoomIn));
@@ -38,11 +38,11 @@ export default class ViewportActions {
     }, 700);
   }
 
-  viewportZoom100(zoomPoint?: WordScreenCoords) {
+  viewportZoom100(zoomPoint?: IWorldScreenCoords) {
     this.viewportMoveCamera(zoomPoint, 1);
   }
 
-  viewportZoomOut(zoomPoint?: WordScreenCoords) {
+  viewportZoomOut(zoomPoint?: IWorldScreenCoords) {
     if (this.runAheadZoomOut > 1) this.runAheadZoomOut = 1;
 
     this.viewportMoveCamera(zoomPoint, this.app.viewport.getNextScaleStepDown(this.runAheadZoomOut));

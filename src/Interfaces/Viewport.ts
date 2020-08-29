@@ -3,14 +3,33 @@ import { GraphicsEngine } from './GraphicsEngine';
 import { Viewport as PixiViewport } from 'pixi-viewport';
 import FlowApp from './FlowApp';
 import { ViewportAnimations } from './Animations';
+import { StageEvent } from './InteractionEvents/StageEvents';
 
-export type WordScreenCoords = {
+export interface IUniScreenCoords {
+  wX?: number;
+  wY?: number;
+  sX?: number;
+  sY?: number;
+  x?: number;
+  y?: number;
+}
+
+export interface IWorldScreenCoords {
   wX: number;
   wY: number;
-};
+}
+
+export interface IScreenCoords {
+  sX: number;
+  sY: number;
+}
 
 // Viewport documentation: https://davidfig.github.io/pixi-viewport/jsdoc/Viewport.html
 // Module: node_modules/pixi-viewport/dist/viewport.es.js
+
+// For specific viewport events use
+// import ViewportEvents from './InteractionEvents/ViewportEvents';
+// new ViewportEvents(this);
 
 export default class Viewport {
   instance: PixiViewport;
@@ -24,6 +43,16 @@ export default class Viewport {
     this.animations = new ViewportAnimations(this);
     this.zoomScale = [0.03125, 0.0625, 0.125, 0.25, 0.5, 1, 2, 4, 8, 16, 32];
     app.stage.addChild(this.instance);
+  }
+
+  getScreenCoordsFromEvent(e: StageEvent): IScreenCoords {
+    return { sX: e.data.global.x, sY: e.data.global.y };
+  }
+
+  getWorldScreenCoordsFromEvent(e: StageEvent): IWorldScreenCoords {
+    const screenClick: IScreenCoords = { sX: e.data.global.x, sY: e.data.global.y };
+    const { x: wX, y: wY } = this.app.viewport.screenToWorld(screenClick);
+    return { wX, wY };
   }
 
   getNextScaleStepDown(runAhead: number): number {
@@ -96,6 +125,10 @@ export default class Viewport {
     return this.instance.addChild(displayObject);
   }
 
+  getScale(): number {
+    return this.instance.scale.x;
+  }
+
   getZoom(): string {
     return Math.round(this.instance.scale.x * 100).toString();
   }
@@ -104,11 +137,11 @@ export default class Viewport {
   //   this.instance.setZoom(absPercent / 100, true);
   // }
 
-  screenToWorld(sX: number, sY: number) {
+  screenToWorld({ sX, sY }: IScreenCoords) {
     return this.instance.toWorld(sX, sY);
   }
 
-  getScreeCenterInWord(): WordScreenCoords {
+  getScreeCenterInWord(): IWorldScreenCoords {
     return {
       wX: this.instance.worldScreenWidth / 2 - this.instance.x / this.instance.scale.x,
       wY: this.instance.worldScreenHeight / 2 - this.instance.y / this.instance.scale.y,
