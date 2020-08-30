@@ -45,7 +45,7 @@ export default class Viewport {
   constructor(public app: FlowApp) {
     this.engine = app.engine;
     this.instance = this.setupViewport(this.engine.hostHTML.clientWidth, this.engine.hostHTML.clientHeight);
-    this.animations = new ViewportAnimations(this);
+    this.animations = new ViewportAnimations(this.app, this);
     this.zoomScale = [0.03125, 0.0625, 0.125, 0.25, 0.5, 1, 2, 4, 8, 16, 32];
     app.stage.addChild(this.instance);
   }

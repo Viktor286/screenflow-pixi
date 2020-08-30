@@ -2,70 +2,48 @@ import { gsap } from 'gsap';
 import PIXI from 'pixi.js';
 import Viewport from './Viewport';
 import { IWorldScreenCoords } from './Viewport';
-
-type cameraControls = {
-  x: number;
-  y: number;
-  scale: number;
-};
+import FlowApp from './FlowApp';
 
 export class ViewportAnimations {
-  cameraControls: cameraControls;
   viewport: Viewport;
 
-  constructor(viewport: Viewport) {
+  constructor(public app: FlowApp, viewport: Viewport) {
     this.viewport = viewport;
-    const vp = viewport.instance;
-
-    this.cameraControls = {
-      get x() {
-        return vp.x;
-      },
-      set x(x) {
-        vp.x = x;
-      },
-      get y() {
-        return vp.y;
-      },
-      set y(y) {
-        vp.y = y;
-      },
-      get scale() {
-        return vp.scale.x;
-      },
-      set scale(scale) {
-        vp.scale.x = scale;
-        vp.scale.y = scale;
-      },
-    };
   }
 
   moveCameraTo(targetPoint: IWorldScreenCoords, targetScale?: number) {
     if (targetScale === undefined) {
-      targetScale = this.cameraControls.scale;
+      targetScale = this.app.stateManager.state.camera.scale;
     }
-
-    // get center()
-    // center of screen in world coordinates = worldScreenWidth / 2 - x / scale
-
-    // get worldScreenWidth()
-    // worldScreenWidth = screenWidth / scale
 
     if (targetScale >= 32) targetScale = 32;
     if (targetScale <= 0.01) targetScale = 0.01;
 
-    gsap.to(this.cameraControls, {
-      x: (this.viewport.screenWidth / targetScale / 2 - targetPoint.wX) * targetScale,
-      y: (this.viewport.screenHeight / targetScale / 2 - targetPoint.wY) * targetScale,
+    const targetProps = {
+      x: (this.app.viewport.screenWidth / targetScale / 2 - targetPoint.wX) * targetScale,
+      y: (this.app.viewport.screenHeight / targetScale / 2 - targetPoint.wY) * targetScale,
       scale: targetScale,
+    };
+
+    const app = this.app;
+
+    gsap.to(this.app.stateManager.getState('camera'), {
+      ...targetProps,
       duration: 0.7,
       ease: 'power3.out',
+      onUpdate: function () {
+        const animatedSet = this.targets()[0]; // current {x, y, scale}
+        // TODO: it might be better not to update state with animation
+        //  - how it is recommended to deal with animations in react?
+        app.stateManager.setState('camera', animatedSet);
+      },
       onStart: () => {
-        this.viewport.interactive = false;
+        this.app.viewport.interactive = false;
       },
       onComplete: () => {
-        this.viewport.interactive = true;
-        this.viewport.onCameraAnimationEnds();
+        this.app.viewport.interactive = true;
+        this.app.viewport.onCameraAnimationEnds();
+        // console.log('camera.state', this.state);
       },
     });
   }

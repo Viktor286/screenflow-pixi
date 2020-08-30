@@ -10,7 +10,7 @@ import ViewportActions from '../Actions/Viewport';
 import { AnimateUiControls } from './Animations';
 import { gsap } from 'gsap';
 import { PixiPlugin } from 'gsap/PixiPlugin';
-import Camera from './Camera';
+import StateManager from './StateManager';
 
 export default class FlowApp {
   engine: GraphicsEngine;
@@ -25,9 +25,11 @@ export default class FlowApp {
   actions: ViewportActions;
   stageEvents: StageEvents;
   // store: Store;
-  camera: Camera;
+  stateManager: StateManager;
 
   constructor(mainEngine: GraphicsEngine) {
+    console.log('FlowApp', this);
+
     this.engine = mainEngine;
     this.pixiApp = this.engine.instance;
     this.screen = this.engine.instance.screen;
@@ -44,17 +46,13 @@ export default class FlowApp {
     // Setup viewport
     this.viewport = new Viewport(this);
 
-    // TODO: temp Camera with state management
-    //  - use immutable js?
-    //  - attach it to redux? (how react "connect" works)
-    //  - should camera high-freq animations be in its own store?
-    this.camera = new Camera(this);
-
     // Setup Memos
     this.memos = new Memos(this);
 
     // Actions
     this.actions = new ViewportActions(this);
+
+    this.stateManager = new StateManager(this);
 
     // UI
     this.focusPoint = this.initFocusPoint();

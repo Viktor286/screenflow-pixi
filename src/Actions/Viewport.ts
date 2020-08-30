@@ -20,8 +20,8 @@ export default class ViewportActions {
     }
 
     // TODO: remove
-    // this.app.viewport.animations.moveCameraTo(targetPoint, targetScale);
-    this.app.camera.moveCameraTo(targetPoint, targetScale);
+    this.app.viewport.animations.moveCameraTo(targetPoint, targetScale);
+    // this.app.camera.moveCameraTo(targetPoint, targetScale);
   }
 
   viewportMoveTo(target: IWorldScreenCoords) {
