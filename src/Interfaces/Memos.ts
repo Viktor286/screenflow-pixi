@@ -103,7 +103,7 @@ export class Memo extends PIXI.Container {
   drawSelection(): void {
     this.selectionDrawing
       .clear()
-      .lineStyle(5 / this.app.viewport.getScale(), 0x73b2ff)
+      .lineStyle(5 / this.app.viewport.scale, 0x73b2ff)
       .drawRect(0, 0, this.snapshot.width, this.snapshot.height);
   }
 

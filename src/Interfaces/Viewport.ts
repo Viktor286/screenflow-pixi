@@ -24,6 +24,10 @@ export interface IScreenCoords {
   sY: number;
 }
 
+export interface IViewportInstance extends PixiViewport {
+  [key: string]: any;
+}
+
 // Viewport documentation: https://davidfig.github.io/pixi-viewport/jsdoc/Viewport.html
 // Module: node_modules/pixi-viewport/dist/viewport.es.js
 
@@ -32,10 +36,11 @@ export interface IScreenCoords {
 // new ViewportEvents(this);
 
 export default class Viewport {
-  instance: PixiViewport;
+  instance: IViewportInstance;
   engine: GraphicsEngine;
   animations: ViewportAnimations;
   zoomScale: number[];
+  [key: string]: any;
 
   constructor(public app: FlowApp) {
     this.engine = app.engine;
@@ -43,6 +48,55 @@ export default class Viewport {
     this.animations = new ViewportAnimations(this);
     this.zoomScale = [0.03125, 0.0625, 0.125, 0.25, 0.5, 1, 2, 4, 8, 16, 32];
     app.stage.addChild(this.instance);
+  }
+
+  set x(x: number) {
+    this.instance.x = x;
+  }
+
+  get x() {
+    return this.instance.x;
+  }
+
+  set y(y: number) {
+    this.instance.y = y;
+  }
+
+  get y() {
+    return this.instance.y;
+  }
+
+  set scale(val: number) {
+    this.instance.scale.x = val;
+    this.instance.scale.y = val;
+  }
+
+  get scale() {
+    return this.instance.scale.x;
+  }
+
+  set screenWidth(val: number) {
+    this.instance.screenWidth = val;
+  }
+
+  get screenWidth() {
+    return this.instance.screenWidth;
+  }
+
+  set screenHeight(val: number) {
+    this.instance.screenHeight = val;
+  }
+
+  get screenHeight() {
+    return this.instance.screenHeight;
+  }
+
+  set interactive(val: boolean) {
+    this.instance.interactive = val;
+  }
+
+  get interactive() {
+    return this.instance.interactive;
   }
 
   getScreenCoordsFromEvent(e: StageEvent): IScreenCoords {
@@ -125,10 +179,6 @@ export default class Viewport {
     return this.instance.addChild(displayObject);
   }
 
-  getScale(): number {
-    return this.instance.scale.x;
-  }
-
   getZoom(): string {
     return Math.round(this.instance.scale.x * 100).toString();
   }
@@ -140,6 +190,12 @@ export default class Viewport {
   screenToWorld({ sX, sY }: IScreenCoords) {
     return this.instance.toWorld(sX, sY);
   }
+
+  // get center()
+  // center of screen in world coordinates = worldScreenWidth / 2 - x / scale
+
+  // get worldScreenWidth()
+  // worldScreenWidth = screenWidth / scale
 
   getScreeCenterInWord(): IWorldScreenCoords {
     return {

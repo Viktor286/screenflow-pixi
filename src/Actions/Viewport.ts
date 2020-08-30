@@ -16,10 +16,12 @@ export default class ViewportActions {
     }
 
     if (targetScale === undefined) {
-      targetScale = this.app.viewport.instance.scale.x;
+      targetScale = this.app.viewport.scale;
     }
 
-    this.app.viewport.animations.moveCameraTo(targetPoint, targetScale);
+    // TODO: remove
+    // this.app.viewport.animations.moveCameraTo(targetPoint, targetScale);
+    this.app.camera.moveCameraTo(targetPoint, targetScale);
   }
 
   viewportMoveTo(target: IWorldScreenCoords) {

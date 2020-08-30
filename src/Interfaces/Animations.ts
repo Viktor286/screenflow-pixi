@@ -55,16 +55,16 @@ export class ViewportAnimations {
     if (targetScale <= 0.01) targetScale = 0.01;
 
     gsap.to(this.cameraControls, {
-      x: (this.viewport.instance.screenWidth / targetScale / 2 - targetPoint.wX) * targetScale,
-      y: (this.viewport.instance.screenHeight / targetScale / 2 - targetPoint.wY) * targetScale,
+      x: (this.viewport.screenWidth / targetScale / 2 - targetPoint.wX) * targetScale,
+      y: (this.viewport.screenHeight / targetScale / 2 - targetPoint.wY) * targetScale,
       scale: targetScale,
       duration: 0.7,
       ease: 'power3.out',
       onStart: () => {
-        this.viewport.instance.interactive = false;
+        this.viewport.interactive = false;
       },
       onComplete: () => {
-        this.viewport.instance.interactive = true;
+        this.viewport.interactive = true;
         this.viewport.onCameraAnimationEnds();
       },
     });

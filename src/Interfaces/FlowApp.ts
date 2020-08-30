@@ -3,12 +3,14 @@ import { GraphicsEngine } from './GraphicsEngine';
 import Viewport, { IWorldScreenCoords } from './Viewport';
 import StageEvents from './InteractionEvents/StageEvents';
 import DevMonitor from './DevMonitor';
+// import { initStore, Store } from '../store/initStore';
 import Memos from './Memos';
 import { WebUi } from './WebUi';
 import ViewportActions from '../Actions/Viewport';
 import { AnimateUiControls } from './Animations';
 import { gsap } from 'gsap';
 import { PixiPlugin } from 'gsap/PixiPlugin';
+import Camera from './Camera';
 
 export default class FlowApp {
   engine: GraphicsEngine;
@@ -22,12 +24,17 @@ export default class FlowApp {
   webUi: WebUi;
   actions: ViewportActions;
   stageEvents: StageEvents;
+  // store: Store;
+  camera: Camera;
 
   constructor(mainEngine: GraphicsEngine) {
     this.engine = mainEngine;
     this.pixiApp = this.engine.instance;
     this.screen = this.engine.instance.screen;
     this.stage = this.pixiApp.stage;
+
+    // this.store = initStore();
+    // console.log('store', this.store);
 
     // this.devMonitor = new DevMonitor();
     this.devMonitor = null;
@@ -36,6 +43,12 @@ export default class FlowApp {
 
     // Setup viewport
     this.viewport = new Viewport(this);
+
+    // TODO: temp Camera with state management
+    //  - use immutable js?
+    //  - attach it to redux? (how react "connect" works)
+    //  - should camera high-freq animations be in its own store?
+    this.camera = new Camera(this);
 
     // Setup Memos
     this.memos = new Memos(this);
