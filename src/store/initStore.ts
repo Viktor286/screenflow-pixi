@@ -1,7 +1,7 @@
-import { createStore, Store as ReduxStore } from "redux";
-import { combineReducers } from "redux";
-import todos from "./Reducers/todos";
-import visibilityFilter from "./Reducers/visibilityFilter";
+import { createStore, Store as ReduxStore } from 'redux';
+import { combineReducers } from 'redux';
+import todos from './Reducers/todos';
+import visibilityFilter from './Reducers/visibilityFilter';
 
 export type Store = ReduxStore;
 
@@ -20,10 +20,10 @@ export function initStore(): Store {
     combineReducers({
       todos,
       visibilityFilter,
-    })
+    }),
   );
 
-  store.subscribe(() => console.log("subscribed store", store.getState()));
+  store.subscribe(() => console.log('subscribed store', store.getState()));
 
   return store;
 }

@@ -1,5 +1,5 @@
 // import { Action as ReduxAction, Store as ReduxStore } from "redux";
-import { Store as ReduxStore } from "redux";
+import { Store as ReduxStore } from 'redux';
 
 export interface IReduxAction {
   type: string;
