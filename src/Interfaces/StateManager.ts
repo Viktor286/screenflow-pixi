@@ -13,14 +13,14 @@ interface IStateSlice {
 }
 
 // TODO: temp state management
-//  - this is version of state with permanent branches(top level keys) to simplify algorithm
+//  - this is version of state with permanent scopes(top level keys) to simplify algorithm
 //  - use immutable js collections?
 //  - attach state to redux? (how react "connect" works, via store.subscribe?)
-//  - should camera high-freq animations be in its own store?
 
 export default class StateManager {
   state: IAppState;
   history: IStateSlice[];
+  historyLevel: number;
 
   constructor(public app: FlowApp) {
     this.state = {
@@ -31,7 +31,12 @@ export default class StateManager {
         animation: false,
       },
     };
-    this.history = []; // TODO: make a queue
+    this.history = [];
+    this.historyLevel = 50;
+  }
+
+  enqueueHistory(action: IStateSlice) {
+    this.history = [action, ...this.history.slice(0, this.historyLevel - 1)];
   }
 
   saveToHistory(stateScope: IStateScope, stateSlice: IStateSlice) {
@@ -40,7 +45,13 @@ export default class StateManager {
         if (stateSlice.animation !== false) {
           return;
         }
-        this.history.push(stateSlice);
+        const { x, y, scale } = stateSlice;
+        this.enqueueHistory({
+          type: 'camera',
+          x,
+          y,
+          scale,
+        });
     }
   }
 
@@ -53,7 +64,6 @@ export default class StateManager {
     };
   }
 
-  // TODO: this setState version supports only stateScoped requests
   setState = (stateScope: IStateScope, stateSlice: IStateSlice) => {
     let prevScopeState = this.getState(stateScope);
     let newScopeState;
@@ -69,10 +79,8 @@ export default class StateManager {
           this.state[stateScope] = newScopeState;
           prevScopeState = newScopeState;
           this.saveToHistory(stateScope, newScopeState);
-
-          // call subscribers?
         } else {
-          // TODO: handle case with object|array sub levels
+          // handle case with object|array sub levels?
         }
       }
     }
@@ -87,21 +95,24 @@ export default class StateManager {
   ): number | ICameraProps | Promise<ICameraProps> | boolean {
     switch (stateScope) {
       case 'camera':
-        // Async animation operation
-        if (typeof value === 'object' && property === 'animation') {
-          const currentState = this.getState('camera');
-          delete currentState.animation;
-          if (JSON.stringify(currentState) !== JSON.stringify(value)) {
-            this.app.viewport
-              .moveCameraTo(value)
-              .then((cameraProps) => this.setState('camera', { ...cameraProps, animation: false }));
-          } else {
-            return false;
-          }
-        }
+        this.asyncCameraAnimationOperation(property, value);
         return value;
       default:
         return value;
+    }
+  }
+
+  asyncCameraAnimationOperation(property: string, value: number | ICameraProps) {
+    if (typeof value === 'object' && property === 'animation') {
+      const currentState = this.getState('camera');
+      delete currentState.animation;
+      if (JSON.stringify(currentState) !== JSON.stringify(value)) {
+        this.app.viewport
+          .moveCameraTo(value)
+          .then((cameraProps) => this.setState('camera', { ...cameraProps, animation: false }));
+      } else {
+        return false;
+      }
     }
   }
 }
