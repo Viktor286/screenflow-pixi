@@ -10,28 +10,19 @@ export default class ViewportActions {
     this.runAheadZoomOut = 0;
   }
 
-  viewportMoveCamera(targetPoint?: IWorldScreenCoords, targetScale?: number) {
-    if (!targetPoint) {
-      targetPoint = this.app.viewport.getScreeCenterInWord();
-    }
-
-    if (targetScale === undefined) {
-      targetScale = this.app.viewport.scale;
-    }
-
-    // TODO: remove
-    this.app.viewport.animations.moveCameraTo(targetPoint, targetScale);
-    // this.app.camera.moveCameraTo(targetPoint, targetScale);
-  }
-
   viewportMoveTo(target: IWorldScreenCoords) {
-    this.viewportMoveCamera(target);
+    const cameraProps = this.app.viewport.cameraPropsConversion(target);
+    this.app.stateManager.setState('camera', { animation: cameraProps });
   }
 
   viewportZoomIn(zoomPoint?: IWorldScreenCoords) {
     if (this.runAheadZoomIn > 1) this.runAheadZoomIn = 1;
 
-    this.viewportMoveCamera(zoomPoint, this.app.viewport.getNextScaleStepUp(this.runAheadZoomIn));
+    const scale = this.app.viewport.getNextScaleStepUp(this.runAheadZoomIn);
+    const cameraProps = this.app.viewport.cameraPropsConversion(zoomPoint, scale);
+
+    this.app.stateManager.setState('camera', { animation: cameraProps });
+
     this.runAheadZoomIn += 1;
 
     setTimeout(() => {
@@ -41,13 +32,20 @@ export default class ViewportActions {
   }
 
   viewportZoom100(zoomPoint?: IWorldScreenCoords) {
-    this.viewportMoveCamera(zoomPoint, 1);
+    const scale = 1;
+    const cameraProps = this.app.viewport.cameraPropsConversion(zoomPoint, scale);
+
+    this.app.stateManager.setState('camera', { animation: cameraProps });
   }
 
   viewportZoomOut(zoomPoint?: IWorldScreenCoords) {
     if (this.runAheadZoomOut > 1) this.runAheadZoomOut = 1;
 
-    this.viewportMoveCamera(zoomPoint, this.app.viewport.getNextScaleStepDown(this.runAheadZoomOut));
+    const scale = this.app.viewport.getNextScaleStepDown(this.runAheadZoomOut);
+    const cameraProps = this.app.viewport.cameraPropsConversion(zoomPoint, scale);
+
+    this.app.stateManager.setState('camera', { animation: cameraProps });
+
     this.runAheadZoomOut += 1;
 
     setTimeout(() => {

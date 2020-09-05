@@ -2,8 +2,8 @@ import PIXI from 'pixi.js';
 import { GraphicsEngine } from './GraphicsEngine';
 import { Viewport as PixiViewport } from 'pixi-viewport';
 import FlowApp from './FlowApp';
-import { ViewportAnimations } from './Animations';
 import { StageEvent } from './InteractionEvents/StageEvents';
+import { gsap } from 'gsap';
 
 export interface IUniScreenCoords {
   wX?: number;
@@ -28,6 +28,21 @@ export interface IViewportInstance extends PixiViewport {
   [key: string]: any;
 }
 
+export interface ICamera {
+  x: number;
+  y: number;
+  scale: number;
+  animation: ICameraProps | boolean;
+  [key: string]: any;
+}
+
+export interface ICameraProps {
+  x?: number;
+  y?: number;
+  scale?: number;
+  [key: string]: any;
+}
+
 // Viewport documentation: https://davidfig.github.io/pixi-viewport/jsdoc/Viewport.html
 // Module: node_modules/pixi-viewport/dist/viewport.es.js
 
@@ -38,14 +53,12 @@ export interface IViewportInstance extends PixiViewport {
 export default class Viewport {
   instance: IViewportInstance;
   engine: GraphicsEngine;
-  animations: ViewportAnimations;
   zoomScale: number[];
   [key: string]: any;
 
   constructor(public app: FlowApp) {
     this.engine = app.engine;
     this.instance = this.setupViewport(this.engine.hostHTML.clientWidth, this.engine.hostHTML.clientHeight);
-    this.animations = new ViewportAnimations(this.app, this);
     this.zoomScale = [0.03125, 0.0625, 0.125, 0.25, 0.5, 1, 2, 4, 8, 16, 32];
     app.stage.addChild(this.instance);
   }
@@ -204,7 +217,52 @@ export default class Viewport {
     };
   }
 
+  cameraPropsConversion(targetPoint?: IWorldScreenCoords, targetScale?: number) {
+    if (!targetPoint) {
+      targetPoint = this.app.viewport.getScreeCenterInWord();
+    }
+
+    if (targetScale === undefined) {
+      targetScale = this.app.stateManager.state.camera.scale;
+    }
+
+    if (targetScale >= 32) targetScale = 32;
+    if (targetScale <= 0.01) targetScale = 0.01;
+
+    return {
+      x: Number(
+        ((this.app.viewport.screenWidth / targetScale / 2 - targetPoint.wX) * targetScale).toFixed(4),
+      ),
+      y: Number(
+        ((this.app.viewport.screenHeight / targetScale / 2 - targetPoint.wY) * targetScale).toFixed(4),
+      ),
+      scale: targetScale,
+    };
+  }
+
+  moveCameraTo(cameraProps: ICameraProps): Promise<ICameraProps> {
+    if (Object.hasOwnProperty.call(cameraProps, 'animation')) {
+      delete cameraProps.animation;
+    }
+    return new Promise((resolve) => {
+      gsap.to(this.app.viewport, {
+        ...cameraProps,
+        duration: 0.7,
+        ease: 'power3.out',
+        onStart: () => {
+          this.app.viewport.interactive = false;
+        },
+        onComplete: () => {
+          this.app.viewport.interactive = true;
+          this.app.viewport.onCameraAnimationEnds();
+          resolve(cameraProps);
+        },
+      });
+    });
+  }
+
   onCameraAnimationEnds = () => {
+    // TODO: should we use actions to handle it?
     this.app.actions.updateZoomBtn();
   };
 }

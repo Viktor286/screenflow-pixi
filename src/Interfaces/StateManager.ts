@@ -1,14 +1,8 @@
 import FlowApp from './FlowApp';
+import { ICamera, ICameraProps } from './Viewport';
 
 interface IAppState {
   camera: ICamera;
-  [key: string]: any;
-}
-
-interface ICamera {
-  x: number;
-  y: number;
-  scale: number;
   [key: string]: any;
 }
 
@@ -26,6 +20,7 @@ interface IStateSlice {
 
 export default class StateManager {
   state: IAppState;
+  history: IStateSlice[];
 
   constructor(public app: FlowApp) {
     this.state = {
@@ -33,8 +28,20 @@ export default class StateManager {
         x: 0,
         y: 0,
         scale: 1,
+        animation: false,
       },
     };
+    this.history = []; // TODO: make a queue
+  }
+
+  saveToHistory(stateScope: IStateScope, stateSlice: IStateSlice) {
+    switch (stateScope) {
+      case 'camera':
+        if (stateSlice.animation !== false) {
+          return;
+        }
+        this.history.push(stateSlice);
+    }
   }
 
   getState(stateScope?: IStateScope): IAppState | ICamera {
@@ -48,22 +55,22 @@ export default class StateManager {
 
   // TODO: this setState version supports only stateScoped requests
   setState = (stateScope: IStateScope, stateSlice: IStateSlice) => {
-    let prevState = this.getState(stateScope);
+    let prevScopeState = this.getState(stateScope);
+    let newScopeState;
 
     for (const property in stateSlice) {
-      if (
-        stateSlice.hasOwnProperty(property) &&
-        prevState.hasOwnProperty(property) &&
-        typeof stateSlice[property] === typeof prevState[property]
-      ) {
-        if (typeof prevState[property] !== 'object' && prevState[property] !== stateSlice[property]) {
-          const newState = {
-            ...prevState,
+      if (stateSlice.hasOwnProperty(property) && prevScopeState.hasOwnProperty(property)) {
+        if (prevScopeState[property] !== stateSlice[property]) {
+          newScopeState = {
+            ...prevScopeState,
             ...{ [property]: this.applyOperation(property, stateSlice[property], stateScope) },
           };
 
-          this.state[stateScope] = newState;
-          prevState = newState;
+          this.state[stateScope] = newScopeState;
+          prevScopeState = newScopeState;
+          this.saveToHistory(stateScope, newScopeState);
+
+          // call subscribers?
         } else {
           // TODO: handle case with object|array sub levels
         }
@@ -73,10 +80,28 @@ export default class StateManager {
     return true;
   };
 
-  applyOperation(property: string, value: number, stateScope: IStateScope): number | undefined {
+  applyOperation(
+    property: string,
+    value: number | ICameraProps,
+    stateScope: IStateScope,
+  ): number | ICameraProps | Promise<ICameraProps> | boolean {
     switch (stateScope) {
       case 'camera':
-        return (this.app.viewport[property] = value);
+        // Async animation operation
+        if (typeof value === 'object' && property === 'animation') {
+          const currentState = this.getState('camera');
+          delete currentState.animation;
+          if (JSON.stringify(currentState) !== JSON.stringify(value)) {
+            this.app.viewport
+              .moveCameraTo(value)
+              .then((cameraProps) => this.setState('camera', { ...cameraProps, animation: false }));
+          } else {
+            return false;
+          }
+        }
+        return value;
+      default:
+        return value;
     }
   }
 }
