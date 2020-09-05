@@ -27,6 +27,8 @@ export default class StateManager {
       camera: {
         x: 0,
         y: 0,
+        wX: 0,
+        wY: 0,
         scale: 1,
         animation: false,
       },
@@ -45,11 +47,11 @@ export default class StateManager {
         if (stateSlice.animation !== false) {
           return;
         }
-        const { x, y, scale } = stateSlice;
+        const { wX, wY, scale } = stateSlice;
         this.enqueueHistory({
           type: 'camera',
-          x,
-          y,
+          wX,
+          wY,
           scale,
         });
     }
@@ -67,6 +69,7 @@ export default class StateManager {
   setState = (stateScope: IStateScope, stateSlice: IStateSlice) => {
     let prevScopeState = this.getState(stateScope);
     let newScopeState;
+    let isUpdated = false;
 
     for (const property in stateSlice) {
       if (stateSlice.hasOwnProperty(property) && prevScopeState.hasOwnProperty(property)) {
@@ -78,11 +81,15 @@ export default class StateManager {
 
           this.state[stateScope] = newScopeState;
           prevScopeState = newScopeState;
-          this.saveToHistory(stateScope, newScopeState);
+          isUpdated = true;
         } else {
           // handle case with object|array sub levels?
         }
       }
+    }
+
+    if (isUpdated && newScopeState) {
+      this.saveToHistory(stateScope, newScopeState);
     }
 
     return true;

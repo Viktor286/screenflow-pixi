@@ -237,16 +237,22 @@ export default class Viewport {
         ((this.app.viewport.screenHeight / targetScale / 2 - targetPoint.wY) * targetScale).toFixed(4),
       ),
       scale: targetScale,
+      wX: Number(targetPoint.wX.toFixed(4)),
+      wY: Number(targetPoint.wY.toFixed(4)),
     };
   }
 
   moveCameraTo(cameraProps: ICameraProps): Promise<ICameraProps> {
-    if (Object.hasOwnProperty.call(cameraProps, 'animation')) {
-      delete cameraProps.animation;
-    }
+    const { x, y, scale, wX, wY } = cameraProps;
+
+    const animateProps = {
+      x,
+      y,
+      scale,
+    };
     return new Promise((resolve) => {
       gsap.to(this.app.viewport, {
-        ...cameraProps,
+        ...animateProps,
         duration: 0.7,
         ease: 'power3.out',
         onStart: () => {
@@ -255,7 +261,7 @@ export default class Viewport {
         onComplete: () => {
           this.app.viewport.interactive = true;
           this.app.viewport.onCameraAnimationEnds();
-          resolve(cameraProps);
+          resolve({ ...animateProps, wX, wY });
         },
       });
     });

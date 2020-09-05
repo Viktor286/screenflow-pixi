@@ -10,8 +10,10 @@ export default class ViewportActions {
     this.runAheadZoomOut = 0;
   }
 
-  viewportMoveTo(target: IWorldScreenCoords) {
-    this.app.stateManager.setState('camera', { animation: this.app.viewport.cameraPropsConversion(target) });
+  viewportMoveTo(target: IWorldScreenCoords, targetScale?: number) {
+    this.app.stateManager.setState('camera', {
+      animation: this.app.viewport.cameraPropsConversion(target, targetScale),
+    });
   }
 
   viewportZoomIn(zoomPoint?: IWorldScreenCoords) {
