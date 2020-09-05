@@ -1,5 +1,29 @@
-body {
+/* Avoid Chrome to see Safari hack */
+@supports (-webkit-touch-callout: none) {
+  body {
+    /* The 100vh Fix for Safari */
+    height: -webkit-fill-available;
+  }
+}
+
+body,
+html {
+  position: fixed;
+  overflow: hidden;
+  height: 100vh;
+  width: 100vw;
   margin: 0;
+  padding: 0;
+  user-select: none;
+  '-webkit-user-select': none;
+  '-moz-user-select': none;
+  '-ms-user-select': none;
+}
+
+
+body {
+  /*user-select: none;*/
+  background-color: #232429;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;
@@ -7,7 +31,31 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+canvas {
+}
+
+button {
+  border-radius: 2px;
+  border: 1px solid #91b6e3;
+  outline: none;
+  margin: 5px;
+  cursor: pointer;
+}
+
+button:active {
+  border: 1px solid #5f9ae2;
+  background: #395062;
+}
+
+.app {
+  /*background-color: #232429;*/
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  box-sizing: border-box;
+  border: 1px dashed skyblue;
+}
+
+.e-type {
+  color: white;
 }
