@@ -11,17 +11,18 @@ export default class ViewportActions {
   }
 
   viewportMoveTo(target: IWorldScreenCoords) {
-    const cameraProps = this.app.viewport.cameraPropsConversion(target);
-    this.app.stateManager.setState('camera', { animation: cameraProps });
+    this.app.stateManager.setState('camera', { animation: this.app.viewport.cameraPropsConversion(target) });
   }
 
   viewportZoomIn(zoomPoint?: IWorldScreenCoords) {
     if (this.runAheadZoomIn > 1) this.runAheadZoomIn = 1;
 
-    const scale = this.app.viewport.getNextScaleStepUp(this.runAheadZoomIn);
-    const cameraProps = this.app.viewport.cameraPropsConversion(zoomPoint, scale);
-
-    this.app.stateManager.setState('camera', { animation: cameraProps });
+    this.app.stateManager.setState('camera', {
+      animation: this.app.viewport.cameraPropsConversion(
+        zoomPoint,
+        this.app.viewport.getNextScaleStepUp(this.runAheadZoomIn),
+      ),
+    });
 
     this.runAheadZoomIn += 1;
 
@@ -33,18 +34,21 @@ export default class ViewportActions {
 
   viewportZoom100(zoomPoint?: IWorldScreenCoords) {
     const scale = 1;
-    const cameraProps = this.app.viewport.cameraPropsConversion(zoomPoint, scale);
 
-    this.app.stateManager.setState('camera', { animation: cameraProps });
+    this.app.stateManager.setState('camera', {
+      animation: this.app.viewport.cameraPropsConversion(zoomPoint, scale),
+    });
   }
 
   viewportZoomOut(zoomPoint?: IWorldScreenCoords) {
     if (this.runAheadZoomOut > 1) this.runAheadZoomOut = 1;
 
-    const scale = this.app.viewport.getNextScaleStepDown(this.runAheadZoomOut);
-    const cameraProps = this.app.viewport.cameraPropsConversion(zoomPoint, scale);
-
-    this.app.stateManager.setState('camera', { animation: cameraProps });
+    this.app.stateManager.setState('camera', {
+      animation: this.app.viewport.cameraPropsConversion(
+        zoomPoint,
+        this.app.viewport.getNextScaleStepDown(this.runAheadZoomOut),
+      ),
+    });
 
     this.runAheadZoomOut += 1;
 
@@ -52,9 +56,5 @@ export default class ViewportActions {
       this.runAheadZoomOut -= 1;
       if (this.runAheadZoomOut < 0) this.runAheadZoomOut = 0;
     }, 700);
-  }
-
-  updateZoomBtn() {
-    this.app.webUi.zoomIndicator.innerHTML = this.app.viewport.getZoom();
   }
 }

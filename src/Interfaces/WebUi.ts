@@ -141,4 +141,8 @@ export class WebUi {
 
     return zoomBtn;
   };
+
+  updateZoomBtn() {
+    this.zoomIndicator.innerHTML = this.app.viewport.getZoom();
+  }
 }

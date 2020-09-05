@@ -262,7 +262,6 @@ export default class Viewport {
   }
 
   onCameraAnimationEnds = () => {
-    // TODO: should we use actions to handle it?
-    this.app.actions.updateZoomBtn();
+    this.app.webUi.updateZoomBtn();
   };
 }
