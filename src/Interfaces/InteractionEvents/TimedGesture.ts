@@ -129,7 +129,7 @@ export default class TimedGesture {
   // Timed-gestures special events
   // Press Up events
   pressUpImmediate(e: IGestureEvent) {
-    const hit = this.app.pixiApp.renderer.plugins.interaction.hitTest({
+    const hit = this.app.engine.renderer.plugins.interaction.hitTest({
       x: e.screenClick.sX,
       y: e.screenClick.sY,
     });
@@ -166,22 +166,22 @@ export default class TimedGesture {
   pressDownImmediate(e: IGestureEvent) {
     // ImmediatePressDown event could be too frequent,
     // its probably best choice to use ImmediatePressUp
-    this.app.putFocusPoint(e.wordScreenClick);
+    this.app.gui.focusPoint.putFocusPoint(e.wordScreenClick);
     this.sendToMonitor('Immediate Press Down', this.getClickInfoStr(e));
   }
 
   pressDownQuick(e: IGestureEvent) {
-    this.app.putFocusPoint(e.wordScreenClick);
+    this.app.gui.focusPoint.putFocusPoint(e.wordScreenClick);
     this.sendToMonitor('Quick Press Down', this.getClickInfoStr(e));
   }
 
   pressDownMedium(e: IGestureEvent) {
-    this.app.putFocusPoint(e.wordScreenClick);
+    this.app.gui.focusPoint.putFocusPoint(e.wordScreenClick);
     this.sendToMonitor('Medium Press Down', this.getClickInfoStr(e));
   }
 
   pressDownLong(e: IGestureEvent) {
-    this.app.putFocusPoint(e.wordScreenClick);
+    this.app.gui.focusPoint.putFocusPoint(e.wordScreenClick);
     this.sendToMonitor('Long Press Down', this.getClickInfoStr(e));
   }
 }

@@ -1,10 +1,10 @@
-import FlowApp from './FlowApp';
+import FlowApp from '../FlowApp';
 
 /**
  * TODO: reconsider how build HTML+CSS UI
  * (do we need emotion, preact, redux?)
  */
-export class WebUi {
+export default class WebUI {
   webUi: HTMLElement;
   zoomInBtn: HTMLElement;
   zoomOutBtn: HTMLElement;
@@ -103,7 +103,7 @@ export class WebUi {
   iniZoomIndicator = () => {
     const elmIcon = document.createElement('div');
     elmIcon.classList.add('icon');
-    elmIcon.innerHTML = this.app.viewport.getZoom();
+    elmIcon.innerHTML = this.app.viewport.getZoomString();
     Object.assign(elmIcon.style, {
       ...this.styles.buttonIcon,
       fontSize: '14px',
@@ -142,7 +142,8 @@ export class WebUi {
     return zoomBtn;
   };
 
-  updateZoomBtn() {
-    this.zoomIndicator.innerHTML = this.app.viewport.getZoom();
+  updateZoomBtn(): HTMLElement {
+    this.zoomIndicator.innerHTML = this.app.viewport.getZoomString();
+    return this.zoomIndicator;
   }
 }

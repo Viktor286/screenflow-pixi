@@ -1,7 +1,6 @@
 import * as PIXI from 'pixi.js';
 import './index.css';
 import FlowApp from './Interfaces/FlowApp';
-import { GraphicsEngine } from './Interfaces/GraphicsEngine';
 import { getImageUrlSet } from './fixtures/imagesDataSet';
 import FilesIO from './Interfaces/FilesIO';
 import { SpaceModifiers } from './modifiers/SpaceModifiers';
@@ -9,7 +8,7 @@ import { SpaceModifiers } from './modifiers/SpaceModifiers';
 async function main() {
   const appDiv = document.querySelector('.app');
   if (appDiv instanceof HTMLElement) {
-    const app = new FlowApp(new GraphicsEngine(appDiv));
+    const app = new FlowApp(appDiv);
 
     /** Temp Test sample **/
     let rectangle = new PIXI.Graphics();

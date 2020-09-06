@@ -1,18 +1,9 @@
 import PIXI from 'pixi.js';
-import { GraphicsEngine } from './GraphicsEngine';
+import GraphicsEngine from './GraphicsEngine';
 import { Viewport as PixiViewport } from 'pixi-viewport';
 import FlowApp from './FlowApp';
 import { StageEvent } from './InteractionEvents/StageEvents';
 import { gsap } from 'gsap';
-
-export interface IUniScreenCoords {
-  wX?: number;
-  wY?: number;
-  sX?: number;
-  sY?: number;
-  x?: number;
-  y?: number;
-}
 
 export interface IWorldScreenCoords {
   wX: number;
@@ -32,7 +23,7 @@ export interface ICamera {
   x: number;
   y: number;
   scale: number;
-  animation: ICameraProps | boolean;
+  animation: ICameraProps | false;
   [key: string]: any;
 }
 
@@ -58,9 +49,30 @@ export default class Viewport {
 
   constructor(public app: FlowApp) {
     this.engine = app.engine;
-    this.instance = this.setupViewport(this.engine.hostHTML.clientWidth, this.engine.hostHTML.clientHeight);
+    this.instance = new PixiViewport({
+      screenWidth: this.app.hostHTMLWidth,
+      screenHeight: this.app.hostHTMLHeight,
+      worldWidth: this.app.hostHTMLWidth,
+      worldHeight: this.app.hostHTMLHeight,
+      // interaction: this.engine.instance.renderer.plugins.interaction, // the interaction module is important for wheel to work properly when renderer.view is placed or scaled
+    });
+
+    // viewport.drag().pinch().wheel().decelerate();
     this.zoomScale = [0.03125, 0.0625, 0.125, 0.25, 0.5, 1, 2, 4, 8, 16, 32];
-    app.stage.addChild(this.instance);
+    app.engine.addDisplayObject(this.instance);
+
+    // Handler for "pixi engine and Viewport" dimensions dependency on window size
+    window.addEventListener('resize', this.resizeViewportHandler);
+    // window.addEventListener('orientationchange', this.orientationchangeViewportHandler, false);
+
+    // For preventing page zoom you should prevent wheel event:
+    window.addEventListener(
+      'wheel',
+      (e) => {
+        e.preventDefault();
+      },
+      { passive: false },
+    );
   }
 
   set x(x: number) {
@@ -112,14 +124,24 @@ export default class Viewport {
     return this.instance.interactive;
   }
 
+  resizeViewportHandler = (): void => {
+    // solution ref: https://github.com/davidfig/pixi-viewport/issues/212#issuecomment-608231281
+    if (
+      this.app.engine.screenWidth !== this.app.hostHTMLWidth ||
+      this.app.engine.screenHeight !== this.app.hostHTMLHeight
+    ) {
+      this.app.engine.renderer.resize(this.app.hostHTMLWidth, this.app.hostHTMLHeight);
+      this.instance.resize(this.app.hostHTMLWidth, this.app.hostHTMLHeight);
+    }
+  };
+
   getScreenCoordsFromEvent(e: StageEvent): IScreenCoords {
     return { sX: e.data.global.x, sY: e.data.global.y };
   }
 
   getWorldScreenCoordsFromEvent(e: StageEvent): IWorldScreenCoords {
     const screenClick: IScreenCoords = this.getScreenCoordsFromEvent(e);
-    const { x: wX, y: wY } = this.app.viewport.screenToWorld(screenClick);
-    return { wX, wY };
+    return this.app.viewport.screenToWorld(screenClick);
   }
 
   getNextScaleStepDown(runAhead: number): number {
@@ -170,38 +192,25 @@ export default class Viewport {
     return 0;
   }
 
-  setupViewport(hostHTMLWidth: number, hostHTMLHeight: number) {
-    // Code Examples:
-    // this.pixiViewport.moveCenter(3, 3);
-
-    // Viewport
-    const viewport = new PixiViewport({
-      screenWidth: hostHTMLWidth,
-      screenHeight: hostHTMLHeight,
-      worldWidth: hostHTMLWidth,
-      worldHeight: hostHTMLHeight,
-      // interaction: this.engine.instance.renderer.plugins.interaction, // the interaction module is important for wheel to work properly when renderer.view is placed or scaled
-    });
-
-    // viewport.drag().pinch().wheel().decelerate();
-
-    return viewport;
-  }
-
-  addToViewport(displayObject: PIXI.DisplayObject) {
+  addToViewport(displayObject: PIXI.DisplayObject): PIXI.DisplayObject {
     return this.instance.addChild(displayObject);
   }
 
-  getZoom(): string {
+  getZoomString(): string {
     return Math.round(this.instance.scale.x * 100).toString();
   }
-  //
-  // setZoom(absPercent: number) {
-  //   this.instance.setZoom(absPercent / 100, true);
-  // }
 
-  screenToWorld({ sX, sY }: IScreenCoords) {
-    return this.instance.toWorld(sX, sY);
+  screenToWorld({ sX, sY }: IScreenCoords): IWorldScreenCoords {
+    const { x: wX, y: wY } = this.instance.toWorld(sX, sY);
+    return { wX, wY };
+  }
+
+  screenCenter(): IScreenCoords {
+    return { sX: this.screenWidth / 2, sY: this.screenHeight / 2 };
+  }
+
+  worldScreenCenter(): IWorldScreenCoords {
+    return { wX: this.instance.worldScreenWidth / 2, wY: this.instance.worldScreenHeight / 2 };
   }
 
   // get center()
@@ -217,7 +226,7 @@ export default class Viewport {
     };
   }
 
-  cameraPropsConversion(targetPoint?: IWorldScreenCoords, targetScale?: number) {
+  cameraPropsConversion(targetPoint?: IWorldScreenCoords, targetScale?: number): ICameraProps {
     if (!targetPoint) {
       targetPoint = this.app.viewport.getScreeCenterInWord();
     }
@@ -267,7 +276,7 @@ export default class Viewport {
     });
   }
 
-  onCameraAnimationEnds = () => {
+  onCameraAnimationEnds = (): void => {
     this.app.webUi.updateZoomBtn();
   };
 }
