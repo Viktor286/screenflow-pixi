@@ -1,10 +1,10 @@
-import FlowApp from './FlowApp';
+import FlowApp from '../FlowApp';
 
 /**
  * TODO: reconsider how build HTML+CSS UI
  * (do we need emotion, preact, redux?)
  */
-export class WebUi {
+export default class WebUI {
   webUi: HTMLElement;
   zoomInBtn: HTMLElement;
   zoomOutBtn: HTMLElement;

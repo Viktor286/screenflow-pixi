@@ -112,6 +112,25 @@ export default class Viewport {
     return this.instance.interactive;
   }
 
+  // TODO: move to constructor
+  setupViewport(hostHTMLWidth: number, hostHTMLHeight: number) {
+    // Code Examples:
+    // this.pixiViewport.moveCenter(3, 3);
+
+    // Viewport
+    const viewport = new PixiViewport({
+      screenWidth: hostHTMLWidth,
+      screenHeight: hostHTMLHeight,
+      worldWidth: hostHTMLWidth,
+      worldHeight: hostHTMLHeight,
+      // interaction: this.engine.instance.renderer.plugins.interaction, // the interaction module is important for wheel to work properly when renderer.view is placed or scaled
+    });
+
+    // viewport.drag().pinch().wheel().decelerate();
+
+    return viewport;
+  }
+
   getScreenCoordsFromEvent(e: StageEvent): IScreenCoords {
     return { sX: e.data.global.x, sY: e.data.global.y };
   }
@@ -170,24 +189,6 @@ export default class Viewport {
     return 0;
   }
 
-  setupViewport(hostHTMLWidth: number, hostHTMLHeight: number) {
-    // Code Examples:
-    // this.pixiViewport.moveCenter(3, 3);
-
-    // Viewport
-    const viewport = new PixiViewport({
-      screenWidth: hostHTMLWidth,
-      screenHeight: hostHTMLHeight,
-      worldWidth: hostHTMLWidth,
-      worldHeight: hostHTMLHeight,
-      // interaction: this.engine.instance.renderer.plugins.interaction, // the interaction module is important for wheel to work properly when renderer.view is placed or scaled
-    });
-
-    // viewport.drag().pinch().wheel().decelerate();
-
-    return viewport;
-  }
-
   addToViewport(displayObject: PIXI.DisplayObject) {
     return this.instance.addChild(displayObject);
   }
@@ -202,6 +203,14 @@ export default class Viewport {
 
   screenToWorld({ sX, sY }: IScreenCoords) {
     return this.instance.toWorld(sX, sY);
+  }
+
+  screenCenter() {
+    return { sX: this.screenWidth / 2, sY: this.screenHeight / 2 };
+  }
+
+  worldScreenCenter() {
+    return { wX: this.instance.worldScreenWidth / 2, wY: this.instance.worldScreenHeight / 2 };
   }
 
   // get center()

@@ -1,13 +1,12 @@
 import * as PIXI from 'pixi.js';
 import { GraphicsEngine } from './GraphicsEngine';
-import Viewport, { IWorldScreenCoords } from './Viewport';
+import Viewport from './Viewport';
 import StageEvents from './InteractionEvents/StageEvents';
 import DevMonitor from './DevMonitor';
-// import { initStore, Store } from '../store/initStore';
 import Memos from './Memos';
-import { WebUi } from './WebUi';
+import WebUI from './WebUI';
+import GUI from './GUI';
 import ViewportActions from '../Actions/Viewport';
-import { AnimateUiControls } from './Animations';
 import { gsap } from 'gsap';
 import { PixiPlugin } from 'gsap/PixiPlugin';
 import StateManager from './StateManager';
@@ -20,8 +19,8 @@ export default class FlowApp {
   memos: Memos;
   pixiApp: PIXI.Application;
   screen: PIXI.Rectangle;
-  focusPoint: PIXI.Graphics;
-  webUi: WebUi;
+  gui: GUI;
+  webUi: WebUI;
   actions: ViewportActions;
   stageEvents: StageEvents;
   // store: Store;
@@ -34,9 +33,6 @@ export default class FlowApp {
     this.pixiApp = this.engine.instance;
     this.screen = this.engine.instance.screen;
     this.stage = this.pixiApp.stage;
-
-    // this.store = initStore();
-    // console.log('store', this.store);
 
     // this.devMonitor = new DevMonitor();
     this.devMonitor = null;
@@ -55,10 +51,10 @@ export default class FlowApp {
     this.stateManager = new StateManager(this);
 
     // UI
-    this.focusPoint = this.initFocusPoint();
+    this.gui = new GUI(this);
 
     // Browser UI
-    this.webUi = new WebUi(this);
+    this.webUi = new WebUI(this);
 
     // // We stop Pixi ticker using stop() function because autoStart = false does NOT stop the shared ticker:
     // // doc: http://pixijs.download/release/docs/PIXI.Application.html
@@ -84,10 +80,6 @@ export default class FlowApp {
     );
   }
 
-  get screenCenter() {
-    return { x: this.pixiApp.screen.width / 2, y: this.pixiApp.screen.height / 2 };
-  }
-
   resizeViewportHandler = () => {
     // solution ref: https://github.com/davidfig/pixi-viewport/issues/212#issuecomment-608231281
     const hostHTMLWidth = this.engine.hostHTML.clientWidth;
@@ -97,23 +89,4 @@ export default class FlowApp {
       this.viewport.instance.resize(hostHTMLWidth, hostHTMLHeight);
     }
   };
-
-  initFocusPoint() {
-    let circle = new PIXI.Graphics();
-    circle.lineStyle(0); // draw a circle, set the lineStyle to zero so the circle doesn't have an outline
-    circle.beginFill(0xfff796, 0.4);
-    circle.drawCircle(0, 0, 10);
-    circle.endFill();
-    circle.pivot.set(0, 0);
-    circle.position.set(this.screenCenter.x, this.screenCenter.y);
-    circle.alpha = 0;
-    this.viewport.addToViewport(circle);
-    return circle;
-  }
-
-  putFocusPoint({ wX, wY }: IWorldScreenCoords) {
-    this.focusPoint.alpha = 0;
-    this.focusPoint.position.set(wX, wY);
-    AnimateUiControls.pressFocusPoint(this.focusPoint);
-  }
 }
