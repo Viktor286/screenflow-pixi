@@ -4,7 +4,7 @@ import DevMonitor from '../DevMonitor';
 import TimedGesture from './TimedGesture';
 
 // TODO: Would it be better for performance to make all events under PIXI.InteractionManager?
-// const IM = new PIXI.InteractionManager(this.app.pixiApp.renderer);
+// const IM = new PIXI.InteractionManager(this.app.engine.renderer);
 // IM.on('pointerdown', (e: StageEvent) => console.log('!!! InteractionManager', e));
 
 export type StageEvent = PIXI.InteractionEvent;
@@ -15,7 +15,7 @@ export default class StageEvents {
   timedGesture: TimedGesture;
 
   constructor(public app: FlowApp) {
-    this.stage = this.app.stage;
+    this.stage = this.app.engine.stage;
 
     this.stage.interactive = true;
     this.eventMonitor = this.app.devMonitor;

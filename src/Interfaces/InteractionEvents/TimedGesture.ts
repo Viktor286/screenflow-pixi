@@ -129,7 +129,7 @@ export default class TimedGesture {
   // Timed-gestures special events
   // Press Up events
   pressUpImmediate(e: IGestureEvent) {
-    const hit = this.app.pixiApp.renderer.plugins.interaction.hitTest({
+    const hit = this.app.engine.renderer.plugins.interaction.hitTest({
       x: e.screenClick.sX,
       y: e.screenClick.sY,
     });

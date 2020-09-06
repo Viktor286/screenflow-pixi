@@ -1,4 +1,7 @@
 import * as PIXI from 'pixi.js';
+import FlowApp from './FlowApp';
+import { gsap } from 'gsap';
+import { PixiPlugin } from 'gsap/PixiPlugin';
 
 // PIXI documentation: https://pixijs.download/dev/docs/PIXI.html
 //
@@ -10,15 +13,16 @@ import * as PIXI from 'pixi.js';
 // texture = new PIXI.Texture(base),
 // sprite = new PIXI.Sprite(texture);
 
-export class GraphicsEngine {
+export default class GraphicsEngine {
   instance: PIXI.Application;
-  hostHTML: HTMLElement;
+  stage: PIXI.Container;
+  renderer: PIXI.Renderer;
+  ticker: PIXI.Ticker;
+  // screen: PIXI.Rectangle;
 
-  constructor(targetDiv: HTMLElement) {
-    this.hostHTML = targetDiv;
-
-    const hostHTMLWidth = this.hostHTML.clientWidth;
-    const hostHTMLHeight = this.hostHTML.clientHeight;
+  constructor(public app: FlowApp) {
+    const hostHTMLWidth = this.app.hostHTML.clientWidth;
+    const hostHTMLHeight = this.app.hostHTML.clientHeight;
 
     this.instance = new PIXI.Application({
       width: hostHTMLWidth,
@@ -28,6 +32,32 @@ export class GraphicsEngine {
       transparent: true,
     });
 
-    this.hostHTML.appendChild(this.instance.view);
+    this.stage = this.instance.stage;
+    this.renderer = this.instance.renderer;
+    this.ticker = this.instance.ticker;
+
+    this.app.hostHTML.appendChild(this.instance.view);
+
+    // // We stop Pixi ticker using stop() function because autoStart = false does NOT stop the shared ticker:
+    // // doc: http://pixijs.download/release/docs/PIXI.Application.html
+    // this.pixiApp.ticker.stop();
+    // // Now, we use 'tick' from gsap
+    // gsap.ticker.add(() => {
+    //   this.pixiApp.ticker.update();
+    // });
+    gsap.registerPlugin(PixiPlugin);
+    PixiPlugin.registerPIXI(PIXI);
+  }
+
+  get screenWidth() {
+    return this.instance.screen.width;
+  }
+
+  get screenHeight() {
+    return this.instance.screen.height;
+  }
+
+  addDisplayObject(...children: PIXI.DisplayObject[]): PIXI.DisplayObject {
+    return this.instance.stage.addChild(...children);
   }
 }

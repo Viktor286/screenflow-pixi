@@ -1,5 +1,5 @@
 import PIXI from 'pixi.js';
-import { GraphicsEngine } from './GraphicsEngine';
+import GraphicsEngine from './GraphicsEngine';
 import { Viewport as PixiViewport } from 'pixi-viewport';
 import FlowApp from './FlowApp';
 import { StageEvent } from './InteractionEvents/StageEvents';
@@ -58,9 +58,30 @@ export default class Viewport {
 
   constructor(public app: FlowApp) {
     this.engine = app.engine;
-    this.instance = this.setupViewport(this.engine.hostHTML.clientWidth, this.engine.hostHTML.clientHeight);
+    this.instance = new PixiViewport({
+      screenWidth: this.app.hostHTMLWidth,
+      screenHeight: this.app.hostHTMLHeight,
+      worldWidth: this.app.hostHTMLWidth,
+      worldHeight: this.app.hostHTMLHeight,
+      // interaction: this.engine.instance.renderer.plugins.interaction, // the interaction module is important for wheel to work properly when renderer.view is placed or scaled
+    });
+
+    // viewport.drag().pinch().wheel().decelerate();
     this.zoomScale = [0.03125, 0.0625, 0.125, 0.25, 0.5, 1, 2, 4, 8, 16, 32];
-    app.stage.addChild(this.instance);
+    app.engine.addDisplayObject(this.instance);
+
+    // Handler for "pixi engine and Viewport" dimensions dependency on window size
+    window.addEventListener('resize', this.resizeViewportHandler);
+    // window.addEventListener('orientationchange', this.orientationchangeViewportHandler, false);
+
+    // For preventing page zoom you should prevent wheel event:
+    window.addEventListener(
+      'wheel',
+      (e) => {
+        e.preventDefault();
+      },
+      { passive: false },
+    );
   }
 
   set x(x: number) {
@@ -112,24 +133,16 @@ export default class Viewport {
     return this.instance.interactive;
   }
 
-  // TODO: move to constructor
-  setupViewport(hostHTMLWidth: number, hostHTMLHeight: number) {
-    // Code Examples:
-    // this.pixiViewport.moveCenter(3, 3);
-
-    // Viewport
-    const viewport = new PixiViewport({
-      screenWidth: hostHTMLWidth,
-      screenHeight: hostHTMLHeight,
-      worldWidth: hostHTMLWidth,
-      worldHeight: hostHTMLHeight,
-      // interaction: this.engine.instance.renderer.plugins.interaction, // the interaction module is important for wheel to work properly when renderer.view is placed or scaled
-    });
-
-    // viewport.drag().pinch().wheel().decelerate();
-
-    return viewport;
-  }
+  resizeViewportHandler = () => {
+    // solution ref: https://github.com/davidfig/pixi-viewport/issues/212#issuecomment-608231281
+    if (
+      this.app.engine.screenWidth !== this.app.hostHTMLWidth ||
+      this.app.engine.screenHeight !== this.app.hostHTMLHeight
+    ) {
+      this.app.engine.renderer.resize(this.app.hostHTMLWidth, this.app.hostHTMLHeight);
+      this.instance.resize(this.app.hostHTMLWidth, this.app.hostHTMLHeight);
+    }
+  };
 
   getScreenCoordsFromEvent(e: StageEvent): IScreenCoords {
     return { sX: e.data.global.x, sY: e.data.global.y };
