@@ -52,6 +52,7 @@
     "postcss-normalize": "8.0.1",
     "postcss-preset-env": "6.7.0",
     "postcss-safe-parser": "4.0.1",
+    "puppeteer": "^5.2.1",
     "react": "^16.13.1",
     "react-app-polyfill": "^1.0.6",
     "react-dev-utils": "^10.2.1",
@@ -75,6 +76,7 @@
     "start": "node scripts/start.js",
     "build": "node scripts/build.js",
     "test": "node scripts/test.js",
+    "automation": "node automation/screentest/basicTest.js",
     "prettify": "prettier --write -l ./src",
     "serve-files": "serve assets/image-server/"
   },

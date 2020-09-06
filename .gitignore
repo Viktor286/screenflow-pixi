@@ -6,6 +6,7 @@
 .pnp.js
 .idea
 assets
+automation/screentest/*.png
 
 # testing
 /coverage
