@@ -5,15 +5,6 @@ import FlowApp from './FlowApp';
 import { StageEvent } from './InteractionEvents/StageEvents';
 import { gsap } from 'gsap';
 
-export interface IUniScreenCoords {
-  wX?: number;
-  wY?: number;
-  sX?: number;
-  sY?: number;
-  x?: number;
-  y?: number;
-}
-
 export interface IWorldScreenCoords {
   wX: number;
   wY: number;
@@ -32,7 +23,7 @@ export interface ICamera {
   x: number;
   y: number;
   scale: number;
-  animation: ICameraProps | boolean;
+  animation: ICameraProps | false;
   [key: string]: any;
 }
 
@@ -133,7 +124,7 @@ export default class Viewport {
     return this.instance.interactive;
   }
 
-  resizeViewportHandler = () => {
+  resizeViewportHandler = (): void => {
     // solution ref: https://github.com/davidfig/pixi-viewport/issues/212#issuecomment-608231281
     if (
       this.app.engine.screenWidth !== this.app.hostHTMLWidth ||
@@ -150,8 +141,7 @@ export default class Viewport {
 
   getWorldScreenCoordsFromEvent(e: StageEvent): IWorldScreenCoords {
     const screenClick: IScreenCoords = this.getScreenCoordsFromEvent(e);
-    const { x: wX, y: wY } = this.app.viewport.screenToWorld(screenClick);
-    return { wX, wY };
+    return this.app.viewport.screenToWorld(screenClick);
   }
 
   getNextScaleStepDown(runAhead: number): number {
@@ -202,27 +192,24 @@ export default class Viewport {
     return 0;
   }
 
-  addToViewport(displayObject: PIXI.DisplayObject) {
+  addToViewport(displayObject: PIXI.DisplayObject): PIXI.DisplayObject {
     return this.instance.addChild(displayObject);
   }
 
-  getZoom(): string {
+  getZoomString(): string {
     return Math.round(this.instance.scale.x * 100).toString();
   }
-  //
-  // setZoom(absPercent: number) {
-  //   this.instance.setZoom(absPercent / 100, true);
-  // }
 
-  screenToWorld({ sX, sY }: IScreenCoords) {
-    return this.instance.toWorld(sX, sY);
+  screenToWorld({ sX, sY }: IScreenCoords): IWorldScreenCoords {
+    const { x: wX, y: wY } = this.instance.toWorld(sX, sY);
+    return { wX, wY };
   }
 
-  screenCenter() {
+  screenCenter(): IScreenCoords {
     return { sX: this.screenWidth / 2, sY: this.screenHeight / 2 };
   }
 
-  worldScreenCenter() {
+  worldScreenCenter(): IWorldScreenCoords {
     return { wX: this.instance.worldScreenWidth / 2, wY: this.instance.worldScreenHeight / 2 };
   }
 
@@ -239,7 +226,7 @@ export default class Viewport {
     };
   }
 
-  cameraPropsConversion(targetPoint?: IWorldScreenCoords, targetScale?: number) {
+  cameraPropsConversion(targetPoint?: IWorldScreenCoords, targetScale?: number): ICameraProps {
     if (!targetPoint) {
       targetPoint = this.app.viewport.getScreeCenterInWord();
     }
@@ -289,7 +276,7 @@ export default class Viewport {
     });
   }
 
-  onCameraAnimationEnds = () => {
+  onCameraAnimationEnds = (): void => {
     this.app.webUi.updateZoomBtn();
   };
 }

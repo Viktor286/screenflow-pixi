@@ -103,7 +103,7 @@ export default class WebUI {
   iniZoomIndicator = () => {
     const elmIcon = document.createElement('div');
     elmIcon.classList.add('icon');
-    elmIcon.innerHTML = this.app.viewport.getZoom();
+    elmIcon.innerHTML = this.app.viewport.getZoomString();
     Object.assign(elmIcon.style, {
       ...this.styles.buttonIcon,
       fontSize: '14px',
@@ -142,7 +142,8 @@ export default class WebUI {
     return zoomBtn;
   };
 
-  updateZoomBtn() {
-    this.zoomIndicator.innerHTML = this.app.viewport.getZoom();
+  updateZoomBtn(): HTMLElement {
+    this.zoomIndicator.innerHTML = this.app.viewport.getZoomString();
+    return this.zoomIndicator;
   }
 }
