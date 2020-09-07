@@ -6,7 +6,7 @@
 .pnp.js
 .idea
 assets
-automation/screentest/*.png
+automation/screentest/initialView
 
 # testing
 /coverage
