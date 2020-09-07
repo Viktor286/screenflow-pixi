@@ -19,8 +19,10 @@ export default class FlowApp {
   actions: ViewportActions;
   stageEvents: StageEvents;
   stateManager: StateManager;
+  env: string | undefined;
 
   constructor(targetDiv: HTMLElement) {
+    this.env = process.env.NODE_ENV;
     this.hostHTML = targetDiv;
     this.engine = new GraphicsEngine(this);
     // this.devMonitor = new DevMonitor();
