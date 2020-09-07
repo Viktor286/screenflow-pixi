@@ -15,18 +15,16 @@ html {
   margin: 0;
   padding: 0;
   user-select: none;
-  '-webkit-user-select': none;
-  '-moz-user-select': none;
-  '-ms-user-select': none;
+  '-webkit-user-select':none ;
+  '-moz-user-select':none ;
+  '-ms-user-select':none ;
 }
-
 
 body {
   /*user-select: none;*/
   background-color: #232429;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell',
+    'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
