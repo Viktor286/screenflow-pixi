@@ -29,8 +29,13 @@ export default class GraphicsEngine {
       height: hostHTMLHeight,
       antialias: true,
       resolution: 1,
+      // resolution: window.devicePixelRatio || 1, // TODO: adopt correct pixel for mobile
       transparent: true,
     });
+
+    // option to try for headless tests (didn't work yet)
+    // https://github.com/pixijs/pixi.js/issues/5778
+    // PIXI.settings.FAIL_IF_MAJOR_PERFORMANCE_CAVEAT = false;
 
     this.stage = this.instance.stage;
     this.renderer = this.instance.renderer;
