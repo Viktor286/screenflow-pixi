@@ -1,4 +1,4 @@
-import PIXI from 'pixi.js';
+import * as PIXI from 'pixi.js';
 import GraphicsEngine from './GraphicsEngine';
 import { Viewport as PixiViewport } from 'pixi-viewport';
 import FlowApp from './FlowApp';
@@ -132,6 +132,7 @@ export default class Viewport {
     ) {
       this.app.engine.renderer.resize(this.app.hostHTMLWidth, this.app.hostHTMLHeight);
       this.instance.resize(this.app.hostHTMLWidth, this.app.hostHTMLHeight);
+      this.app.gui.stageBackTile.updateDimensions(this.app.hostHTMLWidth, this.app.hostHTMLHeight);
     }
   };
 
@@ -266,6 +267,9 @@ export default class Viewport {
         ease: 'power3.out',
         onStart: () => {
           this.app.viewport.interactive = false;
+        },
+        onUpdate: () => {
+          this.app.gui.stageBackTile.updateGraphics();
         },
         onComplete: () => {
           this.app.viewport.interactive = true;

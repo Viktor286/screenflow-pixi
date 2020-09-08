@@ -17,13 +17,13 @@ async function main() {
     app.viewport.addToViewport(rectangle);
 
     /** Load test images **/
-    const loader = await FilesIO.loadUrlSet(getImageUrlSet(30));
+    const loader = await FilesIO.loadUrlSet(getImageUrlSet(12));
 
     for (const resource of Object.values(loader.resources)) {
       app.memos.addMemo(resource.texture);
     }
 
-    SpaceModifiers.setPositionGrid(app.memos.list, 8, 400, 230, 0.2);
+    SpaceModifiers.setPositionGrid(app.memos.list, 3, 400, 230, 0.2);
 
     // /** Auto update from store **/
     // app.state.snapshots.store.forEach((snapShot, i) => {

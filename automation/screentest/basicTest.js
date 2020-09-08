@@ -93,6 +93,7 @@ async function compareScreenshots({ name: screenshotFileName }) {
     const diff = new PNG({ width, height });
 
     // returns the number of mismatched pixels
+    // https://www.npmjs.com/package/pixelmatch
     const pixelMismatchValue = pixelmatch(origin.data, current.data, diff.data, width, height, {
       threshold: 0.35,
     });
