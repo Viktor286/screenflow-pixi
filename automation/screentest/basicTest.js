@@ -94,13 +94,20 @@ async function compareScreenshots({ name: screenshotFileName }) {
 
     // returns the number of mismatched pixels
     // https://www.npmjs.com/package/pixelmatch
+    const pixelMismatchThreshold = 0.35;
+    const pixelMismatchLimit = 185;
     const pixelMismatchValue = pixelmatch(origin.data, current.data, diff.data, width, height, {
-      threshold: 0.35,
+      threshold: pixelMismatchThreshold,
     });
 
-    console.log(`[${time()}] pixelMismatchValue:`, pixelMismatchValue);
+    console.log(
+      `[${time()}] PixelMismatchValue:`,
+      pixelMismatchValue,
+      `Limit: ${pixelMismatchLimit}`,
+      `Threshold: ${pixelMismatchThreshold}`,
+    );
 
-    if (pixelMismatchValue > 185) {
+    if (pixelMismatchValue > pixelMismatchLimit) {
       await fs.writeFile(`${targetPath}/${screenshotFileName}[D].png`, PNG.sync.write(diff));
       await fs.writeFile(`${targetPath}/${screenshotFileName}.png`, screenshot.current);
       console.error(`[${time()}] Screenshot verification for "${screenshotFileName}" is failed.`);
