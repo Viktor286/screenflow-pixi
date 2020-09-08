@@ -51,7 +51,7 @@ button:active {
   height: 100%;
   position: absolute;
   box-sizing: border-box;
-  border: 1px dashed skyblue;
+  /*border: 1px dashed skyblue;*/
 }
 
 .e-type {

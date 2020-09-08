@@ -3,6 +3,12 @@ import FlowApp from './FlowApp';
 import { gsap } from 'gsap';
 import { PixiPlugin } from 'gsap/PixiPlugin';
 
+declare global {
+  interface Window {
+    automationScreenshot: string | undefined;
+  }
+}
+
 // PIXI documentation: https://pixijs.download/dev/docs/PIXI.html
 //
 // Module: node_modules/pixi.js/lib/pixi.es.js
@@ -28,8 +34,8 @@ export default class GraphicsEngine {
       width: hostHTMLWidth,
       height: hostHTMLHeight,
       antialias: true,
-      resolution: 1,
-      // resolution: window.devicePixelRatio || 1, // TODO: adopt correct pixel for mobile
+      resolution: window.automationScreenshot ? 1 : window.devicePixelRatio || 1,
+      autoDensity: !window.automationScreenshot,
       transparent: true,
     });
 
