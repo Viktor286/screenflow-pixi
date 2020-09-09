@@ -11,7 +11,9 @@ export default class StageBackTile {
     // https://pixijs.io/examples/#/sprite/tiling-sprite.js
     // http://pixijs.download/release/docs/PIXI.TilingSprite.html
 
-    const tileTx = PIXI.Texture.from('http://localhost:5000/texture/grid-tiles/simple-grid_512(alpha).png');
+    const tileTx = PIXI.Texture.from(
+      'http://192.168.1.152:5000/texture/grid-tiles/simple-grid_512(alpha).png',
+    );
 
     this.tileMiddle = this.createTile(tileTx);
     // this.lvlTileLow = this.createTile(tileTx);
