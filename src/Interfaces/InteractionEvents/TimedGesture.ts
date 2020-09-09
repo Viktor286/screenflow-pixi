@@ -5,7 +5,7 @@ import { IScreenCoords, IWorldScreenCoords } from '../Viewport';
 
 type IGestureEvent = {
   screenClick: IScreenCoords;
-  wordScreenClick: IWorldScreenCoords;
+  worldScreenClick: IWorldScreenCoords;
 };
 
 export default class TimedGesture {
@@ -42,7 +42,7 @@ export default class TimedGesture {
   getGestureEvent(e: StageEvent): IGestureEvent {
     return {
       screenClick: this.app.viewport.getScreenCoordsFromEvent(e),
-      wordScreenClick: this.app.viewport.getWorldScreenCoordsFromEvent(e),
+      worldScreenClick: this.app.viewport.getWorldScreenCoordsFromEvent(e),
     };
   }
 
@@ -144,7 +144,7 @@ export default class TimedGesture {
   }
 
   pressUpQuick(e: IGestureEvent) {
-    this.app.actions.viewportMoveTo(e.wordScreenClick);
+    this.app.actions.viewportMoveTo(e.worldScreenClick);
     this.sendToMonitor('Quick Press Up', this.getClickInfoStr(e));
   }
 
@@ -159,29 +159,29 @@ export default class TimedGesture {
   // Additional events
   doubleClick(e: IGestureEvent) {
     this.sendToMonitor('DoubleClick', this.getClickInfoStr(e));
-    this.app.actions.viewportZoomIn(e.wordScreenClick);
+    this.app.actions.viewportZoomIn(e.worldScreenClick);
   }
 
   // Press Down events
   pressDownImmediate(e: IGestureEvent) {
     // ImmediatePressDown event could be too frequent,
     // its probably best choice to use ImmediatePressUp
-    this.app.gui.focusPoint.putFocusPoint(e.wordScreenClick);
+    this.app.gui.focusPoint.putFocusPoint(e.worldScreenClick);
     this.sendToMonitor('Immediate Press Down', this.getClickInfoStr(e));
   }
 
   pressDownQuick(e: IGestureEvent) {
-    this.app.gui.focusPoint.putFocusPoint(e.wordScreenClick);
+    this.app.gui.focusPoint.putFocusPoint(e.worldScreenClick);
     this.sendToMonitor('Quick Press Down', this.getClickInfoStr(e));
   }
 
   pressDownMedium(e: IGestureEvent) {
-    this.app.gui.focusPoint.putFocusPoint(e.wordScreenClick);
+    this.app.gui.focusPoint.putFocusPoint(e.worldScreenClick);
     this.sendToMonitor('Medium Press Down', this.getClickInfoStr(e));
   }
 
   pressDownLong(e: IGestureEvent) {
-    this.app.gui.focusPoint.putFocusPoint(e.wordScreenClick);
+    this.app.gui.focusPoint.putFocusPoint(e.worldScreenClick);
     this.sendToMonitor('Long Press Down', this.getClickInfoStr(e));
   }
 }

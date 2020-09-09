@@ -1,7 +1,7 @@
 import * as PIXI from 'pixi.js';
 import FlowApp from './FlowApp';
-import { gsap } from 'gsap';
-import { PixiPlugin } from 'gsap/PixiPlugin';
+// import { gsap } from 'gsap';
+// import { PixiPlugin } from 'gsap/PixiPlugin';
 
 declare global {
   interface Window {
@@ -56,8 +56,8 @@ export default class GraphicsEngine {
     // gsap.ticker.add(() => {
     //   this.pixiApp.ticker.update();
     // });
-    gsap.registerPlugin(PixiPlugin);
-    PixiPlugin.registerPIXI(PIXI);
+    // gsap.registerPlugin(PixiPlugin);
+    // PixiPlugin.registerPIXI(PIXI);
   }
 
   get screenWidth() {
