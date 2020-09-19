@@ -26,9 +26,9 @@ class ReactWebUI extends Component {
   render() {
     return (
       <main className={styles.mainContainer}>
-        <SquareButton text="-" action={(e) => this.app.actions.viewportZoomOut()} />
-        <RectangleButton text={this.state.zoomIndicator} action={(e) => this.app.actions.viewportZoom100()} />
-        <SquareButton text="+" action={(e) => this.app.actions.viewportZoomIn()} />
+        <SquareButton text="-" action={() => this.app.actions.viewportZoomOut()} />
+        <RectangleButton text={this.state.zoomIndicator} action={() => this.app.actions.viewportZoom100()} />
+        <SquareButton text="+" action={() => this.app.actions.viewportZoomIn()} />
       </main>
     );
   }

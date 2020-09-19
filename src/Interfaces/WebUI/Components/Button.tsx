@@ -3,7 +3,7 @@ import { css } from 'emotion';
 
 export interface IButtonProps {
   text: string;
-  action: IAction;
+  action: Function;
   styles: IButtonStyles;
 }
 
@@ -14,11 +14,7 @@ export interface IButtonStyles {
 
 export interface IDecoratedButtonProps {
   text: string;
-  action: IAction;
-}
-
-export interface IAction {
-  (e: React.MouseEvent): any;
+  action: Function;
 }
 
 export const buttonBaseCss = css`
@@ -52,7 +48,7 @@ export const buttonIconBaseCss = css`
 
 export function Button({ text, action, styles }: IButtonProps) {
   return (
-    <div className={styles.button} onClick={(e) => action(e)}>
+    <div className={styles.button} onClick={(e: React.MouseEvent) => action(e)}>
       <div className={styles.label}>{text}</div>
     </div>
   );
