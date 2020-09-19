@@ -1,18 +1,17 @@
 import FlowApp from '../FlowApp';
-import ReactWebUI from './react';
-import ReactDOM from 'react-dom';
-import React from 'react';
+import { reactInitializer } from './ReactWebUI';
+import { Component } from 'react';
 
 export default class WebUI {
+  reactWebUI: Component;
+
   constructor(public app: FlowApp) {
-    ReactDOM.render(
-      React.createElement(ReactWebUI, { app: this.app }, null),
-      document.getElementById('web-ui'),
-    );
+    this.reactWebUI = reactInitializer(this.app);
   }
 
   updateZoomBtn() {
-    // this.zoomIndicator.innerHTML = this.app.viewport.getZoomString();
-    // return this.zoomIndicator;
+    this.reactWebUI.setState({
+      zoomIndicator: this.app.viewport.getZoomString(),
+    });
   }
 }
