@@ -2,6 +2,8 @@ import React, { Component, ComponentClass } from 'react';
 import FlowApp from '../FlowApp';
 import * as styles from './Styles';
 import ReactDOM from 'react-dom';
+import SquareButton from './Components/SquareButton';
+import RectangleButton from './Components/RectangleButton';
 
 let app: FlowApp;
 
@@ -24,9 +26,9 @@ class ReactWebUI extends Component {
   render() {
     return (
       <main className={styles.mainContainer}>
-        <BasicButton text="-" action={(e) => this.app.actions.viewportZoomOut()} />
-        <LabeledButton text={this.state.zoomIndicator} action={(e) => this.app.actions.viewportZoom100()} />
-        <BasicButton text="+" action={(e) => this.app.actions.viewportZoomIn()} />
+        <SquareButton text="-" action={(e) => this.app.actions.viewportZoomOut()} />
+        <RectangleButton text={this.state.zoomIndicator} action={(e) => this.app.actions.viewportZoom100()} />
+        <SquareButton text="+" action={(e) => this.app.actions.viewportZoomIn()} />
       </main>
     );
   }
@@ -38,31 +40,6 @@ export function reactInitializer(appRef: FlowApp): Component {
     React.createElement((ReactWebUI as unknown) as ComponentClass<object>, {}, null),
     document.getElementById('web-ui'),
   ) as unknown) as Component;
-}
-
-interface IButtonProp {
-  text: string;
-  action: IAction;
-}
-
-interface IAction {
-  (e: React.MouseEvent): any;
-}
-
-function BasicButton({ text, action }: IButtonProp) {
-  return (
-    <div className={styles.squareButton} onClick={(e) => action(e)}>
-      <div className={styles.buttonIcon}>{text}</div>
-    </div>
-  );
-}
-
-function LabeledButton({ text, action }: IButtonProp) {
-  return (
-    <div className={styles.labeledButtonCss} onClick={(e) => action(e)}>
-      <div className={styles.buttonTextLabel}>{text}</div>
-    </div>
-  );
 }
 
 // export default (ReactWebUI as unknown) as ComponentClass<InitProps>;
