@@ -12,11 +12,6 @@ export interface IButtonStyles {
   label: string;
 }
 
-export interface IDecoratedButtonProps {
-  text: string;
-  action: Function;
-}
-
 export const buttonBaseCss = css`
   height: 45px;
   background: #395062;

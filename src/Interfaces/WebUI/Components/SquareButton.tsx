@@ -1,6 +1,11 @@
 import React from 'react';
-import { Button, buttonBaseCss, buttonIconBaseCss, IDecoratedButtonProps } from './Button';
+import { Button, buttonBaseCss, buttonIconBaseCss } from './Button';
 import { css } from 'emotion';
+
+export interface IDecoratedButtonProps {
+  text: string;
+  action: Function;
+}
 
 const squareButton = css`
   ${buttonBaseCss};
