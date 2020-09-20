@@ -12,23 +12,21 @@ type IState = {
 };
 
 class ReactWebUI extends Component {
-  app: FlowApp;
   state: IState;
 
   constructor(props: object) {
     super(props);
-    this.app = app;
     this.state = {
-      zoomIndicator: this.app.viewport.getZoomString(),
+      zoomIndicator: app.viewport.getZoomString(),
     };
   }
 
   render() {
     return (
       <main className={styles.mainContainer}>
-        <SquareButton text="-" action={() => this.app.actions.viewportZoomOut()} />
-        <RectangleButton text={this.state.zoomIndicator} action={() => this.app.actions.viewportZoom100()} />
-        <SquareButton text="+" action={() => this.app.actions.viewportZoomIn()} />
+        <SquareButton text="-" action={() => app.actions.viewportZoomOut()} />
+        <RectangleButton text={this.state.zoomIndicator} action={() => app.actions.viewportZoom100()} />
+        <SquareButton text="+" action={() => app.actions.viewportZoomIn()} />
       </main>
     );
   }
