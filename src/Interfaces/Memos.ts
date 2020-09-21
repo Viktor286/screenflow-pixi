@@ -2,15 +2,22 @@ import * as PIXI from 'pixi.js';
 import { Snapshot } from './Snapshot';
 import FlowApp from './FlowApp';
 
+interface IPublicMemosState {
+  list: Memo[]; // TODO: create PublicMemo representation
+}
+
 export default class Memos {
-  list: Memo[];
+  publicMemosState: IPublicMemosState;
   selected: Map<string, Memo>;
   isMultiSelect: boolean;
 
   constructor(public app: FlowApp) {
-    this.list = [];
     this.selected = new Map();
     this.isMultiSelect = false;
+
+    this.publicMemosState = {
+      list: [],
+    };
 
     if (this.app.devMonitor) {
       this.app.devMonitor.addDevMonitor('memoEvents');
@@ -19,7 +26,7 @@ export default class Memos {
 
   addMemo(resource: PIXI.Texture) {
     const memo = new Memo(resource, this.app);
-    this.list.push(memo);
+    this.publicMemosState.list.push(memo);
     this.app.viewport.addToViewport(memo);
     this.app.viewport.instance.setChildIndex(memo, 0);
   }

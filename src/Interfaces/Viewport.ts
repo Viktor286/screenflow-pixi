@@ -19,18 +19,12 @@ export interface IViewportInstance extends PixiViewport {
   [key: string]: any;
 }
 
-export interface ICamera {
+export interface IPublicCameraState {
   x: number;
   y: number;
+  wX: number;
+  wY: number;
   scale: number;
-  animation: ICameraProps | false;
-  [key: string]: any;
-}
-
-export interface ICameraProps {
-  x?: number;
-  y?: number;
-  scale?: number;
   [key: string]: any;
 }
 
@@ -44,7 +38,8 @@ export interface ICameraProps {
 export default class Viewport {
   instance: IViewportInstance;
   engine: GraphicsEngine;
-  zoomScale: number[];
+  publicCameraState: IPublicCameraState;
+  zoomScales: number[];
   [key: string]: any;
 
   constructor(public app: FlowApp) {
@@ -57,8 +52,16 @@ export default class Viewport {
       // interaction: this.engine.instance.renderer.plugins.interaction, // the interaction module is important for wheel to work properly when renderer.view is placed or scaled
     });
 
+    this.publicCameraState = {
+      x: 0,
+      y: 0,
+      wX: 0,
+      wY: 0,
+      scale: 1,
+    };
+
     // viewport.drag().pinch().wheel().decelerate();
-    this.zoomScale = [0.03125, 0.0625, 0.125, 0.25, 0.5, 1, 2, 4, 8, 16, 32];
+    this.zoomScales = [0.03125, 0.0625, 0.125, 0.25, 0.5, 1, 2, 4, 8, 16, 32];
     app.engine.addDisplayObject(this.instance);
 
     // Handler for "pixi engine and Viewport" dimensions dependency on window size
@@ -89,6 +92,22 @@ export default class Viewport {
 
   get y() {
     return this.instance.y;
+  }
+
+  set wX(wX: number) {
+    // void
+  }
+
+  get wX() {
+    return this.publicCameraState.wX;
+  }
+
+  set wY(wY: number) {
+    // void
+  }
+
+  get wY() {
+    return this.publicCameraState.wY;
   }
 
   set scale(val: number) {
@@ -148,21 +167,21 @@ export default class Viewport {
   getNextScaleStepDown(runAhead: number): number {
     const currentScale = this.instance.scale.x;
 
-    for (let i = 0; i < this.zoomScale.length; i++) {
-      if (currentScale <= this.zoomScale[0]) {
-        return this.zoomScale[0];
+    for (let i = 0; i < this.zoomScales.length; i++) {
+      if (currentScale <= this.zoomScales[0]) {
+        return this.zoomScales[0];
       }
 
-      if (currentScale > this.zoomScale[this.zoomScale.length - 1]) {
-        return this.zoomScale[this.zoomScale.length - (1 - runAhead)];
+      if (currentScale > this.zoomScales[this.zoomScales.length - 1]) {
+        return this.zoomScales[this.zoomScales.length - (1 - runAhead)];
       }
 
-      if (currentScale === this.zoomScale[i]) {
-        return this.zoomScale[i - (1 - runAhead)] || this.zoomScale[0];
+      if (currentScale === this.zoomScales[i]) {
+        return this.zoomScales[i - (1 - runAhead)] || this.zoomScales[0];
       }
 
-      if (currentScale > this.zoomScale[i] && currentScale < this.zoomScale[i + 1]) {
-        return this.zoomScale[i - runAhead] || this.zoomScale[0];
+      if (currentScale > this.zoomScales[i] && currentScale < this.zoomScales[i + 1]) {
+        return this.zoomScales[i - runAhead] || this.zoomScales[0];
       }
     }
 
@@ -172,21 +191,21 @@ export default class Viewport {
   getNextScaleStepUp(runAhead: number): number {
     const currentScale = this.instance.scale.x;
 
-    for (let i = 0; i < this.zoomScale.length; i++) {
-      if (currentScale < this.zoomScale[0]) {
-        return this.zoomScale[runAhead];
+    for (let i = 0; i < this.zoomScales.length; i++) {
+      if (currentScale < this.zoomScales[0]) {
+        return this.zoomScales[runAhead];
       }
 
-      if (currentScale >= this.zoomScale[this.zoomScale.length - 1]) {
-        return this.zoomScale[this.zoomScale.length - 1];
+      if (currentScale >= this.zoomScales[this.zoomScales.length - 1]) {
+        return this.zoomScales[this.zoomScales.length - 1];
       }
 
-      if (currentScale === this.zoomScale[i]) {
-        return this.zoomScale[i + (1 + runAhead)] || this.zoomScale[this.zoomScale.length - 1];
+      if (currentScale === this.zoomScales[i]) {
+        return this.zoomScales[i + (1 + runAhead)] || this.zoomScales[this.zoomScales.length - 1];
       }
 
-      if (currentScale > this.zoomScale[i] && currentScale < this.zoomScale[i + 1]) {
-        return this.zoomScale[i + (1 + runAhead)] || this.zoomScale[this.zoomScale.length - 1];
+      if (currentScale > this.zoomScales[i] && currentScale < this.zoomScales[i + 1]) {
+        return this.zoomScales[i + (1 + runAhead)] || this.zoomScales[this.zoomScales.length - 1];
       }
     }
 
@@ -227,13 +246,13 @@ export default class Viewport {
     };
   }
 
-  cameraPropsConversion(targetPoint?: IWorldScreenCoords, targetScale?: number): ICameraProps {
+  cameraPropsConversion(targetPoint?: IWorldScreenCoords, targetScale?: number): IPublicCameraState {
     if (!targetPoint) {
       targetPoint = this.app.viewport.getScreeCenterInWord();
     }
 
     if (targetScale === undefined) {
-      targetScale = this.app.stateManager.state.camera.scale;
+      targetScale = this.app.stateManager.publicState.camera.scale;
     }
 
     if (targetScale >= 32) targetScale = 32;
@@ -252,7 +271,7 @@ export default class Viewport {
     };
   }
 
-  moveCameraTo(cameraProps: ICameraProps): Promise<ICameraProps> {
+  moveCameraTo(cameraProps: IPublicCameraState): Promise<IPublicCameraState> {
     const { x, y, scale, wX, wY } = cameraProps;
 
     const animateProps = {
