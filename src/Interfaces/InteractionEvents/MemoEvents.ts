@@ -37,16 +37,15 @@ export class MemoEvents {
     // Button example: https://pixijs.io/examples/#/interaction/interactivity.js
     // Mouse & touch events are normalized into
     // the pointer* events for handling different button events.
-    this.memo.interactive = true;
-
+    this.memo.container.interactive = true;
     // Normalized "pointer" events
     // this.memo.on('pointermove', (e: MemoEvent) => this.memoPointerMove(e));
     // this.memo.on('pointercancel', (e: MemoEvent) => this.memoPointerCancel(e));
-    this.memo.on('pointerdown', (e: MemoEvent) => this.memoPointerDown(e));
+    this.memo.container.on('pointerdown', (e: MemoEvent) => this.memoPointerDown(e));
     // this.memo.on('pointerout', (e: MemoEvent) => this.memoPointerOut(e));
     // this.memo.on('pointerover', (e: MemoEvent) => this.memoPointerOver(e));
     // this.memo.on('pointertap', (e: MemoEvent) => this.memoPointerTap(e));
-    this.memo.on('pointerup', (e: MemoEvent) => this.memoPointerUp(e));
+    this.memo.container.on('pointerup', (e: MemoEvent) => this.memoPointerUp(e));
     // this.memo.on('pointerupoutside', (e: MemoEvent) => this.memoPointerUpOutside(e));
 
     // Touch-device specific events

@@ -3,7 +3,7 @@ import './index.css';
 import FlowApp from './Interfaces/FlowApp';
 import { getImageUrlSet } from './fixtures/imagesDataSet';
 import FilesIO from './Interfaces/FilesIO';
-import { SpaceModifiers } from './modifiers/SpaceModifiers';
+// import { SpaceModifiers } from './modifiers/SpaceModifiers';
 
 async function main() {
   const appDiv = document.querySelector('.app');
@@ -23,7 +23,7 @@ async function main() {
       app.memos.addMemo(resource.texture);
     }
 
-    SpaceModifiers.setPositionGrid(app.memos.publicMemosState.list, 3, 400, 230, 0.2);
+    // SpaceModifiers.setPositionGrid(app.memos.publicMemosState.list, 3, 400, 230, 0.2);
 
     // /** Auto update from store **/
     // app.state.snapshots.store.forEach((snapShot, i) => {

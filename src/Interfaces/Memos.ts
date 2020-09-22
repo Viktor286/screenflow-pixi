@@ -3,11 +3,12 @@ import { Snapshot } from './Snapshot';
 import FlowApp from './FlowApp';
 
 interface IPublicMemosState {
-  list: Memo[]; // TODO: create PublicMemo representation
+  [key: string]: IPublicMemo;
 }
 
 export default class Memos {
   publicMemosState: IPublicMemosState;
+  innerMemoMap: Map<string, Memo>;
   selected: Map<string, Memo>;
   isMultiSelect: boolean;
 
@@ -15,9 +16,8 @@ export default class Memos {
     this.selected = new Map();
     this.isMultiSelect = false;
 
-    this.publicMemosState = {
-      list: [],
-    };
+    this.innerMemoMap = new Map();
+    this.publicMemosState = {};
 
     if (this.app.devMonitor) {
       this.app.devMonitor.addDevMonitor('memoEvents');
@@ -26,9 +26,10 @@ export default class Memos {
 
   addMemo(resource: PIXI.Texture) {
     const memo = new Memo(resource, this.app);
-    this.publicMemosState.list.push(memo);
-    this.app.viewport.addToViewport(memo);
-    this.app.viewport.instance.setChildIndex(memo, 0);
+    this.innerMemoMap.set(memo.id, memo);
+    this.publicMemosState[memo.id] = memo.publicState;
+    this.app.viewport.addToViewport(memo.container);
+    this.app.viewport.instance.setChildIndex(memo.container, 0);
   }
 
   addMemoToSelected(memo: Memo) {
@@ -71,19 +72,28 @@ export default class Memos {
   }
 }
 
-export class Memo extends PIXI.Container {
+export interface IPublicMemo {
+  x: number;
+  y: number;
+  scale: number;
+}
+
+export class Memo {
   snapshot: Snapshot;
   selected: boolean;
   selectionDrawing: PIXI.Graphics;
   id: string;
-  width: number;
-  height: number;
+  publicState: IPublicMemo;
   memos: Memos;
+  container: IMemoContainer;
+  [key: string]: any;
 
   constructor(texture: PIXI.Texture, public app: FlowApp) {
-    super();
     this.memos = this.app.memos;
+
     this.id = Math.random().toString(32).slice(2);
+    this.container = new MemoContainer(this);
+
     this.snapshot = new Snapshot(texture, this);
 
     this.width = this.snapshot.width;
@@ -92,11 +102,74 @@ export class Memo extends PIXI.Container {
     this.selected = false;
     this.selectionDrawing = new PIXI.Graphics();
 
-    this.addChild(this.snapshot.sprite);
-    this.addChild(this.selectionDrawing);
+    this.publicState = {
+      x: 0,
+      y: 0,
+      scale: 1,
+    };
+
+    this.container.addChild(this.snapshot.sprite);
+    this.container.addChild(this.selectionDrawing);
 
     // new MemoEvents(this);
-    this.interactive = true;
+    this.container.interactive = true;
+  }
+
+  // set wX(wX: number) {
+  //   // void
+  // }
+  //
+  // get wX() {
+  //   return this.publicCameraState.wX;
+  // }
+  //
+  // set wY(wY: number) {
+  //   // void
+  // }
+  //
+  // get wY() {
+  //   return this.publicCameraState.wY;
+  // }
+
+  get width() {
+    return this.container.width;
+  }
+
+  set width(val: number) {
+    this.container.width = val;
+  }
+
+  get height() {
+    return this.container.height;
+  }
+
+  set height(val: number) {
+    this.container.height = val;
+  }
+
+  get x() {
+    return this.container.x;
+  }
+
+  set x(val: number) {
+    this.container.x = val;
+  }
+
+  get y() {
+    return this.container.y;
+  }
+
+  set y(val: number) {
+    this.container.y = val;
+  }
+
+  get scale() {
+    return this.container.scale.x;
+  }
+
+  set scale(val: number) {
+    this.container.scale.x = val;
+    this.container.scale.y = val;
   }
 
   select() {
@@ -116,5 +189,15 @@ export class Memo extends PIXI.Container {
 
   eraseSelection() {
     this.selectionDrawing.clear();
+  }
+}
+
+export interface IMemoContainer extends PIXI.Container {
+  memo: Memo;
+}
+
+export class MemoContainer extends PIXI.Container implements IMemoContainer {
+  constructor(public memo: Memo) {
+    super();
   }
 }
