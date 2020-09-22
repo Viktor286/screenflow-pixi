@@ -5,8 +5,8 @@ import DevMonitor from './DevMonitor';
 import Memos from './Memos';
 import WebUI from './WebUI';
 import GUI from './GUI';
-import ViewportActions from '../Actions/Viewport';
 import StateManager from './StateManager';
+import Actions from '../Actions';
 
 export default class FlowApp {
   engine: GraphicsEngine;
@@ -16,7 +16,7 @@ export default class FlowApp {
   memos: Memos;
   gui: GUI;
   webUi: WebUI;
-  actions: ViewportActions;
+  actions: Actions;
   stageEvents: StageEvents;
   stateManager: StateManager;
   env: string | undefined;
@@ -30,7 +30,7 @@ export default class FlowApp {
     this.stageEvents = new StageEvents(this);
     this.viewport = new Viewport(this);
     this.memos = new Memos(this);
-    this.actions = new ViewportActions(this);
+    this.actions = new Actions(this);
     this.stateManager = new StateManager(this);
     this.gui = new GUI(this);
     this.webUi = new WebUI(this);
