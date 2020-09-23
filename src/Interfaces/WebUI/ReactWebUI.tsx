@@ -12,7 +12,7 @@ type IState = {
 };
 
 class ReactWebUI extends Component {
-  state: IState;
+  public readonly state: IState;
 
   constructor(props: object) {
     super(props);
@@ -21,7 +21,7 @@ class ReactWebUI extends Component {
     };
   }
 
-  render() {
+  public render() {
     return (
       <main className={styles.mainContainer}>
         <SquareButton text="-" action={() => app.actions.viewport.zoomOut()} />
