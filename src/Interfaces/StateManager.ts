@@ -1,8 +1,10 @@
 import FlowApp from './FlowApp';
 import { IPublicCameraState } from './Viewport';
+import { IPublicMemosState } from './Memos';
 
 interface IAppState {
   camera: IPublicCameraState;
+  memos: IPublicMemosState;
   [key: string]: any;
 }
 
@@ -13,18 +15,14 @@ interface IStateSlice {
 }
 
 export default class StateManager {
-  publicState: IAppState;
-  history: IStateSlice[];
-  historyLevel: number;
+  public readonly publicState: IAppState = {
+    camera: this.app.viewport.publicCameraState,
+    memos: this.app.memos.publicMemosState,
+  };
+  public history: IStateSlice[] = [];
+  public historyLevel = 50;
 
   constructor(public app: FlowApp) {
-    this.publicState = {
-      camera: this.app.viewport.publicCameraState,
-      memos: this.app.memos.publicMemosState,
-    };
-
-    this.history = [];
-    this.historyLevel = 50;
     for (const scope in this.publicState) {
       if (Object.prototype.hasOwnProperty.call(this.publicState, scope)) {
         this.saveToHistory(scope, this.getState(scope));
@@ -32,11 +30,7 @@ export default class StateManager {
     }
   }
 
-  enqueueHistory(action: IStateSlice) {
-    this.history = [action, ...this.history.slice(0, this.historyLevel - 1)];
-  }
-
-  saveToHistory(stateScope: IStateScope, stateSlice: IStateSlice) {
+  public saveToHistory(stateScope: IStateScope, stateSlice: IStateSlice) {
     this.enqueueHistory({ type: stateScope, ...stateSlice });
     // switch (stateScope) {
     //   case 'camera':
@@ -44,7 +38,7 @@ export default class StateManager {
     // }
   }
 
-  getState(stateScope?: IStateScope): IAppState | IPublicCameraState {
+  public getState(stateScope?: IStateScope): IAppState | IPublicCameraState {
     if (stateScope) {
       return Object.assign({}, this.getOriginState(stateScope));
     }
@@ -53,15 +47,7 @@ export default class StateManager {
     };
   }
 
-  getOriginState(stateScope: IStateScope) {
-    if (this.isScopeWithSubDomain(stateScope)) {
-      const { domain, target } = this.parseSubdomainScope(stateScope);
-      return this.publicState[domain][target];
-    }
-    return this.publicState[stateScope];
-  }
-
-  setState = (stateScope: IStateScope, stateSlice: IStateSlice) => {
+  public setState = (stateScope: IStateScope, stateSlice: IStateSlice) => {
     if (typeof stateSlice !== 'object' && !Array.isArray(stateSlice)) {
       return false;
     }
@@ -96,7 +82,19 @@ export default class StateManager {
     return true;
   };
 
-  setPrimitiveStateProp(stateScope: string, property: string, updateValue: number) {
+  private enqueueHistory(action: IStateSlice) {
+    this.history = [action, ...this.history.slice(0, this.historyLevel - 1)];
+  }
+
+  private getOriginState(stateScope: IStateScope) {
+    if (this.isScopeWithSubDomain(stateScope)) {
+      const { domain, target } = this.parseSubdomainScope(stateScope);
+      return this.publicState[domain][target];
+    }
+    return this.publicState[stateScope];
+  }
+
+  private setPrimitiveStateProp(stateScope: string, property: string, updateValue: number) {
     let prevScopeState = this.getState(stateScope);
     const outdatedValue = prevScopeState[property];
 
@@ -111,7 +109,7 @@ export default class StateManager {
     }
   }
 
-  applyOperation(
+  private applyOperation(
     property: string,
     updateValue: number | IPublicCameraState,
     stateScope: IStateScope,
@@ -149,15 +147,15 @@ export default class StateManager {
     return updateValue;
   }
 
-  asyncCameraAnimationOperation(value: IPublicCameraState) {
+  private asyncCameraAnimationOperation(value: IPublicCameraState) {
     this.app.viewport.moveCameraTo(value).then((cameraProps) => this.setState('camera', { ...cameraProps }));
   }
 
-  isScopeWithSubDomain(inputStr: string): boolean {
+  private isScopeWithSubDomain(inputStr: string): boolean {
     return inputStr[0] === '/';
   }
 
-  parseSubdomainScope(inputStr: string) {
+  private parseSubdomainScope(inputStr: string) {
     const result = {
       domain: '',
       target: '',

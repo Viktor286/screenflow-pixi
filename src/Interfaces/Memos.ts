@@ -2,7 +2,7 @@ import * as PIXI from 'pixi.js';
 import { Snapshot } from './Snapshot';
 import FlowApp from './FlowApp';
 
-interface IPublicMemosState {
+export interface IPublicMemosState {
   [key: string]: IPublicMemo;
 }
 
