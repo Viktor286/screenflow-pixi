@@ -1,7 +1,7 @@
 import StageEvents, { StageEvent } from './StageEvents';
-import { MemoContainer } from '../Memos';
 import FlowApp from '../FlowApp';
 import { IScreenCoords, IWorldScreenCoords } from '../Viewport';
+import { MemoContainer } from '../Memo';
 
 type IGestureEvent = {
   screenClick: IScreenCoords;

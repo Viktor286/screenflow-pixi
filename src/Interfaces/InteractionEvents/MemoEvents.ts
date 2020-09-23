@@ -1,6 +1,6 @@
 // import * as PIXI from 'pixi.js';
-import { Memo } from '../Memos';
 import PIXI from 'pixi.js';
+import { Memo } from '../Memo';
 
 /** MemoEvent mimics PIXI.interaction.InteractionEvent with targets overwritten **/
 interface MemoEvent {

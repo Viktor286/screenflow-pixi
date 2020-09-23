@@ -1,4 +1,4 @@
-import { Memo } from '../Interfaces/Memos';
+import { Memo } from '../Interfaces/Memo';
 
 /** TODO: change modifier interface to matrix output (prev, next states for animation) **/
 export class SpaceModifiers {
