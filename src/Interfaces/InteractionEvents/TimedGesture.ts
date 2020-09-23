@@ -9,44 +9,38 @@ type IGestureEvent = {
 };
 
 export default class TimedGesture {
-  app: FlowApp;
-  sendToMonitor: Function;
+  private app: FlowApp;
+  private readonly sendToMonitor = this.stageEvents.sendToMonitor;
 
-  awaiting: boolean | string;
-  timer: ReturnType<typeof setTimeout> | null;
-  clickCnt: number;
-  doubleClickThreshold: number;
+  // Timed-gestures event manager
+  private awaiting: boolean | string = false;
+  private timer: ReturnType<typeof setTimeout> | null = null;
+  private clickCnt = 0;
+
+  // touchpad handle < 400 badly, but with that amount desktop mouse shows dbclick too soon
+  //  desktop mouse show fine result < 300
+  private readonly doubleClickThreshold = 320;
 
   constructor(public stageEvents: StageEvents) {
     this.app = stageEvents.app;
-    this.sendToMonitor = this.stageEvents.sendToMonitor;
-
-    // Timed-gestures event manager
-    this.clickCnt = 0;
-    this.awaiting = false;
-    this.timer = null;
-
-    // touchpad handle < 400 badly, but with that amount desktop mouse shows dbclick too soon
-    //  desktop mouse show fine result < 300
-    this.doubleClickThreshold = 320;
   }
 
   // TODO: this helper belongs to eventMonitor class?
   //  we need figure out what scope can use this TimedGesture controller
-  getClickInfoStr(e: IGestureEvent) {
+  private getClickInfoStr(e: IGestureEvent) {
     if (this.app.stageEvents.eventMonitor) {
       return `${Math.round(e.screenClick.sX)} : ${Math.round(e.screenClick.sY)}`;
     }
   }
 
-  getGestureEvent(e: StageEvent): IGestureEvent {
+  private getGestureEvent(e: StageEvent): IGestureEvent {
     return {
       screenClick: this.app.viewport.getScreenCoordsFromEvent(e),
       worldScreenClick: this.app.viewport.getWorldScreenCoordsFromEvent(e),
     };
   }
 
-  pointerDownGate(e: StageEvent) {
+  public pointerDownGate(e: StageEvent) {
     // Timed-gestures manager
     this.awaiting = true;
     this.clickCnt += 1;
@@ -86,7 +80,7 @@ export default class TimedGesture {
     }
   }
 
-  pointerUpGate(e: StageEvent) {
+  public pointerUpGate(e: StageEvent) {
     // Timed-gestures handlers
 
     // Required data from the input event should be preserved here
@@ -128,7 +122,7 @@ export default class TimedGesture {
 
   // Timed-gestures special events
   // Press Up events
-  pressUpImmediate(e: IGestureEvent) {
+  private pressUpImmediate(e: IGestureEvent) {
     const hit = this.app.engine.renderer.plugins.interaction.hitTest({
       x: e.screenClick.sX,
       y: e.screenClick.sY,
@@ -143,44 +137,44 @@ export default class TimedGesture {
     this.sendToMonitor('Immediate Press Up', this.getClickInfoStr(e));
   }
 
-  pressUpQuick(e: IGestureEvent) {
+  private pressUpQuick(e: IGestureEvent) {
     this.app.actions.viewport.moveTo(e.worldScreenClick);
     this.sendToMonitor('Quick Press Up', this.getClickInfoStr(e));
   }
 
-  pressUpMedium(e: IGestureEvent) {
+  private pressUpMedium(e: IGestureEvent) {
     this.sendToMonitor('Medium Press Up', this.getClickInfoStr(e));
   }
 
-  pressUpLong(e: IGestureEvent) {
+  private pressUpLong(e: IGestureEvent) {
     this.sendToMonitor('Long Press Up', this.getClickInfoStr(e));
   }
 
   // Additional events
-  doubleClick(e: IGestureEvent) {
+  private doubleClick(e: IGestureEvent) {
     this.sendToMonitor('DoubleClick', this.getClickInfoStr(e));
     this.app.actions.viewport.zoomIn(e.worldScreenClick);
   }
 
   // Press Down events
-  pressDownImmediate(e: IGestureEvent) {
+  private pressDownImmediate(e: IGestureEvent) {
     // ImmediatePressDown event could be too frequent,
     // its probably best choice to use ImmediatePressUp
     this.app.gui.focusPoint.putFocusPoint(e.worldScreenClick);
     this.sendToMonitor('Immediate Press Down', this.getClickInfoStr(e));
   }
 
-  pressDownQuick(e: IGestureEvent) {
+  private pressDownQuick(e: IGestureEvent) {
     this.app.gui.focusPoint.putFocusPoint(e.worldScreenClick);
     this.sendToMonitor('Quick Press Down', this.getClickInfoStr(e));
   }
 
-  pressDownMedium(e: IGestureEvent) {
+  private pressDownMedium(e: IGestureEvent) {
     this.app.gui.focusPoint.putFocusPoint(e.worldScreenClick);
     this.sendToMonitor('Medium Press Down', this.getClickInfoStr(e));
   }
 
-  pressDownLong(e: IGestureEvent) {
+  private pressDownLong(e: IGestureEvent) {
     this.app.gui.focusPoint.putFocusPoint(e.worldScreenClick);
     this.sendToMonitor('Long Press Down', this.getClickInfoStr(e));
   }
