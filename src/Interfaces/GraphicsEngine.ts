@@ -20,10 +20,10 @@ declare global {
 // sprite = new PIXI.Sprite(texture);
 
 export default class GraphicsEngine {
-  instance: PIXI.Application;
-  stage: PIXI.Container;
-  renderer: PIXI.Renderer;
-  ticker: PIXI.Ticker;
+  public readonly instance: PIXI.Application;
+  public readonly stage: PIXI.Container;
+  public readonly renderer: PIXI.Renderer;
+  public readonly ticker: PIXI.Ticker;
   // screen: PIXI.Rectangle;
 
   constructor(public app: FlowApp) {
@@ -68,7 +68,7 @@ export default class GraphicsEngine {
     return this.instance.screen.height;
   }
 
-  addDisplayObject(...children: PIXI.DisplayObject[]): PIXI.DisplayObject {
+  public addDisplayObject(...children: PIXI.DisplayObject[]): PIXI.DisplayObject {
     return this.instance.stage.addChild(...children);
   }
 }
