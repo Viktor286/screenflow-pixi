@@ -10,13 +10,13 @@ export default class ViewportActions {
     this.runAheadZoomOut = 0;
   }
 
-  viewportMoveTo(target: IWorldScreenCoords, targetScale?: number) {
+  moveTo(target: IWorldScreenCoords, targetScale?: number) {
     this.app.stateManager.setState('camera', {
       animation: this.app.viewport.cameraPropsConversion(target, targetScale),
     });
   }
 
-  viewportZoomIn(zoomPoint?: IWorldScreenCoords) {
+  zoomIn(zoomPoint?: IWorldScreenCoords) {
     if (this.runAheadZoomIn > 1) this.runAheadZoomIn = 1;
 
     this.app.stateManager.setState('camera', {
@@ -34,7 +34,7 @@ export default class ViewportActions {
     }, 700);
   }
 
-  viewportZoom100(zoomPoint?: IWorldScreenCoords) {
+  zoom100(zoomPoint?: IWorldScreenCoords) {
     const scale = 1;
 
     this.app.stateManager.setState('camera', {
@@ -42,7 +42,7 @@ export default class ViewportActions {
     });
   }
 
-  viewportZoomOut(zoomPoint?: IWorldScreenCoords) {
+  zoomOut(zoomPoint?: IWorldScreenCoords) {
     if (this.runAheadZoomOut > 1) this.runAheadZoomOut = 1;
 
     this.app.stateManager.setState('camera', {

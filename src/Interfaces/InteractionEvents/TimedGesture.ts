@@ -1,5 +1,5 @@
 import StageEvents, { StageEvent } from './StageEvents';
-import { Memo } from '../Memos';
+import { MemoContainer } from '../Memos';
 import FlowApp from '../FlowApp';
 import { IScreenCoords, IWorldScreenCoords } from '../Viewport';
 
@@ -134,8 +134,8 @@ export default class TimedGesture {
       y: e.screenClick.sY,
     });
 
-    if (hit instanceof Memo) {
-      const memo = hit;
+    if (hit instanceof MemoContainer) {
+      const memo = hit.memo;
       memo.select();
       console.log(`Memo clicked "${memo.id}" `, memo);
     }
@@ -144,7 +144,7 @@ export default class TimedGesture {
   }
 
   pressUpQuick(e: IGestureEvent) {
-    this.app.actions.viewportMoveTo(e.worldScreenClick);
+    this.app.actions.viewport.moveTo(e.worldScreenClick);
     this.sendToMonitor('Quick Press Up', this.getClickInfoStr(e));
   }
 
@@ -159,7 +159,7 @@ export default class TimedGesture {
   // Additional events
   doubleClick(e: IGestureEvent) {
     this.sendToMonitor('DoubleClick', this.getClickInfoStr(e));
-    this.app.actions.viewportZoomIn(e.worldScreenClick);
+    this.app.actions.viewport.zoomIn(e.worldScreenClick);
   }
 
   // Press Down events

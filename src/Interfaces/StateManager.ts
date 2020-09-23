@@ -1,8 +1,8 @@
 import FlowApp from './FlowApp';
-import { ICamera, ICameraProps } from './Viewport';
+import { IPublicCameraState } from './Viewport';
 
 interface IAppState {
-  camera: ICamera;
+  camera: IPublicCameraState;
   [key: string]: any;
 }
 
@@ -12,29 +12,24 @@ interface IStateSlice {
   [key: string]: any;
 }
 
-// TODO: temp state management
-//  - this is version of state with permanent scopes(top level keys) to simplify algorithm
-//  - use immutable js collections?
-//  - attach state to redux? (how react "connect" works, via store.subscribe?)
-
 export default class StateManager {
-  state: IAppState;
+  publicState: IAppState;
   history: IStateSlice[];
   historyLevel: number;
 
   constructor(public app: FlowApp) {
-    this.state = {
-      camera: {
-        x: 0,
-        y: 0,
-        wX: 0,
-        wY: 0,
-        scale: 1,
-        animation: false,
-      },
+    this.publicState = {
+      camera: this.app.viewport.publicCameraState,
+      memos: this.app.memos.publicMemosState,
     };
+
     this.history = [];
     this.historyLevel = 50;
+    for (const scope in this.publicState) {
+      if (Object.prototype.hasOwnProperty.call(this.publicState, scope)) {
+        this.saveToHistory(scope, this.getState(scope));
+      }
+    }
   }
 
   enqueueHistory(action: IStateSlice) {
@@ -42,84 +37,140 @@ export default class StateManager {
   }
 
   saveToHistory(stateScope: IStateScope, stateSlice: IStateSlice) {
-    switch (stateScope) {
-      case 'camera':
-        if (stateSlice.animation !== false) {
-          return;
-        }
-        const { wX, wY, scale } = stateSlice;
-        this.enqueueHistory({
-          type: 'camera',
-          wX,
-          wY,
-          scale,
-        });
-    }
+    this.enqueueHistory({ type: stateScope, ...stateSlice });
+    // switch (stateScope) {
+    //   case 'camera':
+    //     this.enqueueHistory({ type: stateScope, ...stateSlice });
+    // }
   }
 
-  getState(stateScope?: IStateScope): IAppState | ICamera {
+  getState(stateScope?: IStateScope): IAppState | IPublicCameraState {
     if (stateScope) {
-      return Object.assign({}, this.state[stateScope]);
+      return Object.assign({}, this.getOriginState(stateScope));
     }
     return {
-      ...this.state,
+      ...this.publicState,
     };
   }
 
+  getOriginState(stateScope: IStateScope) {
+    if (this.isScopeWithSubDomain(stateScope)) {
+      const { domain, target } = this.parseSubdomainScope(stateScope);
+      return this.publicState[domain][target];
+    }
+    return this.publicState[stateScope];
+  }
+
   setState = (stateScope: IStateScope, stateSlice: IStateSlice) => {
-    let prevScopeState = this.getState(stateScope);
-    let newScopeState;
-    let isUpdated = false;
+    if (typeof stateSlice !== 'object' && !Array.isArray(stateSlice)) {
+      return false;
+    }
+
+    // For animations -- apply operation immediately without setting the state at initial frame
+    if (stateSlice.hasOwnProperty('animation')) {
+      this.applyOperation('animation', stateSlice.animation, stateScope);
+      return false;
+    }
 
     for (const property in stateSlice) {
-      if (stateSlice.hasOwnProperty(property) && prevScopeState.hasOwnProperty(property)) {
-        if (prevScopeState[property] !== stateSlice[property]) {
-          newScopeState = {
-            ...prevScopeState,
-            ...{ [property]: this.applyOperation(property, stateSlice[property], stateScope) },
-          };
-
-          this.state[stateScope] = newScopeState;
-          prevScopeState = newScopeState;
-          isUpdated = true;
-        } else {
-          // handle case with object|array sub levels?
-        }
+      if (!Object.prototype.hasOwnProperty.call(stateSlice, property)) {
+        continue;
       }
+
+      if (stateSlice[property] === undefined) {
+        continue;
+      }
+
+      const updateValue = stateSlice[property];
+
+      if (typeof updateValue === 'object') {
+        // recursive call of setState/processObjectProps?
+        continue;
+      }
+
+      // Apply singe property update
+      this.setPrimitiveStateProp(stateScope, property, updateValue);
     }
 
-    if (isUpdated && newScopeState) {
-      this.saveToHistory(stateScope, newScopeState);
-    }
-
+    this.saveToHistory(stateScope, this.getState(stateScope));
     return true;
   };
 
-  applyOperation(
-    property: string,
-    value: number | ICameraProps,
-    stateScope: IStateScope,
-  ): number | ICameraProps | Promise<ICameraProps> | boolean {
-    switch (stateScope) {
-      case 'camera':
-        this.asyncCameraAnimationOperation(property, value);
-        return value;
-      default:
-        return value;
+  setPrimitiveStateProp(stateScope: string, property: string, updateValue: number) {
+    let prevScopeState = this.getState(stateScope);
+    const outdatedValue = prevScopeState[property];
+
+    if (outdatedValue !== updateValue) {
+      let newScopeState = {
+        ...prevScopeState,
+        [property]: this.applyOperation(property, updateValue, stateScope),
+      };
+
+      // Assign fields of referenced origin
+      Object.assign(this.getOriginState(stateScope), newScopeState);
     }
   }
 
-  asyncCameraAnimationOperation(property: string, value: number | ICameraProps) {
-    if (typeof value === 'object' && property === 'animation') {
-      const currentState = this.getState('camera');
-      delete currentState.animation;
-      if (JSON.stringify(currentState) !== JSON.stringify(value)) {
-        this.app.viewport
-          .moveCameraTo(value)
-          .then((cameraProps) => this.setState('camera', { ...cameraProps, animation: false }));
-      } else {
-        return false;
+  applyOperation(
+    property: string,
+    updateValue: number | IPublicCameraState,
+    stateScope: IStateScope,
+  ): number | IPublicCameraState | Promise<IPublicCameraState> | boolean {
+    if (stateScope.startsWith('/memos')) {
+      if (this.isScopeWithSubDomain(stateScope)) {
+        const { target: id } = this.parseSubdomainScope(stateScope);
+        const memo = this.app.memos.innerMemoMap.get(id);
+
+        if (memo) {
+          memo[property] = updateValue;
+        }
+
+        this.getOriginState(stateScope)[property] = updateValue;
       }
     }
+
+    // Viewport (camera) -- only animation handled at the moment
+    if (stateScope === 'camera') {
+      // // Run animation with another postponed state update at animation end
+      if (property === 'animation' && typeof updateValue === 'object') {
+        this.asyncCameraAnimationOperation(updateValue);
+        return true;
+      }
+
+      // TODO: solve problem with animation in-progress sequence overlaps with state update request
+      // Apply external operation
+      // this.app.viewport[property] = updateValue;
+
+      // Always return original updateValue
+      return updateValue;
+    }
+
+    // Default return origin value
+    return updateValue;
+  }
+
+  asyncCameraAnimationOperation(value: IPublicCameraState) {
+    this.app.viewport.moveCameraTo(value).then((cameraProps) => this.setState('camera', { ...cameraProps }));
+  }
+
+  isScopeWithSubDomain(inputStr: string): boolean {
+    return inputStr[0] === '/';
+  }
+
+  parseSubdomainScope(inputStr: string) {
+    const result = {
+      domain: '',
+      target: '',
+    };
+
+    const parsedStr = inputStr.slice(1).split('/');
+
+    if (parsedStr.length === 2) {
+      result.domain = parsedStr[0];
+      result.target = parsedStr[1];
+      return result;
+    }
+
+    return result;
   }
 }

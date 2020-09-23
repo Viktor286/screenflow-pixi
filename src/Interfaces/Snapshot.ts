@@ -5,13 +5,13 @@ import { Memo } from './Memos';
 
 export class Snapshot {
   title: string;
-  parent: PIXI.Container;
+  parent: Memo;
   parentList: Memo[] | undefined;
   sprite: PIXI.Sprite;
   width: number;
   height: number;
 
-  constructor(texture: PIXI.Texture, parent: PIXI.Container) {
+  constructor(texture: PIXI.Texture, parent: Memo) {
     const sprite = PIXI.Sprite.from(texture);
     this.title = '';
     this.parent = parent;
