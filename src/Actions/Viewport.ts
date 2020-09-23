@@ -2,21 +2,18 @@ import FlowApp from '../Interfaces/FlowApp';
 import { IWorldScreenCoords } from '../Interfaces/Viewport';
 
 export default class ViewportActions {
-  runAheadZoomIn: number;
-  runAheadZoomOut: number;
+  private runAheadZoomIn = 0;
+  private runAheadZoomOut = 0;
 
-  constructor(public app: FlowApp) {
-    this.runAheadZoomIn = 0;
-    this.runAheadZoomOut = 0;
-  }
+  constructor(public app: FlowApp) {}
 
-  moveTo(target: IWorldScreenCoords, targetScale?: number) {
+  public moveTo(target: IWorldScreenCoords, targetScale?: number) {
     this.app.stateManager.setState('camera', {
       animation: this.app.viewport.cameraPropsConversion(target, targetScale),
     });
   }
 
-  zoomIn(zoomPoint?: IWorldScreenCoords) {
+  public zoomIn(zoomPoint?: IWorldScreenCoords) {
     if (this.runAheadZoomIn > 1) this.runAheadZoomIn = 1;
 
     this.app.stateManager.setState('camera', {
@@ -34,7 +31,7 @@ export default class ViewportActions {
     }, 700);
   }
 
-  zoom100(zoomPoint?: IWorldScreenCoords) {
+  public zoom100(zoomPoint?: IWorldScreenCoords) {
     const scale = 1;
 
     this.app.stateManager.setState('camera', {
@@ -42,7 +39,7 @@ export default class ViewportActions {
     });
   }
 
-  zoomOut(zoomPoint?: IWorldScreenCoords) {
+  public zoomOut(zoomPoint?: IWorldScreenCoords) {
     if (this.runAheadZoomOut > 1) this.runAheadZoomOut = 1;
 
     this.app.stateManager.setState('camera', {

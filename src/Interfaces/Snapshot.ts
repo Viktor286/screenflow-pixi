@@ -4,12 +4,12 @@ import { Memo } from './Memo';
 /** TODO: Snapshot needs to have its own set of events, extends PIXI.Container ? **/
 
 export class Snapshot {
-  title: string;
-  parent: Memo;
-  parentList: Memo[] | undefined;
-  sprite: PIXI.Sprite;
-  width: number;
-  height: number;
+  public title: string;
+  public readonly parent: Memo;
+  public readonly parentList: Memo[] | undefined;
+  public sprite: PIXI.Sprite;
+  public width: number;
+  public height: number;
 
   constructor(texture: PIXI.Texture, parent: Memo) {
     const sprite = PIXI.Sprite.from(texture);
