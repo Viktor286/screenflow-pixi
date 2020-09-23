@@ -4,10 +4,9 @@ import { IWorldScreenCoords } from '../Viewport';
 import { gsap } from 'gsap';
 
 export default class FocusPoint {
-  touchGraphics: PIXI.Graphics;
+  private readonly touchGraphics: PIXI.Graphics = this.createTouchGraphics(0xfff796);
 
   constructor(public app: FlowApp) {
-    this.touchGraphics = this.createTouchGraphics(0xfff796);
     // this.app.engine.stage.addChild(this.touchGraphics);
     this.app.viewport.addToViewport(this.touchGraphics);
   }
@@ -29,7 +28,7 @@ export default class FocusPoint {
     return this.touchGraphics.alpha;
   }
 
-  createTouchGraphics(color: number): PIXI.Graphics {
+  private createTouchGraphics(color: number): PIXI.Graphics {
     const circle = new PIXI.Graphics();
     circle.lineStyle(0); // lineStyle to zero
     circle.beginFill(color, 0.4);
@@ -39,13 +38,13 @@ export default class FocusPoint {
     return circle;
   }
 
-  putFocusPoint({ wX, wY }: IWorldScreenCoords) {
+  public putFocusPoint({ wX, wY }: IWorldScreenCoords) {
     // const { x, y } = this.app.viewport.instance.toGlobal({ x: wX, y: wY });
     this.touchGraphics.position.set(wX, wY);
     this.animateFocusPoint();
   }
 
-  animateFocusPoint() {
+  private animateFocusPoint() {
     gsap.fromTo(
       this,
       {
