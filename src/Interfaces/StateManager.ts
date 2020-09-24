@@ -1,6 +1,7 @@
 import FlowApp from './FlowApp';
 import { IPublicCameraState } from './Viewport';
 import { IPublicMemosState } from './Memos';
+import { IPublicMemo, Memo } from './Memo';
 
 interface IAppState {
   camera: IPublicCameraState;
@@ -120,10 +121,13 @@ export default class StateManager {
         const memo = this.app.memos.innerMemoMap.get(id);
 
         if (memo) {
+          if (property === 'animation' && typeof updateValue === 'object') {
+            this.asyncMemoAnimationOperation(memo, updateValue);
+            return true;
+          }
           memo[property] = updateValue;
+          this.getOriginState(stateScope)[property] = updateValue;
         }
-
-        this.getOriginState(stateScope)[property] = updateValue;
       }
     }
 
@@ -148,7 +152,13 @@ export default class StateManager {
   }
 
   private asyncCameraAnimationOperation(value: IPublicCameraState) {
-    this.app.viewport.moveCameraTo(value).then((cameraProps) => this.setState('camera', { ...cameraProps }));
+    this.app.viewport.animateCamera(value).then((cameraProps) => this.setState('camera', { ...cameraProps }));
+  }
+
+  private asyncMemoAnimationOperation(targetMemo: Memo, value: IPublicMemo) {
+    targetMemo
+      .animateMemo(value)
+      .then((memoProps) => this.setState(`/memos/${targetMemo.id}`, { ...memoProps }));
   }
 
   private isScopeWithSubDomain(inputStr: string): boolean {

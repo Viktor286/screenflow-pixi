@@ -9,6 +9,7 @@ export default class FocusPoint {
   constructor(public app: FlowApp) {
     // this.app.engine.stage.addChild(this.touchGraphics);
     this.app.viewport.addToViewport(this.touchGraphics);
+    this.touchGraphics.zIndex = 9999;
   }
 
   set scale(value: number) {

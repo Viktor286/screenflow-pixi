@@ -2,11 +2,12 @@ import * as PIXI from 'pixi.js';
 import { Snapshot } from './Snapshot';
 import FlowApp from './FlowApp';
 import Memos from './Memos';
+import { gsap } from 'gsap';
 
 export interface IPublicMemo {
-  x: number;
-  y: number;
-  scale: number;
+  x?: number;
+  y?: number;
+  scale?: number;
 }
 
 export class Memo {
@@ -29,11 +30,11 @@ export class Memo {
     this.id = Math.random().toString(32).slice(2);
     this.snapshot = new Snapshot(texture, this);
 
-    this.width = this.snapshot.width;
-    this.height = this.snapshot.height;
-
     this.container.addChild(this.snapshot.sprite);
     this.container.addChild(this.selectionDrawing);
+
+    this.width = this.snapshot.width;
+    this.height = this.snapshot.height;
 
     // new MemoEvents(this);
     this.container.interactive = true;
@@ -45,6 +46,7 @@ export class Memo {
 
   set width(val: number) {
     this.container.width = val;
+    this.updateCenterPivot();
   }
 
   get height() {
@@ -53,6 +55,23 @@ export class Memo {
 
   set height(val: number) {
     this.container.height = val;
+    this.updateCenterPivot();
+  }
+
+  get pivotX() {
+    return this.container.pivot.x;
+  }
+
+  set pivotX(val: number) {
+    this.container.pivot.x = val;
+  }
+
+  get pivotY() {
+    return this.container.pivot.y;
+  }
+
+  set pivotY(val: number) {
+    this.container.pivot.y = val;
   }
 
   get x() {
@@ -92,6 +111,28 @@ export class Memo {
     this.eraseSelection();
   }
 
+  public animateMemo(memoProps: IPublicMemo): Promise<IPublicMemo> {
+    return new Promise((resolve) => {
+      gsap.to(this, {
+        ...memoProps,
+        duration: 0.7,
+        ease: 'power3.out',
+        onStart: () => {
+          this.container.interactive = false;
+          this.container.zIndex = 1;
+        },
+        onUpdate: () => {
+          // this.app.gui.stageBackTile.updateGraphics();
+        },
+        onComplete: () => {
+          this.container.interactive = true;
+          this.container.zIndex = 0; // bring back zIndex after sorting operation
+          resolve({ ...memoProps });
+        },
+      });
+    });
+  }
+
   private drawSelection(): void {
     this.selectionDrawing
       .clear()
@@ -101,6 +142,11 @@ export class Memo {
 
   private eraseSelection() {
     this.selectionDrawing.clear();
+  }
+
+  private updateCenterPivot() {
+    this.pivotX = this.width / 2;
+    this.pivotY = this.height / 2;
   }
 }
 

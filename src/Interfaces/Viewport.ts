@@ -60,6 +60,7 @@ export default class Viewport {
 
     // viewport.drag().pinch().wheel().decelerate();
     app.engine.addDisplayObject(this.instance);
+    this.instance.sortableChildren = true;
 
     // Handler for "pixi engine and Viewport" dimensions dependency on window size
     window.addEventListener('resize', this.resizeViewportHandler);
@@ -268,7 +269,7 @@ export default class Viewport {
     };
   }
 
-  public moveCameraTo(cameraProps: IPublicCameraState): Promise<IPublicCameraState> {
+  public animateCamera(cameraProps: IPublicCameraState): Promise<IPublicCameraState> {
     const { x, y, scale, wX, wY } = cameraProps;
 
     const animateProps = {

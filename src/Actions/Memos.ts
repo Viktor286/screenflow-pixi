@@ -13,15 +13,14 @@ export default class MemoActions {
 
   public scaleTo(id: string, targetScale?: number) {
     this.app.stateManager.setState(`/memos/${id}`, {
-      scale: targetScale,
+      animation: { scale: targetScale },
     });
   }
 
   public moveTo(id: string, target: IWorldScreenCoords) {
     const { wX: x, wY: y } = target;
     this.app.stateManager.setState(`/memos/${id}`, {
-      x,
-      y,
+      animation: { x, y },
     });
   }
 }
