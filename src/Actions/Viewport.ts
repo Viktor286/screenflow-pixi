@@ -7,6 +7,12 @@ export default class ViewportActions {
 
   constructor(public app: FlowApp) {}
 
+  public fitToTarget(target: IWorldScreenCoords, targetScale?: number) {
+    this.app.stateManager.setState('camera', {
+      animation: this.app.viewport.cameraPropsConversion(target, targetScale),
+    });
+  }
+
   public moveTo(target: IWorldScreenCoords, targetScale?: number) {
     this.app.stateManager.setState('camera', {
       animation: this.app.viewport.cameraPropsConversion(target, targetScale),

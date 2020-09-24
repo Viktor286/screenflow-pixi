@@ -166,20 +166,26 @@ export default class Viewport {
     const currentScale = this.instance.scale.x;
 
     for (let i = 0; i < this.zoomScales.length; i++) {
-      if (currentScale <= this.zoomScales[0]) {
-        return this.zoomScales[0];
+      const firstStep = this.zoomScales[0];
+      if (currentScale <= firstStep) {
+        return firstStep;
       }
 
-      if (currentScale > this.zoomScales[this.zoomScales.length - 1]) {
+      const lastStep = this.zoomScales[this.zoomScales.length - 1];
+      if (currentScale > lastStep) {
         return this.zoomScales[this.zoomScales.length - (1 - runAhead)];
       }
 
       if (currentScale === this.zoomScales[i]) {
-        return this.zoomScales[i - (1 - runAhead)] || this.zoomScales[0];
+        return this.zoomScales[i - (1 - runAhead)] || firstStep;
       }
 
       if (currentScale > this.zoomScales[i] && currentScale < this.zoomScales[i + 1]) {
-        return this.zoomScales[i - runAhead] || this.zoomScales[0];
+        if (currentScale - this.zoomScales[i] / 2 < this.zoomScales[i]) {
+          // avoid the short jump case when next step less than halfway (without runAhead)
+          return this.zoomScales[i - 1] || firstStep;
+        }
+        return this.zoomScales[i - runAhead] || firstStep;
       }
     }
 
@@ -190,20 +196,27 @@ export default class Viewport {
     const currentScale = this.instance.scale.x;
 
     for (let i = 0; i < this.zoomScales.length; i++) {
-      if (currentScale < this.zoomScales[0]) {
+      const firstStep = this.zoomScales[0];
+      if (currentScale < firstStep) {
         return this.zoomScales[runAhead];
       }
 
-      if (currentScale >= this.zoomScales[this.zoomScales.length - 1]) {
-        return this.zoomScales[this.zoomScales.length - 1];
+      const lastStep = this.zoomScales[this.zoomScales.length - 1];
+      if (currentScale >= lastStep) {
+        return lastStep;
       }
 
       if (currentScale === this.zoomScales[i]) {
-        return this.zoomScales[i + (1 + runAhead)] || this.zoomScales[this.zoomScales.length - 1];
+        return this.zoomScales[i + (1 + runAhead)] || lastStep;
       }
 
-      if (currentScale > this.zoomScales[i] && currentScale < this.zoomScales[i + 1]) {
-        return this.zoomScales[i + (1 + runAhead)] || this.zoomScales[this.zoomScales.length - 1];
+      const nextStep = this.zoomScales[i + 1];
+      if (currentScale > this.zoomScales[i] && currentScale < nextStep) {
+        if (currentScale + nextStep / 2 > nextStep) {
+          // avoid the short jump case when next step less than halfway (without runAhead)
+          return this.zoomScales[i + 2] || lastStep;
+        }
+        return this.zoomScales[i + (1 + runAhead)] || lastStep;
       }
     }
 
@@ -239,8 +252,8 @@ export default class Viewport {
 
   public getScreeCenterInWord(): IWorldScreenCoords {
     return {
-      wX: this.instance.worldScreenWidth / 2 - this.instance.x / this.instance.scale.x,
-      wY: this.instance.worldScreenHeight / 2 - this.instance.y / this.instance.scale.y,
+      wX: Number((this.instance.worldScreenWidth / 2 - this.instance.x / this.instance.scale.x).toFixed(4)),
+      wY: Number((this.instance.worldScreenHeight / 2 - this.instance.y / this.instance.scale.y).toFixed(4)),
     };
   }
 
