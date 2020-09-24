@@ -3,14 +3,13 @@ import PIXI from 'pixi.js';
 import DevMonitor from '../DevMonitor';
 import { ClickEventData, MovedEventData, Viewport as PixiViewport } from 'pixi-viewport';
 
+/** This class might be useful when Viewport UI work will begin **/
+
 export default class ViewportEvents {
-  eventMonitor: DevMonitor | null;
-  viewport: PixiViewport;
+  public eventMonitor: DevMonitor | null = this.app.devMonitor;
+  public viewport: PixiViewport = this.app.viewport.instance;
 
   constructor(public app: FlowApp) {
-    this.viewport = this.app.viewport.instance;
-    this.eventMonitor = this.app.devMonitor;
-
     if (this.eventMonitor instanceof DevMonitor) {
       this.eventMonitor.addDevMonitor('viewportEvents');
     }
@@ -18,7 +17,7 @@ export default class ViewportEvents {
     this.initViewportEvents();
   }
 
-  sendToMonitor(eventName: string, msg: string = '') {
+  public sendToMonitor(eventName: string, msg: string = '') {
     if (this.eventMonitor instanceof DevMonitor) {
       this.eventMonitor.dispatchMonitor('viewportEvents', eventName, msg);
       console.log(`[viewport] ${eventName} ${msg}`);
@@ -27,7 +26,7 @@ export default class ViewportEvents {
 
   // Docs
   // https://davidfig.github.io/pixi-viewport/jsdoc/Viewport.html#event:frame-end
-  initViewportEvents() {
+  private initViewportEvents() {
     // Activate only required events for optimization purposes
 
     // Container events
@@ -59,25 +58,25 @@ export default class ViewportEvents {
     // viewport.on('snap-zoom-end', (e) => this.viewportSnapZoomEnd(e));
   }
 
-  viewportPointerTap(e: PIXI.InteractionEvent) {
+  private viewportPointerTap(e: PIXI.InteractionEvent) {
     const eventName = 'Pointer Tap';
     const msg = ``;
     this.sendToMonitor(eventName, msg);
   }
 
-  viewportClicked(e: ClickEventData) {
+  private viewportClicked(e: ClickEventData) {
     const eventName = 'Clicked';
     const msg = `${eventName} ${Math.round(e.world.x)} : ${Math.round(e.world.y)} `;
     this.sendToMonitor(eventName, msg);
   }
 
-  viewportDragStart(e: ClickEventData) {
+  private viewportDragStart(e: ClickEventData) {
     const eventName = 'DragStart';
     const msg = `${Math.round(e.event.data.global.x)} : ${Math.round(e.event.data.global.y)}`;
     this.sendToMonitor(eventName, msg);
   }
 
-  viewportDragEnd(e: ClickEventData) {
+  private viewportDragEnd(e: ClickEventData) {
     const eventName = 'DragEnd';
     const msg = `${Math.round(e.event.data.global.x)} : ${Math.round(e.event.data.global.y)}`;
     this.sendToMonitor(eventName, msg);
@@ -89,38 +88,38 @@ export default class ViewportEvents {
 
   // hitArea.x, .y = lastViewport.x, .y
   // transform.scale._x = lastViewport.scaleX
-  viewportMoved(e: MovedEventData) {
+  private viewportMoved(e: MovedEventData) {
     const eventName = 'Moved';
     const msg = this.getViewportLogMsg(e.viewport);
     this.sendToMonitor(eventName, msg);
   }
 
-  viewportMovedEnd(e: PixiViewport) {
+  private viewportMovedEnd(e: PixiViewport) {
     const eventName = 'MovedEnd';
     const msg = this.getViewportLogMsg(e);
     this.sendToMonitor(eventName, msg);
   }
 
-  getViewportLogMsg(v: PixiViewport) {
+  private getViewportLogMsg(v: PixiViewport) {
     const { lastViewport } = v;
     const { scaleX, scaleY, x, y } = lastViewport;
     return `${Math.round(x)}:${Math.round(y)} (${scaleX.toFixed(2)}:${scaleY.toFixed(2)})`;
   }
 
-  viewportZoomedEnd(e: PixiViewport) {
+  private viewportZoomedEnd(e: PixiViewport) {
     const eventName = 'ZoomedEnd';
     const msg = this.getViewportLogMsg(e);
     this.sendToMonitor(eventName, msg);
   }
 
   // What is MouseEdge start/end?
-  viewportMouseEdgeStart(e: PixiViewport) {
+  private viewportMouseEdgeStart(e: PixiViewport) {
     const eventName = 'MouseEdgeStart';
     const msg = ``;
     this.sendToMonitor(eventName, msg);
   }
 
-  viewportMouseEdgeEnd(e: PixiViewport) {
+  private viewportMouseEdgeEnd(e: PixiViewport) {
     const eventName = 'MouseEdgeEnd';
     const msg = ``;
     this.sendToMonitor(eventName, msg);

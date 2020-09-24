@@ -4,7 +4,7 @@ import FlowApp from '../FlowApp';
 
 export default class StageBackTile {
   // lvlTileTop: PIXI.TilingSprite;
-  tileMiddle: PIXI.TilingSprite;
+  private tileMiddle: PIXI.TilingSprite;
   // lvlTileLow: PIXI.TilingSprite;
 
   constructor(public app: FlowApp) {
@@ -27,23 +27,7 @@ export default class StageBackTile {
     // console.log('this.tileMiddle', this.tileMiddle);
   }
 
-  createTile(tileTx: PIXI.Texture) {
-    // console.log('tileTx', tileTx);
-    // tileTx.width
-    // tileTx.height
-
-    const tile = new PIXI.TilingSprite(tileTx, this.app.viewport.screenWidth, this.app.viewport.screenHeight);
-
-    tile.roundPixels = true;
-    // tile.filters = [new PIXI.Filter(undefined, this.shader())];
-
-    this.app.engine.stage.addChild(tile);
-    this.app.engine.stage.setChildIndex(tile, 0);
-
-    return tile;
-  }
-
-  updateDimensions(hostHTMLWidth: number, hostHTMLHeight: number) {
+  public updateDimensions(hostHTMLWidth: number, hostHTMLHeight: number) {
     this.tileMiddle.width = hostHTMLWidth;
     this.tileMiddle.height = hostHTMLHeight;
 
@@ -51,7 +35,7 @@ export default class StageBackTile {
     // this.lvlTileLow.height = hostHTMLHeight;
   }
 
-  updateGraphics() {
+  public updateGraphics() {
     this.tileMiddle.tileScale.x = this.app.viewport.scale * 0.25;
     this.tileMiddle.tileScale.y = this.app.viewport.scale * 0.25;
 
@@ -68,6 +52,22 @@ export default class StageBackTile {
     // this.lvlTileLow.tilePosition.y = this.app.viewport.y;
   }
 
+  private createTile(tileTx: PIXI.Texture) {
+    // console.log('tileTx', tileTx);
+    // tileTx.width
+    // tileTx.height
+
+    const tile = new PIXI.TilingSprite(tileTx, this.app.viewport.screenWidth, this.app.viewport.screenHeight);
+
+    tile.roundPixels = true;
+    // tile.filters = [new PIXI.Filter(undefined, this.shader())];
+
+    this.app.engine.stage.addChild(tile);
+    this.app.engine.stage.setChildIndex(tile, 0);
+
+    return tile;
+  }
+
   /**
    * Reference to start diving into shaders for PIXI
    * https://www.html5gamedevs.com/topic/44488-cant-get-grid-shader-to-work-v3-to-v5/?do=findComment&comment=247713
@@ -78,7 +78,7 @@ export default class StageBackTile {
    * Examples adopted from an interesting article
    * https://css-tricks.com/building-an-images-gallery-using-pixijs-and-webgl/
    * */
-  shader() {
+  private shader() {
     return `#ifdef GL_ES
 precision mediump float;
 #endif
@@ -104,7 +104,7 @@ void main () {
    * https://www.html5gamedevs.com/topic/44488-cant-get-grid-shader-to-work-v3-to-v5/
    * https://codepen.io/ardenpm/pen/pVojYG
    * */
-  initGridShader(width: number, height: number) {
+  private initGridShader(width: number, height: number) {
     const uniforms = {
       vpw: width,
       vph: height,
@@ -120,7 +120,7 @@ void main () {
     this.app.engine.stage.setChildIndex(rect, 0);
   }
 
-  gridShader() {
+  private gridShader() {
     return `precision mediump float;
 
 uniform float vpw; // Width, in pixels

@@ -10,16 +10,12 @@ import TimedGesture from './TimedGesture';
 export type StageEvent = PIXI.InteractionEvent;
 
 export default class StageEvents {
-  eventMonitor: DevMonitor | null;
-  stage: PIXI.Container;
-  timedGesture: TimedGesture;
+  public eventMonitor: DevMonitor | null = this.app.devMonitor;
+  public stage: PIXI.Container = this.app.engine.stage;
+  private timedGesture = new TimedGesture(this);
 
   constructor(public app: FlowApp) {
-    this.stage = this.app.engine.stage;
-
     this.stage.interactive = true;
-    this.eventMonitor = this.app.devMonitor;
-    this.timedGesture = new TimedGesture(this);
 
     // Monitoring
     if (this.eventMonitor instanceof DevMonitor) {
@@ -29,25 +25,25 @@ export default class StageEvents {
     this.initStageEvents();
   }
 
-  sendToMonitor(eventName: string, msg: string = '') {
+  public sendToMonitor(eventName: string, msg: string = '') {
     if (this.eventMonitor instanceof DevMonitor) {
       this.eventMonitor.dispatchMonitor('stageEvents', eventName, msg);
       console.log(`[stage] ${eventName} ${msg}`);
     }
   }
 
-  initStageEvents() {
+  private initStageEvents() {
     // Normalized "Pointer" events
     this.stage.on('pointerdown', (e: StageEvent) => this.stagePointerDown(e));
     this.stage.on('pointerup', (e: StageEvent) => this.stagePointerUp(e));
   }
 
   // Original events
-  stagePointerDown(e: StageEvent) {
+  private stagePointerDown(e: StageEvent) {
     this.timedGesture.pointerDownGate(e);
   }
 
-  stagePointerUp(e: StageEvent) {
+  private stagePointerUp(e: StageEvent) {
     this.timedGesture.pointerUpGate(e);
   }
 

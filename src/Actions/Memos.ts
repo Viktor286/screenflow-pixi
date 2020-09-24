@@ -11,17 +11,16 @@ export default class MemoActions {
   //   });
   // }
 
-  scaleTo(id: string, targetScale?: number) {
+  public scaleTo(id: string, targetScale?: number) {
     this.app.stateManager.setState(`/memos/${id}`, {
-      scale: targetScale,
+      animation: { scale: targetScale },
     });
   }
 
-  moveTo(id: string, target: IWorldScreenCoords) {
+  public moveTo(id: string, target: IWorldScreenCoords) {
     const { wX: x, wY: y } = target;
     this.app.stateManager.setState(`/memos/${id}`, {
-      x,
-      y,
+      animation: { x, y },
     });
   }
 }

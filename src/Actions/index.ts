@@ -1,12 +1,12 @@
 import FlowApp from '../Interfaces/FlowApp';
 import ViewportActions from './Viewport';
-import MemoActions from './Memo';
+import MemoActions from './Memos';
 
 export default class Actions {
-  viewport: ViewportActions;
-  memo: MemoActions;
+  public readonly viewport: ViewportActions;
+  public readonly memos: MemoActions;
   constructor(public app: FlowApp) {
     this.viewport = new ViewportActions(app);
-    this.memo = new MemoActions(app);
+    this.memos = new MemoActions(app);
   }
 }

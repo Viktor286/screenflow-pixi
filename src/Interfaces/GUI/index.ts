@@ -3,11 +3,8 @@ import FocusPoint from './FocusPoint';
 import StageBackTile from './StageBackTile';
 
 export default class GUI {
-  focusPoint: FocusPoint;
-  stageBackTile: StageBackTile;
+  public focusPoint = new FocusPoint(this.app);
+  public stageBackTile = new StageBackTile(this.app);
 
-  constructor(public app: FlowApp) {
-    this.focusPoint = new FocusPoint(this.app);
-    this.stageBackTile = new StageBackTile(this.app);
-  }
+  constructor(public app: FlowApp) {}
 }

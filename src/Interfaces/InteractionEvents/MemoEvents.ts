@@ -1,8 +1,10 @@
 // import * as PIXI from 'pixi.js';
-import { Memo } from '../Memos';
 import PIXI from 'pixi.js';
+import { Memo } from '../Memo';
 
-/** MemoEvent mimics PIXI.interaction.InteractionEvent with targets overwritten **/
+/** This class might be useful when Memo UI work will begin **/
+
+// MemoEvent mimics PIXI.interaction.InteractionEvent with targets overwritten
 interface MemoEvent {
   stopped: boolean;
   target: Memo;
@@ -18,7 +20,7 @@ export class MemoEvents {
     this.initStageEvents();
   }
 
-  initStageEvents() {
+  private initStageEvents() {
     // TODO: we need to define list of universal events
 
     // Singe Press
@@ -59,13 +61,13 @@ export class MemoEvents {
     // touchstart
   }
 
-  sendToMonitor(eventName: string, msg: string = '') {
+  public sendToMonitor(eventName: string, msg: string = '') {
     this.memo.memos.sendEventToMonitor(this.memo, eventName, msg);
   }
 
   // Event assignments
 
-  memoPointerDown(e: MemoEvent) {
+  private memoPointerDown(e: MemoEvent) {
     this.sendToMonitor('Pointer Down');
     // console.log('Pointer Down e.currentTarget', e.currentTarget);
     // console.log('Pointer Down e.target', e.target);
@@ -73,7 +75,7 @@ export class MemoEvents {
     // this.memo.app.stage.emit('pointerdown', e);
   }
 
-  memoPointerUp(e: MemoEvent) {
+  private memoPointerUp(e: MemoEvent) {
     this.sendToMonitor('Pointer Up');
     // console.log('Pointer Up', e);
   }

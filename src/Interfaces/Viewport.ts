@@ -36,10 +36,16 @@ export interface IPublicCameraState {
 // new ViewportEvents(this);
 
 export default class Viewport {
-  instance: IViewportInstance;
-  engine: GraphicsEngine;
-  publicCameraState: IPublicCameraState;
-  zoomScales: number[];
+  public readonly instance: IViewportInstance;
+  public readonly engine: GraphicsEngine;
+  private readonly zoomScales: number[] = [0.03125, 0.0625, 0.125, 0.25, 0.5, 1, 2, 4, 8, 16, 32];
+  public readonly publicCameraState: IPublicCameraState = {
+    x: 0,
+    y: 0,
+    wX: 0,
+    wY: 0,
+    scale: 1,
+  };
   [key: string]: any;
 
   constructor(public app: FlowApp) {
@@ -52,17 +58,9 @@ export default class Viewport {
       // interaction: this.engine.instance.renderer.plugins.interaction, // the interaction module is important for wheel to work properly when renderer.view is placed or scaled
     });
 
-    this.publicCameraState = {
-      x: 0,
-      y: 0,
-      wX: 0,
-      wY: 0,
-      scale: 1,
-    };
-
     // viewport.drag().pinch().wheel().decelerate();
-    this.zoomScales = [0.03125, 0.0625, 0.125, 0.25, 0.5, 1, 2, 4, 8, 16, 32];
     app.engine.addDisplayObject(this.instance);
+    this.instance.sortableChildren = true;
 
     // Handler for "pixi engine and Viewport" dimensions dependency on window size
     window.addEventListener('resize', this.resizeViewportHandler);
@@ -143,7 +141,7 @@ export default class Viewport {
     return this.instance.interactive;
   }
 
-  resizeViewportHandler = (): void => {
+  public resizeViewportHandler = (): void => {
     // solution ref: https://github.com/davidfig/pixi-viewport/issues/212#issuecomment-608231281
     if (
       this.app.engine.screenWidth !== this.app.hostHTMLWidth ||
@@ -155,16 +153,16 @@ export default class Viewport {
     }
   };
 
-  getScreenCoordsFromEvent(e: StageEvent): IScreenCoords {
+  public getScreenCoordsFromEvent(e: StageEvent): IScreenCoords {
     return { sX: e.data.global.x, sY: e.data.global.y };
   }
 
-  getWorldScreenCoordsFromEvent(e: StageEvent): IWorldScreenCoords {
+  public getWorldScreenCoordsFromEvent(e: StageEvent): IWorldScreenCoords {
     const screenClick: IScreenCoords = this.getScreenCoordsFromEvent(e);
     return this.app.viewport.screenToWorld(screenClick);
   }
 
-  getNextScaleStepDown(runAhead: number): number {
+  public getNextScaleStepDown(runAhead: number): number {
     const currentScale = this.instance.scale.x;
 
     for (let i = 0; i < this.zoomScales.length; i++) {
@@ -188,7 +186,7 @@ export default class Viewport {
     return 0;
   }
 
-  getNextScaleStepUp(runAhead: number): number {
+  public getNextScaleStepUp(runAhead: number): number {
     const currentScale = this.instance.scale.x;
 
     for (let i = 0; i < this.zoomScales.length; i++) {
@@ -212,24 +210,24 @@ export default class Viewport {
     return 0;
   }
 
-  addToViewport(displayObject: PIXI.DisplayObject): PIXI.DisplayObject {
+  public addToViewport(displayObject: PIXI.DisplayObject): PIXI.DisplayObject {
     return this.instance.addChild(displayObject);
   }
 
-  getZoomString(): string {
+  public getZoomString(): string {
     return Math.round(this.instance.scale.x * 100).toString();
   }
 
-  screenToWorld({ sX, sY }: IScreenCoords): IWorldScreenCoords {
+  public screenToWorld({ sX, sY }: IScreenCoords): IWorldScreenCoords {
     const { x: wX, y: wY } = this.instance.toWorld(sX, sY);
     return { wX, wY };
   }
 
-  screenCenter(): IScreenCoords {
+  public screenCenter(): IScreenCoords {
     return { sX: this.screenWidth / 2, sY: this.screenHeight / 2 };
   }
 
-  worldScreenCenter(): IWorldScreenCoords {
+  public worldScreenCenter(): IWorldScreenCoords {
     return { wX: this.instance.worldScreenWidth / 2, wY: this.instance.worldScreenHeight / 2 };
   }
 
@@ -239,14 +237,14 @@ export default class Viewport {
   // get worldScreenWidth()
   // worldScreenWidth = screenWidth / scale
 
-  getScreeCenterInWord(): IWorldScreenCoords {
+  public getScreeCenterInWord(): IWorldScreenCoords {
     return {
       wX: this.instance.worldScreenWidth / 2 - this.instance.x / this.instance.scale.x,
       wY: this.instance.worldScreenHeight / 2 - this.instance.y / this.instance.scale.y,
     };
   }
 
-  cameraPropsConversion(targetPoint?: IWorldScreenCoords, targetScale?: number): IPublicCameraState {
+  public cameraPropsConversion(targetPoint?: IWorldScreenCoords, targetScale?: number): IPublicCameraState {
     if (!targetPoint) {
       targetPoint = this.app.viewport.getScreeCenterInWord();
     }
@@ -271,7 +269,7 @@ export default class Viewport {
     };
   }
 
-  moveCameraTo(cameraProps: IPublicCameraState): Promise<IPublicCameraState> {
+  public animateCamera(cameraProps: IPublicCameraState): Promise<IPublicCameraState> {
     const { x, y, scale, wX, wY } = cameraProps;
 
     const animateProps = {
@@ -299,7 +297,7 @@ export default class Viewport {
     });
   }
 
-  onCameraAnimationEnds = (): void => {
+  private onCameraAnimationEnds = (): void => {
     this.app.webUi.updateZoomBtn();
   };
 }

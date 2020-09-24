@@ -6,19 +6,16 @@ interface IMonitorStreams {
 }
 
 export default class DevMonitor {
-  eventMonitorDiv: HTMLElement;
-  eventMonitorStreams: IMonitorStreams;
+  private readonly eventMonitorDiv: HTMLElement = DevMonitor.createEventMonitorDiv();
+  private readonly eventMonitorStreams: IMonitorStreams = {};
 
   constructor() {
-    this.eventMonitorStreams = {};
-
-    this.eventMonitorDiv = this.createEventMonitorDiv();
     // TODO: display viewport params: move, w, h, center, corner, zoom %, scale
 
     window.document.body.appendChild(this.eventMonitorDiv);
   }
 
-  createEventMonitorDiv() {
+  private static createEventMonitorDiv() {
     const div = document.createElement('div');
     div.id = 'EventMonitor';
     div.style.width = '100%';
@@ -35,7 +32,7 @@ export default class DevMonitor {
     return div;
   }
 
-  createDevMonitorElement(title: string): HTMLElement {
+  private static createDevMonitorElement(title: string): HTMLElement {
     const section = document.createElement('section');
     section.id = title;
     section.classList.add('event-monitor-section');
@@ -43,51 +40,47 @@ export default class DevMonitor {
     return section;
   }
 
-  addDevMonitor(title: string) {
+  public addDevMonitor(title: string) {
     const mStream = new MonitoringStream(title);
-    const mSection = this.createDevMonitorElement(title);
+    const mSection = DevMonitor.createDevMonitorElement(title);
     mStream.initStreamUiContainer(mSection);
     this.eventMonitorDiv.appendChild(mSection);
     this.eventMonitorStreams[title] = mStream;
   }
 
-  dispatchMonitor(monitor: Monitor, eventType: string, eventMsg: string) {
+  public dispatchMonitor(monitor: Monitor, eventType: string, eventMsg: string) {
     this.eventMonitorStreams[monitor].addStreamMessage(eventType, eventMsg);
     this.eventMonitorStreams[monitor].updateStreamView();
   }
 }
 
 class MonitoringStream {
-  Stream: StreamMessage[];
-  StreamMsgLimit: number;
-  viewContainer: HTMLElement | null;
+  Stream: StreamMessage[] = [];
+  StreamMsgLimit: number = 20;
+  viewContainer: HTMLElement | null = null;
 
-  constructor(public title: string) {
-    this.Stream = [];
-    this.viewContainer = null;
-    this.StreamMsgLimit = 20;
-  }
+  constructor(public title: string) {}
 
-  formatStreamMessage(type: string, msg: string) {
+  private static formatStreamMessage(type: string, msg: string) {
     const now = new Date();
     const timestamp = `${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`;
     return `${timestamp} <span class="e-type">${type}</span> ${msg}`;
   }
 
-  addStreamMessage(type: string, msg: string) {
-    this.Stream.push(this.formatStreamMessage(type, msg));
+  public addStreamMessage(type: string, msg: string) {
+    this.Stream.push(MonitoringStream.formatStreamMessage(type, msg));
     if (this.Stream.length > this.StreamMsgLimit) {
       this.Stream.shift();
     }
   }
 
-  initStreamUiContainer(targetElement: HTMLElement) {
+  public initStreamUiContainer(targetElement: HTMLElement) {
     this.viewContainer = document.createElement('div');
     this.viewContainer.classList.add('stream');
     targetElement.appendChild(this.viewContainer);
   }
 
-  updateStreamView() {
+  public updateStreamView() {
     if (this.viewContainer !== null) {
       this.viewContainer.innerHTML = this.Stream.join('<br />');
     }

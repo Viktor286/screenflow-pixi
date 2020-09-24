@@ -9,17 +9,17 @@ import StateManager from './StateManager';
 import Actions from '../Actions';
 
 export default class FlowApp {
-  engine: GraphicsEngine;
-  hostHTML: HTMLElement;
-  viewport: Viewport;
-  devMonitor: DevMonitor | null; // TODO: replace for "Debug" with included prod logic
-  memos: Memos;
-  gui: GUI;
-  webUi: WebUI;
-  actions: Actions;
-  stageEvents: StageEvents;
-  stateManager: StateManager;
-  env: string | undefined;
+  public readonly engine: GraphicsEngine;
+  public readonly hostHTML: HTMLElement;
+  public readonly viewport: Viewport;
+  public readonly devMonitor: DevMonitor | null; // TODO: replace for "Debug" with included prod logic
+  public readonly memos: Memos;
+  public readonly gui: GUI;
+  public readonly webUi: WebUI;
+  public readonly actions: Actions;
+  public readonly stageEvents: StageEvents;
+  public readonly stateManager: StateManager;
+  public readonly env: string | undefined;
 
   constructor(targetDiv: HTMLElement) {
     this.env = process.env.NODE_ENV;
