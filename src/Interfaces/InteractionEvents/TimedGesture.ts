@@ -130,7 +130,13 @@ export default class TimedGesture {
 
     if (hit instanceof MemoContainer) {
       const memo = hit.memo;
-      memo.select();
+      if (memo.selected) {
+        const { x, y, width, height } = memo;
+        this.app.actions.viewport.fitToArea({ wX: x, wY: y }, width, height);
+      } else {
+        memo.select();
+      }
+
       console.log(`Memo clicked "${memo.id}" `, memo);
     }
 
@@ -153,7 +159,29 @@ export default class TimedGesture {
   // Additional events
   private doubleClick(e: IGestureEvent) {
     this.sendToMonitor('DoubleClick', this.getClickInfoStr(e));
-    this.app.actions.viewport.zoomIn(e.worldScreenClick);
+
+    const hit = this.app.engine.renderer.plugins.interaction.hitTest({
+      x: e.screenClick.sX,
+      y: e.screenClick.sY,
+    });
+
+    if (hit instanceof MemoContainer) {
+      // fitToArea Or ZoomIn
+      const { x, y, width, height } = hit.memo;
+      const targetScale = this.app.viewport.findScaleFit(width, height);
+      if (
+        this.app.viewport.scale >=
+          targetScale + (targetScale / 100) * this.app.viewport.fitAreaMarginPercent ||
+        (Math.round(this.app.viewport.getScreenCenterInWord().wX) === x &&
+          Math.round(this.app.viewport.getScreenCenterInWord().wY) === y)
+      ) {
+        this.app.actions.viewport.zoomIn(e.worldScreenClick);
+      } else {
+        this.app.actions.viewport.fitToArea({ wX: x, wY: y }, width, height);
+      }
+    } else {
+      this.app.actions.viewport.zoomIn(e.worldScreenClick);
+    }
   }
 
   // Press Down events
