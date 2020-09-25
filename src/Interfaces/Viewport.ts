@@ -39,6 +39,7 @@ export default class Viewport {
   public readonly instance: IViewportInstance;
   public readonly engine: GraphicsEngine;
   private readonly zoomScales: number[] = [0.03125, 0.0625, 0.125, 0.25, 0.5, 1, 2, 4, 8, 16, 32];
+  public readonly fitAreaMarginPercent = 20;
   public readonly publicCameraState: IPublicCameraState = {
     x: 0,
     y: 0,
@@ -250,16 +251,20 @@ export default class Viewport {
   // get worldScreenWidth()
   // worldScreenWidth = screenWidth / scale
 
-  public getScreeCenterInWord(): IWorldScreenCoords {
+  public getScreenCenterInWord(): IWorldScreenCoords {
     return {
       wX: Number((this.instance.worldScreenWidth / 2 - this.instance.x / this.instance.scale.x).toFixed(4)),
       wY: Number((this.instance.worldScreenHeight / 2 - this.instance.y / this.instance.scale.y).toFixed(4)),
     };
   }
 
+  public findScaleFit(width: number, height: number) {
+    return Number(this.app.viewport.instance.findFit(width, height).toFixed(4));
+  }
+
   public cameraPropsConversion(targetPoint?: IWorldScreenCoords, targetScale?: number): IPublicCameraState {
     if (!targetPoint) {
-      targetPoint = this.app.viewport.getScreeCenterInWord();
+      targetPoint = this.app.viewport.getScreenCenterInWord();
     }
 
     if (targetScale === undefined) {

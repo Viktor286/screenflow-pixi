@@ -132,8 +132,7 @@ export default class TimedGesture {
       const memo = hit.memo;
       if (memo.selected) {
         const { x, y, width, height } = memo;
-        const targetScale = Number(this.app.viewport.instance.findFit(width, height).toFixed(4));
-        this.app.actions.viewport.fitToTarget({ wX: x, wY: y }, targetScale);
+        this.app.actions.viewport.fitToArea({ wX: x, wY: y }, width, height);
       } else {
         memo.select();
       }
@@ -167,21 +166,19 @@ export default class TimedGesture {
     });
 
     if (hit instanceof MemoContainer) {
-      const memo = hit.memo;
-      // if (memo.selected) {
-      const { x, y, width, height } = memo;
       // fitToArea Or ZoomIn
-      const targetScale = Number(this.app.viewport.instance.findFit(width, height).toFixed(4));
+      const { x, y, width, height } = hit.memo;
+      const targetScale = this.app.viewport.findScaleFit(width, height);
       if (
-        this.app.viewport.scale >= targetScale + targetScale / 10 ||
-        (this.app.viewport.getScreeCenterInWord().wX === x &&
-          this.app.viewport.getScreeCenterInWord().wY === y)
+        this.app.viewport.scale >=
+          targetScale + (targetScale / 100) * this.app.viewport.fitAreaMarginPercent ||
+        (Math.round(this.app.viewport.getScreenCenterInWord().wX) === x &&
+          Math.round(this.app.viewport.getScreenCenterInWord().wY) === y)
       ) {
         this.app.actions.viewport.zoomIn(e.worldScreenClick);
       } else {
-        this.app.actions.viewport.fitToTarget({ wX: x, wY: y }, targetScale);
+        this.app.actions.viewport.fitToArea({ wX: x, wY: y }, width, height);
       }
-      // }
     } else {
       this.app.actions.viewport.zoomIn(e.worldScreenClick);
     }
