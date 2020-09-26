@@ -39,6 +39,8 @@ export default class Viewport {
   public readonly instance: IViewportInstance;
   public readonly engine: GraphicsEngine;
   private readonly zoomScales: number[] = [0.03125, 0.0625, 0.125, 0.25, 0.5, 1, 2, 4, 8, 16, 32];
+  public wasSliding = false;
+  public wasSlidingTimer: ReturnType<typeof setTimeout> | null = null;
   public readonly fitAreaMarginPercent = 20;
   public readonly publicCameraState: IPublicCameraState = {
     x: 0,
@@ -56,10 +58,53 @@ export default class Viewport {
       screenHeight: this.app.hostHTMLHeight,
       worldWidth: this.app.hostHTMLWidth,
       worldHeight: this.app.hostHTMLHeight,
-      // interaction: this.engine.instance.renderer.plugins.interaction, // the interaction module is important for wheel to work properly when renderer.view is placed or scaled
+      interaction: this.engine.instance.renderer.plugins.interaction, // the interaction module is important for wheel to work properly when renderer.view is placed or scaled
     });
 
-    // viewport.drag().pinch().wheel().decelerate();
+    this.instance
+      .drag()
+      .pinch()
+      .wheel()
+      .decelerate({
+        friction: 0.75,
+        bounce: 0.8,
+        minSpeed: 0.05,
+      })
+      .clampZoom({
+        minScale: this.zoomScales[0],
+        maxScale: this.zoomScales[this.zoomScales.length - 1],
+      });
+
+    this.instance.on('zoomed', () => this.app.webUi.updateZoomBtn());
+
+    this.instance.on('moved', () => {
+      this.app.gui.stageBackTile.updateGraphics();
+    });
+
+    this.instance.on('moved-end', () => {
+      // "moved-end" event is too frequently ends to use it for stable "slide" state
+    });
+
+    this.instance.on('drag-start', () => {
+      this.wasSliding = true;
+    });
+
+    this.instance.on('drag-end', () => {
+      this.turnOffSlidingIndicator();
+    });
+
+    this.instance.on('pinch-start', () => {
+      this.wasSliding = true;
+    });
+
+    this.instance.on('pinch-end', () => {
+      this.turnOffSlidingIndicator();
+    });
+
+    // this.instance.plugins.pause('drag');
+    // this.instance.plugins.pause('pinch');
+    // this.instance.plugins.pause('wheel');
+
     app.engine.addDisplayObject(this.instance);
     this.instance.sortableChildren = true;
 
@@ -75,6 +120,16 @@ export default class Viewport {
       },
       { passive: false },
     );
+  }
+
+  turnOffSlidingIndicator() {
+    if (this.wasSlidingTimer) {
+      clearTimeout(this.wasSlidingTimer);
+    }
+
+    this.wasSlidingTimer = setTimeout(() => {
+      this.wasSliding = false;
+    }, 220);
   }
 
   set x(x: number) {
@@ -268,7 +323,7 @@ export default class Viewport {
     }
 
     if (targetScale === undefined) {
-      targetScale = this.app.stateManager.publicState.camera.scale;
+      targetScale = this.app.viewport.scale;
     }
 
     if (targetScale >= 32) targetScale = 32;
@@ -298,7 +353,7 @@ export default class Viewport {
     return new Promise((resolve) => {
       gsap.to(this.app.viewport, {
         ...animateProps,
-        duration: 0.7,
+        duration: 0.5,
         ease: 'power3.out',
         onStart: () => {
           this.app.viewport.interactive = false;

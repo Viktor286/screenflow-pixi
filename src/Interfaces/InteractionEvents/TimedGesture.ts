@@ -57,16 +57,28 @@ export default class TimedGesture {
 
       this.pressDownImmediate(gestureEvent);
       this.timer = setTimeout(() => {
+        if (this.app.viewport.wasSliding) {
+          return;
+        }
+
         if (this.awaiting) {
           // Tier 1: quick-press
           this.awaiting = 'quick';
           this.pressDownQuick(gestureEvent);
           this.timer = setTimeout(() => {
+            if (this.app.viewport.wasSliding) {
+              return;
+            }
+
             if (this.awaiting) {
               // Tier 2: medium-press
               this.awaiting = 'medium';
               this.pressDownMedium(gestureEvent);
               this.timer = setTimeout(() => {
+                if (this.app.viewport.wasSliding) {
+                  return;
+                }
+
                 if (this.awaiting) {
                   // Tier 3: long-press
                   this.awaiting = 'long';
@@ -82,6 +94,10 @@ export default class TimedGesture {
 
   public pointerUpGate(e: StageEvent) {
     // Timed-gestures handlers
+    if (this.app.viewport.wasSliding) {
+      this.awaiting = false;
+      return;
+    }
 
     // Required data from the input event should be preserved here
     // otherwise event data will be obtained respecting the Gestures delay state (not state from a click)
@@ -137,7 +153,7 @@ export default class TimedGesture {
         memo.select();
       }
 
-      console.log(`Memo clicked "${memo.id}" `, memo);
+      console.log(`pressUpImmediate Memo clicked "${memo.id}" `, memo);
     }
 
     this.sendToMonitor('Immediate Press Up', this.getClickInfoStr(e));
@@ -165,8 +181,8 @@ export default class TimedGesture {
       y: e.screenClick.sY,
     });
 
+    // fitToArea Or ZoomIn
     if (hit instanceof MemoContainer) {
-      // fitToArea Or ZoomIn
       const { x, y, width, height } = hit.memo;
       const targetScale = this.app.viewport.findScaleFit(width, height);
       if (
@@ -178,6 +194,7 @@ export default class TimedGesture {
         this.app.actions.viewport.zoomIn(e.worldScreenClick);
       } else {
         this.app.actions.viewport.fitToArea({ wX: x, wY: y }, width, height);
+        hit.memo.select();
       }
     } else {
       this.app.actions.viewport.zoomIn(e.worldScreenClick);
