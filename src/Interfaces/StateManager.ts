@@ -32,6 +32,7 @@ export default class StateManager {
   }
 
   public saveToHistory(stateScope: IStateScope, stateSlice: IStateSlice) {
+    console.log(`history: ${stateScope}`, stateSlice);
     this.enqueueHistory({ type: stateScope, ...stateSlice });
     // switch (stateScope) {
     //   case 'camera':
@@ -59,24 +60,29 @@ export default class StateManager {
       return false;
     }
 
-    for (const property in stateSlice) {
-      if (!Object.prototype.hasOwnProperty.call(stateSlice, property)) {
-        continue;
+    // For amendment just apply new state props
+    if (stateSlice.hasOwnProperty('amend')) {
+      this.applyOperation('amend', stateSlice.amend, stateScope);
+    } else {
+      for (const property in stateSlice) {
+        if (!Object.prototype.hasOwnProperty.call(stateSlice, property)) {
+          continue;
+        }
+
+        if (stateSlice[property] === undefined) {
+          continue;
+        }
+
+        const updateValue = stateSlice[property];
+
+        if (typeof updateValue === 'object') {
+          // recursive call of setState/processObjectProps?
+          continue;
+        }
+
+        // Apply singe property update
+        this.setPrimitiveStateProp(stateScope, property, updateValue);
       }
-
-      if (stateSlice[property] === undefined) {
-        continue;
-      }
-
-      const updateValue = stateSlice[property];
-
-      if (typeof updateValue === 'object') {
-        // recursive call of setState/processObjectProps?
-        continue;
-      }
-
-      // Apply singe property update
-      this.setPrimitiveStateProp(stateScope, property, updateValue);
     }
 
     this.saveToHistory(stateScope, this.getState(stateScope));
@@ -137,6 +143,16 @@ export default class StateManager {
       if (property === 'animation' && typeof updateValue === 'object') {
         this.asyncCameraAnimationOperation(updateValue);
         return true;
+      }
+
+      if (property === 'amend' && typeof updateValue === 'object') {
+        for (let prop in updateValue) {
+          if (Object.prototype.hasOwnProperty.call(updateValue, prop)) {
+            this.setPrimitiveStateProp(stateScope, prop, updateValue[prop]);
+            this.getOriginState(stateScope)[prop] = updateValue[prop];
+          }
+        }
+        return updateValue;
       }
 
       // TODO: solve problem with animation in-progress sequence overlaps with state update request

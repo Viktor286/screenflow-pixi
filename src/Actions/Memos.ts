@@ -1,6 +1,6 @@
 import FlowApp from '../Interfaces/FlowApp';
 // import { Memo } from '../Interfaces/Memos';
-import { IWorldScreenCoords } from '../Interfaces/Viewport';
+import { IWorldCoords } from '../Interfaces/Viewport';
 
 export default class MemoActions {
   constructor(public app: FlowApp) {}
@@ -17,7 +17,7 @@ export default class MemoActions {
     });
   }
 
-  public moveTo(id: string, target: IWorldScreenCoords) {
+  public moveTo(id: string, target: IWorldCoords) {
     const { wX: x, wY: y } = target;
     this.app.stateManager.setState(`/memos/${id}`, {
       animation: { x, y },

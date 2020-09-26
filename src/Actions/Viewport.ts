@@ -1,5 +1,5 @@
 import FlowApp from '../Interfaces/FlowApp';
-import { IWorldScreenCoords } from '../Interfaces/Viewport';
+import { IWorldCoords } from '../Interfaces/Viewport';
 
 export default class ViewportActions {
   private runAheadZoomIn = 0;
@@ -7,7 +7,7 @@ export default class ViewportActions {
 
   constructor(public app: FlowApp) {}
 
-  public fitToArea(targetPoint: IWorldScreenCoords, width: number, height: number) {
+  public fitToArea(targetPoint: IWorldCoords, width: number, height: number) {
     const targetScale = this.app.viewport.findScaleFit(width, height);
 
     this.app.stateManager.setState('camera', {
@@ -18,13 +18,13 @@ export default class ViewportActions {
     });
   }
 
-  public moveTo(target: IWorldScreenCoords, targetScale?: number) {
+  public moveTo(target: IWorldCoords, targetScale?: number) {
     this.app.stateManager.setState('camera', {
       animation: this.app.viewport.cameraPropsConversion(target, targetScale),
     });
   }
 
-  public zoomIn(zoomPoint?: IWorldScreenCoords) {
+  public zoomIn(zoomPoint?: IWorldCoords) {
     if (this.runAheadZoomIn > 1) this.runAheadZoomIn = 1;
 
     this.app.stateManager.setState('camera', {
@@ -42,7 +42,7 @@ export default class ViewportActions {
     }, 700);
   }
 
-  public zoom100(zoomPoint?: IWorldScreenCoords) {
+  public zoom100(zoomPoint?: IWorldCoords) {
     const scale = 1;
 
     this.app.stateManager.setState('camera', {
@@ -50,7 +50,7 @@ export default class ViewportActions {
     });
   }
 
-  public zoomOut(zoomPoint?: IWorldScreenCoords) {
+  public zoomOut(zoomPoint?: IWorldCoords) {
     if (this.runAheadZoomOut > 1) this.runAheadZoomOut = 1;
 
     this.app.stateManager.setState('camera', {
@@ -66,5 +66,18 @@ export default class ViewportActions {
       this.runAheadZoomOut -= 1;
       if (this.runAheadZoomOut < 0) this.runAheadZoomOut = 0;
     }, 700);
+  }
+
+  public amendCameraState() {
+    const { x, y, cwX, cwY, scale } = this.app.viewport;
+    this.app.stateManager.setState('camera', {
+      amend: {
+        x,
+        y,
+        cwX,
+        cwY,
+        scale,
+      },
+    });
   }
 }
