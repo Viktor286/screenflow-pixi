@@ -1,11 +1,11 @@
 import StageEvents, { StageEvent } from './StageEvents';
 import FlowApp from '../FlowApp';
-import { IScreenCoords, IWorldScreenCoords } from '../Viewport';
+import { IScreenCoords, IWorldCoords } from '../Viewport';
 import { MemoContainer } from '../Memo';
 
 type IGestureEvent = {
   screenClick: IScreenCoords;
-  worldScreenClick: IWorldScreenCoords;
+  worldClick: IWorldCoords;
 };
 
 export default class TimedGesture {
@@ -36,7 +36,7 @@ export default class TimedGesture {
   private getGestureEvent(e: StageEvent): IGestureEvent {
     return {
       screenClick: this.app.viewport.getScreenCoordsFromEvent(e),
-      worldScreenClick: this.app.viewport.getWorldScreenCoordsFromEvent(e),
+      worldClick: this.app.viewport.getWorldScreenCoordsFromEvent(e),
     };
   }
 
@@ -57,7 +57,7 @@ export default class TimedGesture {
 
       this.pressDownImmediate(gestureEvent);
       this.timer = setTimeout(() => {
-        if (this.app.viewport.wasSliding) {
+        if (this.app.viewport.slideControls.isSliding) {
           return;
         }
 
@@ -66,7 +66,7 @@ export default class TimedGesture {
           this.awaiting = 'quick';
           this.pressDownQuick(gestureEvent);
           this.timer = setTimeout(() => {
-            if (this.app.viewport.wasSliding) {
+            if (this.app.viewport.slideControls.isSliding) {
               return;
             }
 
@@ -75,7 +75,7 @@ export default class TimedGesture {
               this.awaiting = 'medium';
               this.pressDownMedium(gestureEvent);
               this.timer = setTimeout(() => {
-                if (this.app.viewport.wasSliding) {
+                if (this.app.viewport.slideControls.isSliding) {
                   return;
                 }
 
@@ -88,13 +88,13 @@ export default class TimedGesture {
             }
           }, 800);
         }
-      }, 200);
+      }, 250);
     }
   }
 
   public pointerUpGate(e: StageEvent) {
     // Timed-gestures handlers
-    if (this.app.viewport.wasSliding) {
+    if (this.app.viewport.slideControls.isSliding) {
       this.awaiting = false;
       return;
     }
@@ -147,8 +147,8 @@ export default class TimedGesture {
     if (hit instanceof MemoContainer) {
       const memo = hit.memo;
       if (memo.selected) {
-        const { x, y, width, height } = memo;
-        this.app.actions.viewport.fitToArea({ wX: x, wY: y }, width, height);
+        // fitToArea action adds more confusion than benefit when user clicked on selected memo
+        // this.app.actions.viewport.fitToArea({ wX: x, wY: y }, width, height);
       } else {
         memo.select();
       }
@@ -160,7 +160,7 @@ export default class TimedGesture {
   }
 
   private pressUpQuick(e: IGestureEvent) {
-    this.app.actions.viewport.moveTo(e.worldScreenClick);
+    this.app.actions.viewport.moveTo(e.worldClick);
     this.sendToMonitor('Quick Press Up', this.getClickInfoStr(e));
   }
 
@@ -191,13 +191,13 @@ export default class TimedGesture {
         (Math.round(this.app.viewport.getScreenCenterInWord().wX) === x &&
           Math.round(this.app.viewport.getScreenCenterInWord().wY) === y)
       ) {
-        this.app.actions.viewport.zoomIn(e.worldScreenClick);
+        this.app.actions.viewport.zoomIn(e.worldClick);
       } else {
         this.app.actions.viewport.fitToArea({ wX: x, wY: y }, width, height);
         hit.memo.select();
       }
     } else {
-      this.app.actions.viewport.zoomIn(e.worldScreenClick);
+      this.app.actions.viewport.zoomIn(e.worldClick);
     }
   }
 
@@ -205,22 +205,24 @@ export default class TimedGesture {
   private pressDownImmediate(e: IGestureEvent) {
     // ImmediatePressDown event could be too frequent,
     // its probably best choice to use ImmediatePressUp
-    this.app.gui.focusPoint.putFocusPoint(e.worldScreenClick);
+    this.app.gui.focusPoint.putFocusPoint(e.worldClick);
+    // console.log('worldClick', e.worldClick.wX, e.worldClick.wY);
+    // console.log('screenClick', e.screenClick.sX, e.screenClick.sY);
     this.sendToMonitor('Immediate Press Down', this.getClickInfoStr(e));
   }
 
   private pressDownQuick(e: IGestureEvent) {
-    this.app.gui.focusPoint.putFocusPoint(e.worldScreenClick);
+    this.app.gui.focusPoint.putFocusPoint(e.worldClick);
     this.sendToMonitor('Quick Press Down', this.getClickInfoStr(e));
   }
 
   private pressDownMedium(e: IGestureEvent) {
-    this.app.gui.focusPoint.putFocusPoint(e.worldScreenClick);
+    this.app.gui.focusPoint.putFocusPoint(e.worldClick);
     this.sendToMonitor('Medium Press Down', this.getClickInfoStr(e));
   }
 
   private pressDownLong(e: IGestureEvent) {
-    this.app.gui.focusPoint.putFocusPoint(e.worldScreenClick);
+    this.app.gui.focusPoint.putFocusPoint(e.worldClick);
     this.sendToMonitor('Long Press Down', this.getClickInfoStr(e));
   }
 }

@@ -3,9 +3,10 @@ import GraphicsEngine from './GraphicsEngine';
 import { Viewport as PixiViewport } from 'pixi-viewport';
 import FlowApp from './FlowApp';
 import { StageEvent } from './InteractionEvents/StageEvents';
+import SlideControls from './InteractionEvents/SlideControls';
 import { gsap } from 'gsap';
 
-export interface IWorldScreenCoords {
+export interface IWorldCoords {
   wX: number;
   wY: number;
 }
@@ -22,31 +23,23 @@ export interface IViewportInstance extends PixiViewport {
 export interface IPublicCameraState {
   x: number;
   y: number;
-  wX: number;
-  wY: number;
+  cwX: number;
+  cwY: number;
   scale: number;
   [key: string]: any;
 }
 
-// Viewport documentation: https://davidfig.github.io/pixi-viewport/jsdoc/Viewport.html
-// Module: node_modules/pixi-viewport/dist/viewport.es.js
-
-// For specific viewport events use
-// import ViewportEvents from './InteractionEvents/ViewportEvents';
-// new ViewportEvents(this);
-
 export default class Viewport {
   public readonly instance: IViewportInstance;
   public readonly engine: GraphicsEngine;
-  private readonly zoomScales: number[] = [0.03125, 0.0625, 0.125, 0.25, 0.5, 1, 2, 4, 8, 16, 32];
-  public wasSliding = false;
-  public wasSlidingTimer: ReturnType<typeof setTimeout> | null = null;
+  public readonly slideControls: SlideControls;
+  public readonly zoomScales: number[] = [0.03125, 0.0625, 0.125, 0.25, 0.5, 1, 2, 4, 8, 16, 32];
   public readonly fitAreaMarginPercent = 20;
   public readonly publicCameraState: IPublicCameraState = {
     x: 0,
     y: 0,
-    wX: 0,
-    wY: 0,
+    cwX: 0,
+    cwY: 0,
     scale: 1,
   };
   [key: string]: any;
@@ -61,52 +54,15 @@ export default class Viewport {
       interaction: this.engine.instance.renderer.plugins.interaction, // the interaction module is important for wheel to work properly when renderer.view is placed or scaled
     });
 
-    this.instance
-      .drag()
-      .pinch()
-      .wheel()
-      .decelerate({
-        friction: 0.75,
-        bounce: 0.8,
-        minSpeed: 0.05,
-      })
-      .clampZoom({
-        minScale: this.zoomScales[0],
-        maxScale: this.zoomScales[this.zoomScales.length - 1],
-      });
-
-    this.instance.on('zoomed', () => this.app.webUi.updateZoomBtn());
-
-    this.instance.on('moved', () => {
-      this.app.gui.stageBackTile.updateGraphics();
-    });
-
-    this.instance.on('moved-end', () => {
-      // "moved-end" event is too frequently ends to use it for stable "slide" state
-    });
-
-    this.instance.on('drag-start', () => {
-      this.wasSliding = true;
-    });
-
-    this.instance.on('drag-end', () => {
-      this.turnOffSlidingIndicator();
-    });
-
-    this.instance.on('pinch-start', () => {
-      this.wasSliding = true;
-    });
-
-    this.instance.on('pinch-end', () => {
-      this.turnOffSlidingIndicator();
-    });
-
-    // this.instance.plugins.pause('drag');
-    // this.instance.plugins.pause('pinch');
-    // this.instance.plugins.pause('wheel');
-
     app.engine.addDisplayObject(this.instance);
     this.instance.sortableChildren = true;
+
+    this.slideControls = new SlideControls(this.app, this);
+    this.slideControls.addSlideControls();
+
+    window.addEventListener('contextmenu', (e) => {
+      e.preventDefault();
+    });
 
     // Handler for "pixi engine and Viewport" dimensions dependency on window size
     window.addEventListener('resize', this.resizeViewportHandler);
@@ -120,16 +76,6 @@ export default class Viewport {
       },
       { passive: false },
     );
-  }
-
-  turnOffSlidingIndicator() {
-    if (this.wasSlidingTimer) {
-      clearTimeout(this.wasSlidingTimer);
-    }
-
-    this.wasSlidingTimer = setTimeout(() => {
-      this.wasSliding = false;
-    }, 220);
   }
 
   set x(x: number) {
@@ -148,20 +94,20 @@ export default class Viewport {
     return this.instance.y;
   }
 
-  set wX(wX: number) {
-    // void
+  set cwX(wcX: number) {
+    this.viewport.instance.center = { x: wcX, y: this.viewport.instance.center.y };
   }
 
-  get wX() {
-    return this.publicCameraState.wX;
+  get cwX() {
+    return this.app.viewport.instance.center.x;
   }
 
-  set wY(wY: number) {
-    // void
+  set cwY(wcY: number) {
+    this.viewport.instance.center = { x: this.viewport.instance.center.x, y: wcY };
   }
 
-  get wY() {
-    return this.publicCameraState.wY;
+  get cwY() {
+    return this.app.viewport.instance.center.y;
   }
 
   set scale(val: number) {
@@ -213,7 +159,7 @@ export default class Viewport {
     return { sX: e.data.global.x, sY: e.data.global.y };
   }
 
-  public getWorldScreenCoordsFromEvent(e: StageEvent): IWorldScreenCoords {
+  public getWorldScreenCoordsFromEvent(e: StageEvent): IWorldCoords {
     const screenClick: IScreenCoords = this.getScreenCoordsFromEvent(e);
     return this.app.viewport.screenToWorld(screenClick);
   }
@@ -287,7 +233,7 @@ export default class Viewport {
     return Math.round(this.instance.scale.x * 100).toString();
   }
 
-  public screenToWorld({ sX, sY }: IScreenCoords): IWorldScreenCoords {
+  public screenToWorld({ sX, sY }: IScreenCoords): IWorldCoords {
     const { x: wX, y: wY } = this.instance.toWorld(sX, sY);
     return { wX, wY };
   }
@@ -296,7 +242,7 @@ export default class Viewport {
     return { sX: this.screenWidth / 2, sY: this.screenHeight / 2 };
   }
 
-  public worldScreenCenter(): IWorldScreenCoords {
+  public worldScreenCenter(): IWorldCoords {
     return { wX: this.instance.worldScreenWidth / 2, wY: this.instance.worldScreenHeight / 2 };
   }
 
@@ -306,18 +252,18 @@ export default class Viewport {
   // get worldScreenWidth()
   // worldScreenWidth = screenWidth / scale
 
-  public getScreenCenterInWord(): IWorldScreenCoords {
+  public getScreenCenterInWord(): IWorldCoords {
     return {
-      wX: Number((this.instance.worldScreenWidth / 2 - this.instance.x / this.instance.scale.x).toFixed(4)),
-      wY: Number((this.instance.worldScreenHeight / 2 - this.instance.y / this.instance.scale.y).toFixed(4)),
+      wX: this.instance.worldScreenWidth / 2 - this.instance.x / this.instance.scale.x,
+      wY: this.instance.worldScreenHeight / 2 - this.instance.y / this.instance.scale.y,
     };
   }
 
   public findScaleFit(width: number, height: number) {
-    return Number(this.app.viewport.instance.findFit(width, height).toFixed(4));
+    return this.app.viewport.instance.findFit(width, height);
   }
 
-  public cameraPropsConversion(targetPoint?: IWorldScreenCoords, targetScale?: number): IPublicCameraState {
+  public cameraPropsConversion(targetPoint?: IWorldCoords, targetScale?: number): IPublicCameraState {
     if (!targetPoint) {
       targetPoint = this.app.viewport.getScreenCenterInWord();
     }
@@ -330,20 +276,16 @@ export default class Viewport {
     if (targetScale <= 0.01) targetScale = 0.01;
 
     return {
-      x: Number(
-        ((this.app.viewport.screenWidth / targetScale / 2 - targetPoint.wX) * targetScale).toFixed(4),
-      ),
-      y: Number(
-        ((this.app.viewport.screenHeight / targetScale / 2 - targetPoint.wY) * targetScale).toFixed(4),
-      ),
+      x: (this.app.viewport.screenWidth / targetScale / 2 - targetPoint.wX) * targetScale,
+      y: (this.app.viewport.screenHeight / targetScale / 2 - targetPoint.wY) * targetScale,
       scale: targetScale,
-      wX: Number(targetPoint.wX.toFixed(4)),
-      wY: Number(targetPoint.wY.toFixed(4)),
+      cwX: targetPoint.wX,
+      cwY: targetPoint.wY,
     };
   }
 
   public animateCamera(cameraProps: IPublicCameraState): Promise<IPublicCameraState> {
-    const { x, y, scale, wX, wY } = cameraProps;
+    const { x, y, scale, cwX, cwY } = cameraProps;
 
     const animateProps = {
       x,
@@ -356,15 +298,15 @@ export default class Viewport {
         duration: 0.5,
         ease: 'power3.out',
         onStart: () => {
-          this.app.viewport.interactive = false;
+          // this.app.viewport.interactive = false;
         },
         onUpdate: () => {
           this.app.gui.stageBackTile.updateGraphics();
         },
         onComplete: () => {
-          this.app.viewport.interactive = true;
+          // this.app.viewport.interactive = true;
           this.app.viewport.onCameraAnimationEnds();
-          resolve({ ...animateProps, wX, wY });
+          resolve({ ...animateProps, cwX, cwY });
         },
       });
     });
