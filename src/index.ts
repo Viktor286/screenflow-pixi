@@ -4,6 +4,7 @@ import FlowApp from './Interfaces/FlowApp';
 import { getImageUrlSet } from './fixtures/imagesDataSet';
 import FilesIO from './Interfaces/FilesIO';
 import { SpaceModifiers } from './modifiers/SpaceModifiers';
+import { Memo } from './Interfaces/Memo';
 
 async function main() {
   const appDiv = document.querySelector('.app');
@@ -20,7 +21,7 @@ async function main() {
     const loader = await FilesIO.loadUrlSet(getImageUrlSet(12));
 
     for (const resource of Object.values(loader.resources)) {
-      app.board.addElement(resource.texture);
+      app.board.addBoardElement(new Memo(resource.texture, app));
     }
 
     SpaceModifiers.setPositionGrid(app, 3, 400, 230, 0.2);

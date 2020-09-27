@@ -1,7 +1,7 @@
 import StageEvents, { StageEvent } from './StageEvents';
 import FlowApp from '../FlowApp';
+import { BoardElementContainer } from '../BoardElement';
 import { IScreenCoords, IWorldCoords } from '../Viewport';
-import { MemoContainer } from '../Memo';
 
 type IGestureEvent = {
   screenClick: IScreenCoords;
@@ -144,16 +144,16 @@ export default class TimedGesture {
       y: e.screenClick.sY,
     });
 
-    if (hit instanceof MemoContainer) {
-      const memo = hit.memo;
-      if (memo.selected) {
+    if (hit instanceof BoardElementContainer) {
+      const boardElement = hit.boardElement;
+      if (boardElement.selected) {
         // fitToArea action adds more confusion than benefit when user clicked on selected memo
         // this.app.actions.viewport.fitToArea({ wX: x, wY: y }, width, height);
       } else {
-        memo.select();
+        boardElement.select();
       }
 
-      console.log(`pressUpImmediate Memo clicked "${memo.id}" `, memo);
+      console.log(`pressUpImmediate Memo clicked "${boardElement.id}" `, boardElement);
     } else {
       this.app.board.clearSelectedElements();
     }
@@ -184,8 +184,8 @@ export default class TimedGesture {
     });
 
     // fitToArea Or ZoomIn
-    if (hit instanceof MemoContainer) {
-      const { x, y, width, height } = hit.memo;
+    if (hit instanceof BoardElementContainer) {
+      const { x, y, width, height } = hit.boardElement;
       const targetScale = this.app.viewport.findScaleFit(width, height);
       if (
         this.app.viewport.scale >=
@@ -196,7 +196,7 @@ export default class TimedGesture {
         this.app.actions.viewport.zoomIn(e.worldClick);
       } else {
         this.app.actions.viewport.fitToArea({ wX: x, wY: y }, width, height);
-        hit.memo.select();
+        hit.boardElement.select();
       }
     } else {
       this.app.actions.viewport.zoomIn(e.worldClick);

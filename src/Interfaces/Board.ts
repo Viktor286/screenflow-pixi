@@ -1,14 +1,14 @@
-import * as PIXI from 'pixi.js';
 import FlowApp from './FlowApp';
-import { IBoardElement, Memo } from './Memo';
+import { Memo } from './Memo';
+import BoardElement, { IBoardElementState } from './BoardElement';
 
 export interface IPublicBoardState {
-  [key: string]: IBoardElement;
+  [key: string]: IBoardElementState;
 }
 
 export default class Board {
   public readonly state: IPublicBoardState = {};
-  public selected: Map<string, Memo> = new Map();
+  public selected: Map<string, BoardElement> = new Map();
   private isMultiSelect: boolean = false;
 
   constructor(public app: FlowApp) {
@@ -17,14 +17,13 @@ export default class Board {
     }
   }
 
-  public addElement(resource: PIXI.Texture) {
-    const boardElement = new Memo(resource, this.app);
+  public addBoardElement(boardElement: BoardElement | Memo) {
     this.state[boardElement.id] = boardElement.state;
     this.app.viewport.addToViewport(boardElement.container);
     this.app.viewport.instance.setChildIndex(boardElement.container, 0);
   }
 
-  public addElementToSelected(boardElement: Memo) {
+  public addElementToSelected(boardElement: BoardElement) {
     if (this.isMultiSelect) {
       this.selected.set(boardElement.id, boardElement);
     } else {
@@ -35,19 +34,19 @@ export default class Board {
     this.app.webUi.updateSelectedMode();
   }
 
-  public removeElementFromSelected(boardElement: Memo) {
+  public removeElementFromSelected(boardElement: BoardElement) {
     this.selected.delete(boardElement.id);
     this.app.webUi.updateSelectedMode();
   }
 
-  public sendEventToMonitor(boardElement: Memo, eventName: string, msg: string = '') {
+  public sendEventToMonitor(boardElement: BoardElement, eventName: string, msg: string = '') {
     if (this.app.devMonitor) {
       this.app.devMonitor.dispatchMonitor('boardEvents', `[${boardElement.id}] ${eventName}`, msg);
     }
   }
 
   public clearSelectedElements() {
-    this.selected.forEach((boardElement) => boardElement.deselect());
+    this.selected.forEach((boardElement: BoardElement) => boardElement.deselect());
   }
 
   // TODO remove this method

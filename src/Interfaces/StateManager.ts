@@ -1,7 +1,7 @@
 import FlowApp from './FlowApp';
 import { IPublicCameraState } from './Viewport';
 import { IPublicBoardState } from './Board';
-import { IBoardElement, Memo } from './Memo';
+import BoardElement, { IBoardElementState } from './BoardElement';
 
 interface IAppState {
   camera: IPublicCameraState;
@@ -171,9 +171,9 @@ export default class StateManager {
     this.app.viewport.animateCamera(value).then((cameraProps) => this.setState('camera', { ...cameraProps }));
   }
 
-  private asyncBoardElementAnimationOperation(targetBoardElement: Memo, value: IBoardElement) {
+  private asyncBoardElementAnimationOperation(targetBoardElement: BoardElement, value: IBoardElementState) {
     targetBoardElement
-      .animateMemo(value)
+      .animateBoardElement(value)
       .then((boardElementProps) =>
         this.setState(`/board/${targetBoardElement.id}`, { ...boardElementProps }),
       );
