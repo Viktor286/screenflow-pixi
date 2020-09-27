@@ -20,10 +20,10 @@ async function main() {
     const loader = await FilesIO.loadUrlSet(getImageUrlSet(12));
 
     for (const resource of Object.values(loader.resources)) {
-      app.memos.addMemo(resource.texture);
+      app.board.addMemo(resource.texture);
     }
 
-    SpaceModifiers.setPositionGrid(app.memos.innerMemoMap, 3, 400, 230, 0.2);
+    SpaceModifiers.setPositionGrid(app, 3, 400, 230, 0.2);
 
     // /** Auto update from store **/
     // app.state.snapshots.store.forEach((snapShot, i) => {

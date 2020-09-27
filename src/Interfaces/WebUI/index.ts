@@ -12,4 +12,10 @@ export default class WebUI {
       zoomIndicator: this.app.viewport.getZoomString(),
     });
   }
+
+  public updateSelectedMode() {
+    this.reactWebUI.setState({
+      isMemoSelected: this.app.board.selected.size,
+    });
+  }
 }

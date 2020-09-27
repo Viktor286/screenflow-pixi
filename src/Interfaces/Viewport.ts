@@ -305,7 +305,7 @@ export default class Viewport {
         },
         onComplete: () => {
           // this.app.viewport.interactive = true;
-          this.app.viewport.onCameraAnimationEnds();
+          setTimeout(() => this.app.viewport.onCameraAnimationEnds()); // send exec to next frame
           resolve({ ...animateProps, cwX, cwY });
         },
       });

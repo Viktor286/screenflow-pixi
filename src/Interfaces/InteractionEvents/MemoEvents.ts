@@ -62,7 +62,7 @@ export class MemoEvents {
   }
 
   public sendToMonitor(eventName: string, msg: string = '') {
-    this.memo.memos.sendEventToMonitor(this.memo, eventName, msg);
+    this.memo.board.sendEventToMonitor(this.memo, eventName, msg);
   }
 
   // Event assignments

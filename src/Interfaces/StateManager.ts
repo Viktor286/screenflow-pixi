@@ -1,11 +1,11 @@
 import FlowApp from './FlowApp';
 import { IPublicCameraState } from './Viewport';
-import { IPublicMemosState } from './Memos';
+import { IPublicBoardState } from './Board';
 import { IPublicMemo, Memo } from './Memo';
 
 interface IAppState {
   camera: IPublicCameraState;
-  memos: IPublicMemosState;
+  board: IPublicBoardState;
   [key: string]: any;
 }
 
@@ -18,7 +18,7 @@ interface IStateSlice {
 export default class StateManager {
   public readonly publicState: IAppState = {
     camera: this.app.viewport.publicCameraState,
-    memos: this.app.memos.publicMemosState,
+    board: this.app.board.state,
   };
   public history: IStateSlice[] = [];
   public historyLevel = 50;
@@ -121,10 +121,10 @@ export default class StateManager {
     updateValue: number | IPublicCameraState,
     stateScope: IStateScope,
   ): number | IPublicCameraState | Promise<IPublicCameraState> | boolean {
-    if (stateScope.startsWith('/memos')) {
+    if (stateScope.startsWith('/board')) {
       if (this.isScopeWithSubDomain(stateScope)) {
         const { target: id } = this.parseSubdomainScope(stateScope);
-        const memo = this.app.memos.innerMemoMap.get(id);
+        const memo = this.app.board.innerMemoMap.get(id);
 
         if (memo) {
           if (property === 'animation' && typeof updateValue === 'object') {
@@ -174,7 +174,7 @@ export default class StateManager {
   private asyncMemoAnimationOperation(targetMemo: Memo, value: IPublicMemo) {
     targetMemo
       .animateMemo(value)
-      .then((memoProps) => this.setState(`/memos/${targetMemo.id}`, { ...memoProps }));
+      .then((memoProps) => this.setState(`/board/${targetMemo.id}`, { ...memoProps }));
   }
 
   private isScopeWithSubDomain(inputStr: string): boolean {

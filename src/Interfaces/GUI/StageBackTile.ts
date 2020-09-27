@@ -78,72 +78,72 @@ export default class StageBackTile {
    * Examples adopted from an interesting article
    * https://css-tricks.com/building-an-images-gallery-using-pixijs-and-webgl/
    * */
-  private shader() {
-    return `#ifdef GL_ES
-precision mediump float;
-#endif
-
-float isGridLine (vec2 coord) {
-  vec2 pixelsPerGrid = vec2(50.0, 50.0);
-  vec2 gridCoords = fract(coord / pixelsPerGrid);
-  vec2 gridPixelCoords = gridCoords * pixelsPerGrid;
-  vec2 gridLine = step(gridPixelCoords, vec2(1.0));
-  float isGridLine = max(gridLine.x, gridLine.y);
-  return isGridLine;
-}
-
-void main () {
-  vec2 coord = gl_FragCoord.xy;
-  vec3 color = vec3(0.0);
-  color.b = isGridLine(coord) * 0.3;
-  gl_FragColor = vec4(color, 1.0);
-}`;
-  }
+  //   private shader() {
+  //     return `#ifdef GL_ES
+  // precision mediump float;
+  // #endif
+  //
+  // float isGridLine (vec2 coord) {
+  //   vec2 pixelsPerGrid = vec2(50.0, 50.0);
+  //   vec2 gridCoords = fract(coord / pixelsPerGrid);
+  //   vec2 gridPixelCoords = gridCoords * pixelsPerGrid;
+  //   vec2 gridLine = step(gridPixelCoords, vec2(1.0));
+  //   float isGridLine = max(gridLine.x, gridLine.y);
+  //   return isGridLine;
+  // }
+  //
+  // void main () {
+  //   vec2 coord = gl_FragCoord.xy;
+  //   vec3 color = vec3(0.0);
+  //   color.b = isGridLine(coord) * 0.3;
+  //   gl_FragColor = vec4(color, 1.0);
+  // }`;
+  //   }
 
   /**
    * https://www.html5gamedevs.com/topic/44488-cant-get-grid-shader-to-work-v3-to-v5/
    * https://codepen.io/ardenpm/pen/pVojYG
    * */
-  private initGridShader(width: number, height: number) {
-    const uniforms = {
-      vpw: width,
-      vph: height,
-      offset: { type: 'v2', value: { x: 0, y: 0 } },
-      pitch: { type: 'v2', value: { x: 50, y: 50 } },
-      resolution: { type: 'v2', value: { x: width, y: height } },
-    };
+  // private initGridShader(width: number, height: number) {
+  //   const uniforms = {
+  //     vpw: width,
+  //     vph: height,
+  //     offset: { type: 'v2', value: { x: 0, y: 0 } },
+  //     pitch: { type: 'v2', value: { x: 50, y: 50 } },
+  //     resolution: { type: 'v2', value: { x: width, y: height } },
+  //   };
+  //
+  //   const gridShader = new PIXI.Filter('', this.gridShader(), uniforms);
+  //   const rect = new PIXI.Graphics().drawRect(0, 0, width, height);
+  //   rect.filters = [gridShader];
+  //   this.app.engine.stage.addChild(rect);
+  //   this.app.engine.stage.setChildIndex(rect, 0);
+  // }
 
-    const gridShader = new PIXI.Filter('', this.gridShader(), uniforms);
-    const rect = new PIXI.Graphics().drawRect(0, 0, width, height);
-    rect.filters = [gridShader];
-    this.app.engine.stage.addChild(rect);
-    this.app.engine.stage.setChildIndex(rect, 0);
-  }
-
-  private gridShader() {
-    return `precision mediump float;
-
-uniform float vpw; // Width, in pixels
-uniform float vph; // Height, in pixels
-
-uniform vec2 offset; // e.g. [-0.023500000000000434 0.9794000000000017], currently the same as the x/y offset in the mvMatrix
-uniform vec2 pitch;  // e.g. [50 50]
-
-void main() {
-  float lX = gl_FragCoord.x / vpw;
-  float lY = gl_FragCoord.y / vph;
-
-  float scaleFactor = 100.0;
-
-  float offX = (scaleFactor * offset[0]) + gl_FragCoord.x;
-  float offY = (scaleFactor * offset[1]) + (1.0 - gl_FragCoord.y);
-
-  if (int(mod(offX, pitch[0])) == 0 ||
-      int(mod(offY, pitch[1])) == 0) {
-    gl_FragColor = vec4(0.0, 0.0, 0.0, 0.5);
-  } else {
-    gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
-  }
-}`;
-  }
+  //   private gridShader() {
+  //     return `precision mediump float;
+  //
+  // uniform float vpw; // Width, in pixels
+  // uniform float vph; // Height, in pixels
+  //
+  // uniform vec2 offset; // e.g. [-0.023500000000000434 0.9794000000000017], currently the same as the x/y offset in the mvMatrix
+  // uniform vec2 pitch;  // e.g. [50 50]
+  //
+  // void main() {
+  //   float lX = gl_FragCoord.x / vpw;
+  //   float lY = gl_FragCoord.y / vph;
+  //
+  //   float scaleFactor = 100.0;
+  //
+  //   float offX = (scaleFactor * offset[0]) + gl_FragCoord.x;
+  //   float offY = (scaleFactor * offset[1]) + (1.0 - gl_FragCoord.y);
+  //
+  //   if (int(mod(offX, pitch[0])) == 0 ||
+  //       int(mod(offY, pitch[1])) == 0) {
+  //     gl_FragColor = vec4(0.0, 0.0, 0.0, 0.5);
+  //   } else {
+  //     gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
+  //   }
+  // }`;
+  //   }
 }

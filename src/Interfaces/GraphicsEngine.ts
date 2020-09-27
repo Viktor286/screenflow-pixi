@@ -34,6 +34,7 @@ export default class GraphicsEngine {
       width: hostHTMLWidth,
       height: hostHTMLHeight,
       antialias: true,
+      // TODO: res 1 for slow devices or native pixel only for new devices?
       resolution: window.automationScreenshot ? 1 : window.devicePixelRatio || 1,
       autoDensity: !window.automationScreenshot,
       transparent: true,

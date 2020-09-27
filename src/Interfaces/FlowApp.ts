@@ -2,7 +2,7 @@ import GraphicsEngine from './GraphicsEngine';
 import Viewport from './Viewport';
 import StageEvents from './InteractionEvents/StageEvents';
 import DevMonitor from './DevMonitor';
-import Memos from './Memos';
+import Board from './Board';
 import WebUI from './WebUI';
 import GUI from './GUI';
 import StateManager from './StateManager';
@@ -13,7 +13,7 @@ export default class FlowApp {
   public readonly hostHTML: HTMLElement;
   public readonly viewport: Viewport;
   public readonly devMonitor: DevMonitor | null; // TODO: replace for "Debug" with included prod logic
-  public readonly memos: Memos;
+  public readonly board: Board;
   public readonly gui: GUI;
   public readonly webUi: WebUI;
   public readonly actions: Actions;
@@ -29,7 +29,7 @@ export default class FlowApp {
     this.devMonitor = null;
     this.stageEvents = new StageEvents(this);
     this.viewport = new Viewport(this);
-    this.memos = new Memos(this);
+    this.board = new Board(this);
     this.actions = new Actions(this);
     this.stateManager = new StateManager(this);
     this.gui = new GUI(this);

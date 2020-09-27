@@ -1,7 +1,7 @@
 import * as PIXI from 'pixi.js';
 import { Snapshot } from './Snapshot';
 import FlowApp from './FlowApp';
-import Memos from './Memos';
+import Board from './Board';
 import { gsap } from 'gsap';
 
 export interface IPublicMemo {
@@ -16,7 +16,7 @@ export class Memo {
   private selectionDrawing = new PIXI.Graphics();
 
   private snapshot: Snapshot;
-  public readonly memos: Memos = this.app.memos;
+  public readonly board: Board = this.app.board;
   public readonly id: string;
   public readonly publicState: IPublicMemo = {
     x: 0,
@@ -100,13 +100,13 @@ export class Memo {
   }
 
   public select() {
-    this.memos.addMemoToSelected(this);
+    this.board.addMemoToSelected(this);
     this.selected = true;
     this.drawSelection();
   }
 
   public deselect() {
-    this.memos.removeMemoFromSelected(this);
+    this.board.removeMemoFromSelected(this);
     this.selected = false;
     this.eraseSelection();
   }
