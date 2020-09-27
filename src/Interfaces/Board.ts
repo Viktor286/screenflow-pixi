@@ -1,58 +1,59 @@
 import * as PIXI from 'pixi.js';
 import FlowApp from './FlowApp';
-import { IPublicMemo, Memo } from './Memo';
+import { IBoardElement, Memo } from './Memo';
 
 export interface IPublicBoardState {
-  [key: string]: IPublicMemo;
+  [key: string]: IBoardElement;
 }
 
 export default class Board {
   public readonly state: IPublicBoardState = {};
-  public readonly innerMemoMap: Map<string, Memo> = new Map();
+  public readonly innerMap: Map<string, Memo> = new Map();
   public selected: Map<string, Memo> = new Map();
   private isMultiSelect: boolean = false;
 
   constructor(public app: FlowApp) {
     if (this.app.devMonitor) {
-      this.app.devMonitor.addDevMonitor('memoEvents');
+      this.app.devMonitor.addDevMonitor('boardEvents');
     }
   }
 
-  public addMemo(resource: PIXI.Texture) {
-    const memo = new Memo(resource, this.app);
-    this.innerMemoMap.set(memo.id, memo);
-    this.state[memo.id] = memo.publicState;
-    this.app.viewport.addToViewport(memo.container);
-    this.app.viewport.instance.setChildIndex(memo.container, 0);
+  public addElement(resource: PIXI.Texture) {
+    const boardElement = new Memo(resource, this.app);
+    this.innerMap.set(boardElement.id, boardElement);
+    this.state[boardElement.id] = boardElement.publicState;
+    this.app.viewport.addToViewport(boardElement.container);
+    this.app.viewport.instance.setChildIndex(boardElement.container, 0);
   }
 
-  public addMemoToSelected(memo: Memo) {
+  public addElementToSelected(boardElement: Memo) {
     if (this.isMultiSelect) {
-      this.selected.set(memo.id, memo);
+      this.selected.set(boardElement.id, boardElement);
     } else {
-      this.clearSelectedMemos();
-      this.selected.set(memo.id, memo);
+      this.clearSelectedElements();
+      this.selected.set(boardElement.id, boardElement);
     }
 
     this.app.webUi.updateSelectedMode();
   }
 
-  public removeMemoFromSelected(memo: Memo) {
-    this.selected.delete(memo.id);
+  public removeElementFromSelected(boardElement: Memo) {
+    this.selected.delete(boardElement.id);
     this.app.webUi.updateSelectedMode();
   }
 
-  public sendEventToMonitor(memo: Memo, eventName: string, msg: string = '') {
+  public sendEventToMonitor(boardElement: Memo, eventName: string, msg: string = '') {
     if (this.app.devMonitor) {
-      this.app.devMonitor.dispatchMonitor('memoEvents', `[${memo.id}] ${eventName}`, msg);
+      this.app.devMonitor.dispatchMonitor('boardEvents', `[${boardElement.id}] ${eventName}`, msg);
     }
   }
 
-  public clearSelectedMemos() {
-    this.selected.forEach((memo) => memo.deselect());
+  public clearSelectedElements() {
+    this.selected.forEach((boardElement) => boardElement.deselect());
   }
 
   public tempGetFirstSelectedId() {
+    // TODO remove this method
     if (this.app.board.selected.size > 0) {
       return this.app.board.selected.keys().next().value;
     }

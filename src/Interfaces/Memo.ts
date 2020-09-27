@@ -4,7 +4,7 @@ import FlowApp from './FlowApp';
 import Board from './Board';
 import { gsap } from 'gsap';
 
-export interface IPublicMemo {
+export interface IBoardElement {
   x?: number;
   y?: number;
   scale?: number;
@@ -18,7 +18,7 @@ export class Memo {
   private snapshot: Snapshot;
   public readonly board: Board = this.app.board;
   public readonly id: string;
-  public readonly publicState: IPublicMemo = {
+  public readonly publicState: IBoardElement = {
     x: 0,
     y: 0,
     scale: 1,
@@ -100,18 +100,18 @@ export class Memo {
   }
 
   public select() {
-    this.board.addMemoToSelected(this);
+    this.board.addElementToSelected(this);
     this.selected = true;
     this.drawSelection();
   }
 
   public deselect() {
-    this.board.removeMemoFromSelected(this);
+    this.board.removeElementFromSelected(this);
     this.selected = false;
     this.eraseSelection();
   }
 
-  public animateMemo(memoProps: IPublicMemo): Promise<IPublicMemo> {
+  public animateMemo(memoProps: IBoardElement): Promise<IBoardElement> {
     return new Promise((resolve) => {
       gsap.to(this, {
         ...memoProps,

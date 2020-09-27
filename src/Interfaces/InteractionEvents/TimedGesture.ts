@@ -155,7 +155,7 @@ export default class TimedGesture {
 
       console.log(`pressUpImmediate Memo clicked "${memo.id}" `, memo);
     } else {
-      this.app.board.clearSelectedMemos();
+      this.app.board.clearSelectedElements();
     }
 
     this.sendToMonitor('Immediate Press Up', this.getClickInfoStr(e));

@@ -1,7 +1,7 @@
 import FlowApp from './FlowApp';
 import { IPublicCameraState } from './Viewport';
 import { IPublicBoardState } from './Board';
-import { IPublicMemo, Memo } from './Memo';
+import { IBoardElement, Memo } from './Memo';
 
 interface IAppState {
   camera: IPublicCameraState;
@@ -124,14 +124,14 @@ export default class StateManager {
     if (stateScope.startsWith('/board')) {
       if (this.isScopeWithSubDomain(stateScope)) {
         const { target: id } = this.parseSubdomainScope(stateScope);
-        const memo = this.app.board.innerMemoMap.get(id);
+        const boardElement = this.app.board.innerMap.get(id);
 
-        if (memo) {
+        if (boardElement) {
           if (property === 'animation' && typeof updateValue === 'object') {
-            this.asyncMemoAnimationOperation(memo, updateValue);
+            this.asyncBoardElementAnimationOperation(boardElement, updateValue);
             return true;
           }
-          memo[property] = updateValue;
+          boardElement[property] = updateValue;
           this.getOriginState(stateScope)[property] = updateValue;
         }
       }
@@ -171,10 +171,12 @@ export default class StateManager {
     this.app.viewport.animateCamera(value).then((cameraProps) => this.setState('camera', { ...cameraProps }));
   }
 
-  private asyncMemoAnimationOperation(targetMemo: Memo, value: IPublicMemo) {
-    targetMemo
+  private asyncBoardElementAnimationOperation(targetBoardElement: Memo, value: IBoardElement) {
+    targetBoardElement
       .animateMemo(value)
-      .then((memoProps) => this.setState(`/board/${targetMemo.id}`, { ...memoProps }));
+      .then((boardElementProps) =>
+        this.setState(`/board/${targetBoardElement.id}`, { ...boardElementProps }),
+      );
   }
 
   private isScopeWithSubDomain(inputStr: string): boolean {

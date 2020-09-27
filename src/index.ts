@@ -20,7 +20,7 @@ async function main() {
     const loader = await FilesIO.loadUrlSet(getImageUrlSet(12));
 
     for (const resource of Object.values(loader.resources)) {
-      app.board.addMemo(resource.texture);
+      app.board.addElement(resource.texture);
     }
 
     SpaceModifiers.setPositionGrid(app, 3, 400, 230, 0.2);
