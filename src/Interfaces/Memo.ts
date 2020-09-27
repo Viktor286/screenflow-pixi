@@ -8,6 +8,7 @@ export interface IBoardElement {
   x?: number;
   y?: number;
   scale?: number;
+  element?: Memo; // TODO: replace to defined types
 }
 
 export class Memo {
@@ -18,10 +19,11 @@ export class Memo {
   private snapshot: Snapshot;
   public readonly board: Board = this.app.board;
   public readonly id: string;
-  public readonly publicState: IBoardElement = {
+  public readonly state: IBoardElement = {
     x: 0,
     y: 0,
     scale: 1,
+    element: this,
   };
 
   [key: string]: any;

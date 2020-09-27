@@ -35,7 +35,10 @@ export default class FlowApp {
     this.gui = new GUI(this);
     this.webUi = new WebUI(this);
 
-    console.log('FlowApp', this);
+    if (this.env !== 'production') {
+      // @ts-ignore
+      window.app = this;
+    }
   }
 
   get hostHTMLWidth() {

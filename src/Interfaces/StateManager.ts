@@ -124,7 +124,7 @@ export default class StateManager {
     if (stateScope.startsWith('/board')) {
       if (this.isScopeWithSubDomain(stateScope)) {
         const { target: id } = this.parseSubdomainScope(stateScope);
-        const boardElement = this.app.board.innerMap.get(id);
+        const boardElement = this.app.board.state[id].element;
 
         if (boardElement) {
           if (property === 'animation' && typeof updateValue === 'object') {

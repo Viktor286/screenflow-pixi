@@ -8,7 +8,6 @@ export interface IPublicBoardState {
 
 export default class Board {
   public readonly state: IPublicBoardState = {};
-  public readonly innerMap: Map<string, Memo> = new Map();
   public selected: Map<string, Memo> = new Map();
   private isMultiSelect: boolean = false;
 
@@ -20,8 +19,7 @@ export default class Board {
 
   public addElement(resource: PIXI.Texture) {
     const boardElement = new Memo(resource, this.app);
-    this.innerMap.set(boardElement.id, boardElement);
-    this.state[boardElement.id] = boardElement.publicState;
+    this.state[boardElement.id] = boardElement.state;
     this.app.viewport.addToViewport(boardElement.container);
     this.app.viewport.instance.setChildIndex(boardElement.container, 0);
   }
@@ -52,8 +50,8 @@ export default class Board {
     this.selected.forEach((boardElement) => boardElement.deselect());
   }
 
+  // TODO remove this method
   public tempGetFirstSelectedId() {
-    // TODO remove this method
     if (this.app.board.selected.size > 0) {
       return this.app.board.selected.keys().next().value;
     }
