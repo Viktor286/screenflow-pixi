@@ -1,5 +1,4 @@
 import FlowApp from '../Interfaces/FlowApp';
-// import { Memo } from '../Interfaces/Memos';
 import { IWorldCoords } from '../Interfaces/Viewport';
 
 export default class BoardActions {

@@ -1,4 +1,3 @@
-// import { Memo } from '../Interfaces/Memo';
 // import {IPublicMemosState} from '../Interfaces/Memos'
 
 import FlowApp from '../Interfaces/FlowApp';

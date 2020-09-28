@@ -1,5 +1,4 @@
 import FlowApp from './FlowApp';
-import { Memo } from './Memo';
 import BoardElement, { IBoardElementState } from './BoardElement';
 
 export interface IPublicBoardState {
@@ -17,10 +16,11 @@ export default class Board {
     }
   }
 
-  public addBoardElement(boardElement: BoardElement | Memo) {
+  public addBoardElement<T extends BoardElement>(boardElement: T): T {
     this.state[boardElement.id] = boardElement.state;
     this.app.viewport.addToViewport(boardElement.container);
     this.app.viewport.instance.setChildIndex(boardElement.container, 0);
+    return boardElement;
   }
 
   public addElementToSelected(boardElement: BoardElement) {
@@ -47,6 +47,12 @@ export default class Board {
 
   public clearSelectedElements() {
     this.selected.forEach((boardElement: BoardElement) => boardElement.deselect());
+  }
+
+  public updateSelectionGraphics() {
+    if (this.selected.size > 0) {
+      this.selected.forEach((boardElement) => boardElement.drawSelection());
+    }
   }
 
   // TODO remove this method

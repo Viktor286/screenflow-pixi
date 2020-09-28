@@ -29,6 +29,11 @@ export default class BoardElement {
     this.container.addChild(this.selectionDrawing);
   }
 
+  public getLocalDimensions() {
+    const { width, height } = this.container.getLocalBounds();
+    return { width, height };
+  }
+
   get width() {
     return this.container.width;
   }
@@ -110,6 +115,9 @@ export default class BoardElement {
           this.container.zIndex = 1;
         },
         onUpdate: () => {
+          if (this.selected) {
+            this.drawSelection();
+          }
           // this.app.gui.stageBackTile.updateGraphics();
         },
         onComplete: () => {
@@ -120,11 +128,12 @@ export default class BoardElement {
     });
   }
 
-  private drawSelection(): void {
+  public drawSelection(): void {
+    const { width, height } = this.getLocalDimensions();
     this.selectionDrawing
       .clear()
-      .lineStyle(5 / this.app.viewport.scale, 0x73b2ff)
-      .drawRect(0, 0, this.snapshot.width, this.snapshot.height);
+      .lineStyle(4 / this.app.viewport.scale / this.scale, 0x73b2ff)
+      .drawRect(0, 0, width, height);
   }
 
   private eraseSelection() {

@@ -1,6 +1,6 @@
 // import * as PIXI from 'pixi.js';
 import PIXI from 'pixi.js';
-import { Memo } from '../Memo';
+import Memo from '../Memo';
 
 /** This class might be useful when Memo UI work will begin **/
 

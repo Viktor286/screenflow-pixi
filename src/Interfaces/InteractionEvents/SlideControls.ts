@@ -28,6 +28,7 @@ export default class SlideControls {
     // Both "moved-end" and 'zoomed-end' events have not stable debounce, firing often than should be.
     // It was decided to use only 'moved' callback for everything
     this.viewport.instance.on('moved', this.onSliderMoved);
+    this.viewport.instance.on('zoomed', this.onSliderZoomed);
 
     this.activated = true;
   }
@@ -38,6 +39,7 @@ export default class SlideControls {
     this.viewport.instance.plugins.remove('wheel');
 
     this.viewport.instance.off('moved', this.onSliderMoved);
+    this.viewport.instance.off('zoomed', this.onSliderZoomed);
 
     this.activated = false;
   }
@@ -63,5 +65,9 @@ export default class SlideControls {
 
     this.isSliding = false;
     this.app.actions.viewport.amendCameraState();
+  };
+
+  private onSliderZoomed = () => {
+    this.app.board.updateSelectionGraphics();
   };
 }
