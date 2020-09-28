@@ -4,7 +4,8 @@ import FlowApp from './Interfaces/FlowApp';
 import { getImageUrlSet } from './fixtures/imagesDataSet';
 import FilesIO from './Interfaces/FilesIO';
 import { SpaceModifiers } from './modifiers/SpaceModifiers';
-import { Memo } from './Interfaces/Memo';
+import Memo from './Interfaces/Memo';
+import Group from './Interfaces/Group';
 
 async function main() {
   const appDiv = document.querySelector('.app');
@@ -25,6 +26,11 @@ async function main() {
     }
 
     SpaceModifiers.setPositionGrid(app, 3, 400, 230, 0.2);
+
+    const g1 = app.board.addBoardElement(new Group(app));
+    g1.drawGroupBorder();
+
+    console.log('g1', g1);
 
     // /** Auto update from store **/
     // app.state.snapshots.store.forEach((snapShot, i) => {
