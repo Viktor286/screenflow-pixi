@@ -15,11 +15,4 @@ export default class Memo extends BoardElement {
 
     this.container.interactive = true;
   }
-
-  public getLocalDimensions() {
-    return {
-      width: this.snapshot.width,
-      height: this.snapshot.height,
-    };
-  }
 }

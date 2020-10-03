@@ -185,19 +185,19 @@ export default class TimedGesture {
 
     // fitToArea Or ZoomIn
     if (hit instanceof BoardElementContainer) {
-      const { x, y, width, height } = hit.boardElement;
-      const targetScale = this.app.viewport.findScaleFit(width, height);
-      if (
-        this.app.viewport.scale >=
-          targetScale + (targetScale / 100) * this.app.viewport.fitAreaMarginPercent ||
-        (Math.round(this.app.viewport.getScreenCenterInWord().wX) === x &&
-          Math.round(this.app.viewport.getScreenCenterInWord().wY) === y)
-      ) {
-        this.app.actions.viewport.zoomIn(e.worldClick);
-      } else {
-        this.app.actions.viewport.fitToArea({ wX: x, wY: y }, width, height);
-        hit.boardElement.select();
+      let targetElement = hit.boardElement;
+
+      // rout to group if group member
+      if (targetElement.inGroup) {
+        targetElement = targetElement.inGroup;
       }
+
+      let { x, y, width, height } = targetElement;
+      x += width / 2;
+      y += height / 2;
+
+      this.app.actions.viewport.fitToArea({ wX: x, wY: y }, width, height);
+      hit.boardElement.select();
     } else {
       this.app.actions.viewport.zoomIn(e.worldClick);
     }
