@@ -68,7 +68,12 @@ export default class SlideControls {
   };
 
   private onSliderZoomed = () => {
-    this.app.board.updateSelectionGraphics();
-    this.app.webUi.updateZoomBtn();
+    if (
+      this.app.viewport.scale < this.viewport.zoomScales[this.viewport.zoomScales.length - 1] &&
+      this.app.viewport.scale > this.viewport.zoomScales[0]
+    ) {
+      this.app.board.updateSelectionGraphics();
+      this.app.webUi.updateZoomBtn();
+    }
   };
 }

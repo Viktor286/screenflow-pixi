@@ -1,6 +1,5 @@
 import FlowApp from './FlowApp';
 import BoardElement, { IBoardElementState } from './BoardElement';
-import Group from './Group';
 
 export interface IPublicBoardState {
   [key: string]: IBoardElementState;
@@ -25,14 +24,11 @@ export default class Board {
   }
 
   public addElementToSelected(boardElement: BoardElement) {
-    if (this.isMultiSelect) {
+    if (!this.selected.has(boardElement.id)) {
+      if (!this.isMultiSelect) this.clearSelectedElements();
       this.selected.set(boardElement.id, boardElement);
-    } else {
-      this.clearSelectedElements();
-      this.selected.set(boardElement.id, boardElement);
+      this.app.webUi.updateSelectedMode();
     }
-
-    this.app.webUi.updateSelectedMode();
   }
 
   public removeElementFromSelected(boardElement: BoardElement) {

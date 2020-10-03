@@ -96,6 +96,11 @@ export default class BoardElement {
     this.container.pivot.y = val;
   }
 
+  public remove() {
+    // TODO: make proper remove
+    this.selectionDrawing.destroy();
+  }
+
   public select() {
     if (this.inGroup) {
       this.inGroup.select();
@@ -113,10 +118,11 @@ export default class BoardElement {
   }
 
   public drawSelection(): void {
+    const groupFactor = this.inGroup ? this.inGroup.scale : 1;
     // Compensate selection draw scale which is child for this.container's scale
     this.selectionDrawing
       .clear()
-      .lineStyle(4 / this.app.viewport.scale / this.scale, 0x73b2ff)
+      .lineStyle(4 / this.app.viewport.scale / this.scale / groupFactor, 0x73b2ff)
       .drawRect(0, 0, this.width / this.scale, this.height / this.scale);
   }
 

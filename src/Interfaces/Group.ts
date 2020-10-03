@@ -1,6 +1,7 @@
 import * as PIXI from 'pixi.js';
 import FlowApp from './FlowApp';
 import BoardElement, { BoardElementContainer } from './BoardElement';
+import { Point } from '../types/global';
 
 export interface IExplodedGroup {
   boardElements: BoardElement[];
@@ -17,9 +18,8 @@ export default class Group extends BoardElement {
     super(app);
 
     this.container.interactive = true;
-    this.groupDrawing.zIndex = 1;
+    this.groupDrawing.zIndex = 2;
 
-    // TODO: looks like this is not good nesting because this interferes with group size
     this.container.addChild(this.groupDrawing);
 
     // PIXI.DisplayObjectContainer
@@ -58,16 +58,18 @@ export default class Group extends BoardElement {
   }
 
   public drawSelection(): void {
-    this.groupDrawing
-      .clear()
-      .lineStyle(2 / this.app.viewport.scale / this.scale, 0xe3d891)
-      .drawRect(0, 0, this.width, this.height);
-
     this.container.children.forEach((elm) => {
       if (elm instanceof BoardElementContainer) {
         elm.boardElement.drawSelection();
       }
     });
+
+    const lineWidth = 2 / this.app.viewport.scale / this.scale;
+
+    this.groupDrawing
+      .clear()
+      .lineStyle(lineWidth, 0xe3d891)
+      .drawRect(0, 0, this.width / this.scale - lineWidth, this.height / this.scale - lineWidth);
   }
 
   public eraseSelection() {
@@ -104,37 +106,47 @@ export default class Group extends BoardElement {
 
   public explodeGroup(): IExplodedGroup {
     const initialScale = this.scale;
-    const fScale = 1 / initialScale;
 
-    const elementMap = new Map<BoardElementContainer, PIXI.Point>();
-    const boardElements: BoardElement[] = [];
+    if (this.container) {
+      const elementMap = new Map<BoardElementContainer, Point>();
+      const boardElements: BoardElement[] = [];
 
-    this.container.children.forEach((elm) => {
-      if (elm instanceof BoardElementContainer) {
-        elementMap.set(elm, elm.toGlobal(this.app.viewport.instance.position));
-      }
-    });
+      // Prepare future position
+      this.container.children.forEach((elm) => {
+        if (elm instanceof BoardElementContainer) {
+          elementMap.set(elm, { x: elm.x + this.x, y: elm.y + this.y });
+        }
+      });
 
-    elementMap.forEach((coords, elm) => {
-      elm.boardElement.inGroup = undefined;
-      elm.boardElement.eraseSelection();
-      this.app.viewport.instance.addChild(elm);
-      elm.x = coords.x;
-      elm.y = coords.y;
-      elm.boardElement.scale = elm.boardElement.scale / fScale;
-      boardElements.push(elm.boardElement);
-    });
+      // Remove children from group & apply prepared position
+      elementMap.forEach((coords, boardElementContainer) => {
+        boardElementContainer.boardElement.inGroup = undefined;
+        boardElementContainer.zIndex = 0;
+        boardElementContainer.boardElement.eraseSelection();
+        this.app.viewport.instance.addChild(boardElementContainer);
+        boardElementContainer.x = coords.x;
+        boardElementContainer.y = coords.y;
+        // elm.boardElement.scale = elm.boardElement.scale / fScale;
+        // elm.boardElement.scale = elm.boardElement.scale / fScale;
+        boardElements.push(boardElementContainer.boardElement);
+      });
 
-    this.container.removeChildren();
-    this.container.destroy();
+      this.container.removeChildren();
+      this.container.destroy();
+      return { boardElements, initialScale };
+    }
 
-    return { boardElements, initialScale };
+    return {
+      boardElements: [],
+      initialScale,
+    };
   }
 
   public implodeGroup({ boardElements, initialScale = 1 }: IExplodedGroup) {
     this.container = new BoardElementContainer(this);
+    this.container.zIndex = 1;
     this.container.interactive = true;
-    this.groupDrawing.zIndex = 1;
+    this.groupDrawing.zIndex = 2;
     this.container.addChild(this.groupDrawing);
 
     this.app.board.addBoardElement(this);
@@ -150,6 +162,7 @@ export default class Group extends BoardElement {
 
       this.container.addChildAt(boardElement.container, 0);
       boardElement.inGroup = this;
+      boardElement.container.zIndex = 1;
     });
 
     // After all children are ready, calc group transforms

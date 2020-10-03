@@ -37,34 +37,50 @@ async function main() {
 
     const Memos = displayObject.map((container) => container.boardElement);
 
+    // TODO: arrange position/scale tests scripts
+
+    // setTimeout(() => {
+    //   Memos[0].scale = 0.1;
+    //   Memos[3].scale = 0.3;
+    //   Memos[5].scale = 0.5;
+    //   group.implodeGroup({
+    //     boardElements: [Memos[0], Memos[3], Memos[5]],
+    //     initialScale: 1,
+    //   });
+    // }, 2000);
+    // setTimeout(() => {
+    //   group.explodeGroup();
+    // }, 3000);
+
+    setTimeout(() => {
+      app.actions.viewport.moveTo({ wX: 0, wY: 0 }, 0.13);
+    }, 700);
+
     setTimeout(() => {
       Memos[0].scale = 0.2;
       Memos[3].scale = 0.22;
-      Memos[5].scale = 0.24;
+      Memos[5].scale = 0.25;
       group.addToGroup(Memos[0]);
     }, 2000);
+    //
     setTimeout(() => {
-      // group.scale = 0.5;
-      // group.x = -1000;
-      // group.y = -1000;
-      // group.scale = 0.5;
       group.addToGroup(Memos[3]);
-      group.x += 10;
-      group.y += 10;
     }, 3000);
-    // setTimeout(() => group.addToGroup(Memos[4]), 4000);
     setTimeout(() => {
       group.addToGroup(Memos[5]);
-      // console.log('GMemo', Memos[0]);
-      // console.log('GMemo before x move', Memos[0].x);
-      // Memos[0].x = -15;
-      // console.log('GMemo after x move', Memos[0].x);
     }, 4000);
     //
     setTimeout(() => {
-      // group.scale = 0.5;
       group.removeFromGroup(Memos[0]);
     }, 5000);
+
+    setTimeout(() => {
+      group.addToGroup(Memos[7]);
+    }, 6000);
+
+    setTimeout(() => {
+      group.removeFromGroup(Memos[5]);
+    }, 6000);
 
     // /** Auto update from store **/
     // app.state.snapshots.store.forEach((snapShot, i) => {
