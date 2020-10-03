@@ -42,6 +42,28 @@ export default class Group extends BoardElement {
     this.drawGroupBorder();
   }
 
+  public addToGroup<T extends BoardElement>(boardElement: T) {
+    const explodedGroup = this.explodeGroup();
+    explodedGroup.boardElements.push(boardElement);
+    this.implodeGroup(explodedGroup);
+  }
+
+  public removeFromGroup<T extends BoardElement>(boardElement: T) {
+    if (
+      this.container.children.find(
+        (elm) => elm instanceof BoardElementContainer && elm.boardElement === boardElement,
+      )
+    ) {
+      const explodedGroup = this.explodeGroup();
+      const boardElements = explodedGroup.boardElements.filter((item) => item !== boardElement);
+
+      this.implodeGroup({
+        boardElements,
+        initialScale: explodedGroup.initialScale,
+      });
+    }
+  }
+
   public explodeGroup(): IExplodedGroup {
     const initialScale = this.scale;
     const fScale = 1 / initialScale;
