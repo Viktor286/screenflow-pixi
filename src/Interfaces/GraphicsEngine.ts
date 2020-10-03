@@ -1,30 +1,11 @@
 import * as PIXI from 'pixi.js';
 import FlowApp from './FlowApp';
-// import { gsap } from 'gsap';
-// import { PixiPlugin } from 'gsap/PixiPlugin';
-
-declare global {
-  interface Window {
-    automationScreenshot: string | undefined;
-  }
-}
-
-// PIXI documentation: https://pixijs.download/dev/docs/PIXI.html
-//
-// Module: node_modules/pixi.js/lib/pixi.es.js
-//
-// Code Examples:
-// sprite = new PIXI.Sprite(PIXI.loader.resources["images/anyImage.png"].texture);
-// base = new PIXI.BaseTexture(anyImageObject),
-// texture = new PIXI.Texture(base),
-// sprite = new PIXI.Sprite(texture);
 
 export default class GraphicsEngine {
   public readonly instance: PIXI.Application;
   public readonly stage: PIXI.Container;
   public readonly renderer: PIXI.Renderer;
   public readonly ticker: PIXI.Ticker;
-  // screen: PIXI.Rectangle;
 
   constructor(public app: FlowApp) {
     const hostHTMLWidth = this.app.hostHTML.clientWidth;
@@ -77,3 +58,16 @@ export default class GraphicsEngine {
     return this.instance.stage.addChild(...children);
   }
 }
+
+// import { gsap } from 'gsap';
+// import { PixiPlugin } from 'gsap/PixiPlugin';
+
+// PIXI documentation: https://pixijs.download/dev/docs/PIXI.html
+//
+// Module: node_modules/pixi.js/lib/pixi.es.js
+//
+// Code Examples:
+// sprite = new PIXI.Sprite(PIXI.loader.resources["images/anyImage.png"].texture);
+// base = new PIXI.BaseTexture(anyImageObject),
+// texture = new PIXI.Texture(base),
+// sprite = new PIXI.Sprite(texture);

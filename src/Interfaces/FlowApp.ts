@@ -8,6 +8,13 @@ import GUI from './GUI';
 import StateManager from './StateManager';
 import Actions from '../Actions';
 
+declare global {
+  interface Window {
+    app: FlowApp;
+    automationScreenshot: string | undefined;
+  }
+}
+
 export default class FlowApp {
   public readonly engine: GraphicsEngine;
   public readonly hostHTML: HTMLElement;
@@ -36,7 +43,6 @@ export default class FlowApp {
     this.webUi = new WebUI(this);
 
     if (this.env !== 'production') {
-      // @ts-ignore
       window.app = this;
     }
   }

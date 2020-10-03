@@ -1,5 +1,7 @@
 import FlowApp from './FlowApp';
-import BoardElement, { IBoardElementState } from './BoardElement';
+import BoardElement, { BoardElementContainer, IBoardElementState } from './BoardElement';
+import Memo from './Memo';
+import Group from './Group';
 
 export interface IPublicBoardState {
   [key: string]: IBoardElementState;
@@ -57,5 +59,21 @@ export default class Board {
     if (this.app.board.selected.size > 0) {
       return this.app.board.selected.keys().next().value;
     }
+  }
+
+  public getMemos() {
+    const displayObject = this.app.viewport.instance.children.filter(
+      (el) => el instanceof BoardElementContainer && el.boardElement instanceof Memo,
+    ) as BoardElementContainer[];
+
+    return displayObject.map((container) => container.boardElement);
+  }
+
+  public getGroups() {
+    const displayObject = this.app.viewport.instance.children.filter(
+      (el) => el instanceof BoardElementContainer && el.boardElement instanceof Group,
+    ) as BoardElementContainer[];
+
+    return displayObject.map((container) => container.boardElement);
   }
 }

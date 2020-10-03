@@ -134,7 +134,7 @@ export default class BoardElement {
     return new Promise((resolve) => {
       gsap.to(this, {
         ...boardElementProps,
-        duration: 0.7,
+        duration: 0.5,
         ease: 'power3.out',
         onStart: () => {
           this.container.zIndex = 1;

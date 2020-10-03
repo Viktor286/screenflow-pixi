@@ -104,6 +104,7 @@ export default class Group extends BoardElement {
     }
   }
 
+  // TODO: fix explode
   public explodeGroup(): IExplodedGroup {
     const initialScale = this.scale;
 
