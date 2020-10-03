@@ -6,7 +6,7 @@ import FilesIO from './Interfaces/FilesIO';
 import { SpaceModifiers } from './modifiers/SpaceModifiers';
 import Memo from './Interfaces/Memo';
 import Group from './Interfaces/Group';
-import { BoardElementContainer } from './Interfaces/BoardElement';
+import { basicGroupWithScaling, basicScaling } from './tests/automation/interaction-scripts/groupWithScaling';
 
 async function main() {
   const appDiv = document.querySelector('.app');
@@ -27,60 +27,6 @@ async function main() {
     }
 
     SpaceModifiers.setPositionGrid(app, 3, 400, 230, 0.2);
-
-    const group = app.board.addBoardElement(new Group(app));
-    console.log('group', group);
-
-    const displayObject = app.viewport.instance.children.filter(
-      (el) => el instanceof BoardElementContainer && el.boardElement instanceof Memo,
-    ) as BoardElementContainer[];
-
-    const Memos = displayObject.map((container) => container.boardElement);
-
-    // TODO: arrange position/scale tests scripts
-
-    // setTimeout(() => {
-    //   Memos[0].scale = 0.1;
-    //   Memos[3].scale = 0.3;
-    //   Memos[5].scale = 0.5;
-    //   group.implodeGroup({
-    //     boardElements: [Memos[0], Memos[3], Memos[5]],
-    //     initialScale: 1,
-    //   });
-    // }, 2000);
-    // setTimeout(() => {
-    //   group.explodeGroup();
-    // }, 3000);
-
-    setTimeout(() => {
-      app.actions.viewport.moveTo({ wX: 0, wY: 0 }, 0.13);
-    }, 700);
-
-    setTimeout(() => {
-      Memos[0].scale = 0.2;
-      Memos[3].scale = 0.22;
-      Memos[5].scale = 0.25;
-      group.addToGroup(Memos[0]);
-    }, 2000);
-    //
-    setTimeout(() => {
-      group.addToGroup(Memos[3]);
-    }, 3000);
-    setTimeout(() => {
-      group.addToGroup(Memos[5]);
-    }, 4000);
-    //
-    setTimeout(() => {
-      group.removeFromGroup(Memos[0]);
-    }, 5000);
-
-    setTimeout(() => {
-      group.addToGroup(Memos[7]);
-    }, 6000);
-
-    setTimeout(() => {
-      group.removeFromGroup(Memos[5]);
-    }, 6000);
 
     // /** Auto update from store **/
     // app.state.snapshots.store.forEach((snapShot, i) => {
@@ -116,4 +62,9 @@ async function main() {
   }
 }
 
-main();
+main().then(async () => {
+  const group = window.app.board.addBoardElement(new Group(window.app));
+  console.log('group', group);
+
+  await basicScaling();
+});

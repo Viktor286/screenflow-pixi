@@ -1,5 +1,5 @@
 const deviceList = require('./deviceList');
-const { time, windowSet } = require('./utils');
+const { time, windowSet } = require('../../utils');
 const puppeteer = require('puppeteer');
 const path = require('path');
 
