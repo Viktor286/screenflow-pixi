@@ -5,7 +5,8 @@ import { getImageUrlSet } from './fixtures/imagesDataSet';
 import FilesIO from './Interfaces/FilesIO';
 import { SpaceModifiers } from './modifiers/SpaceModifiers';
 import Memo from './Interfaces/Memo';
-import Group from './Interfaces/Group';
+import Group, { IExplodedGroup } from './Interfaces/Group';
+import { BoardElementContainer } from './Interfaces/BoardElement';
 
 async function main() {
   const appDiv = document.querySelector('.app');
@@ -27,10 +28,44 @@ async function main() {
 
     SpaceModifiers.setPositionGrid(app, 3, 400, 230, 0.2);
 
-    const g1 = app.board.addBoardElement(new Group(app));
-    g1.drawGroupBorder();
+    const group = app.board.addBoardElement(new Group(app));
+    console.log('group', group);
 
-    console.log('g1', g1);
+    const displayObject = app.viewport.instance.children.filter(
+      (el) => el instanceof BoardElementContainer && el.boardElement instanceof Memo,
+    ) as BoardElementContainer[];
+
+    const Memos = displayObject.map((container) => container.boardElement);
+
+    let groupMembers: IExplodedGroup;
+
+    setTimeout(() => {
+      Memos[0].scale = 0.2;
+      Memos[3].scale = 0.22;
+      Memos[5].scale = 0.24;
+
+      group.implodeGroup({ boardElements: [Memos[0], Memos[3], Memos[5]], initialScale: 0.1 });
+      // group.scale = 0.5;
+    }, 2000);
+    setTimeout(() => {
+      // group.x = -1000;
+      // group.y = -1000;
+      // group.scale = 0.5;
+      groupMembers = group.explodeGroup();
+    }, 3000);
+    // setTimeout(() => group.addToGroup(Memos[4]), 4000);
+    setTimeout(() => {
+      group.implodeGroup(groupMembers);
+      // console.log('GMemo', Memos[0]);
+      // console.log('GMemo before x move', Memos[0].x);
+      // Memos[0].x = -15;
+      // console.log('GMemo after x move', Memos[0].x);
+    }, 5000);
+    //
+    setTimeout(() => {
+      // group.scale = 0.5;
+      group.explodeGroup();
+    }, 6000);
 
     // /** Auto update from store **/
     // app.state.snapshots.store.forEach((snapShot, i) => {

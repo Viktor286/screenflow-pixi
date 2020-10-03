@@ -35,6 +35,10 @@ export default class GraphicsEngine {
       height: hostHTMLHeight,
       antialias: true,
       // TODO: res 1 for slow devices or native pixel only for new devices?
+
+      // TODO: Some older mobile devices run things a little slower.
+      //  passing in the option 'legacy:true' to the renderer can help with performance.
+      //  https://github.com/pixijs/pixi.js/wiki/v4-Performance-Tips
       resolution: window.automationScreenshot ? 1 : window.devicePixelRatio || 1,
       autoDensity: !window.automationScreenshot,
       transparent: true,

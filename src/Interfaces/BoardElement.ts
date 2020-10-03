@@ -1,6 +1,7 @@
 import * as PIXI from 'pixi.js';
 import FlowApp from './FlowApp';
 import { gsap } from 'gsap';
+import Group from './Group';
 
 export interface IBoardElementState {
   x?: number;
@@ -11,6 +12,7 @@ export interface IBoardElementState {
 
 export default class BoardElement {
   public selected = false;
+  public inGroup: Group | undefined = undefined;
   public container = new BoardElementContainer(this);
   private selectionDrawing = new PIXI.Graphics();
   public readonly id: string;
@@ -34,46 +36,17 @@ export default class BoardElement {
     return { width, height };
   }
 
-  get width() {
-    return this.container.width;
-  }
-
-  set width(val: number) {
-    this.container.width = val;
-    this.updateCenterPivot();
-  }
-
-  get height() {
-    return this.container.height;
-  }
-
-  set height(val: number) {
-    this.container.height = val;
-    this.updateCenterPivot();
-  }
-
-  get pivotX() {
-    return this.container.pivot.x;
-  }
-
-  set pivotX(val: number) {
-    this.container.pivot.x = val;
-  }
-
-  get pivotY() {
-    return this.container.pivot.y;
-  }
-
-  set pivotY(val: number) {
-    this.container.pivot.y = val;
-  }
-
   get x() {
     return this.container.x;
   }
 
   set x(val: number) {
-    this.container.x = val;
+    if (this.inGroup) {
+      // we don't allow to change pos in group for now
+      this.container.x = val;
+    } else {
+      this.container.x = val;
+    }
   }
 
   get y() {
@@ -81,7 +54,12 @@ export default class BoardElement {
   }
 
   set y(val: number) {
-    this.container.y = val;
+    if (this.inGroup) {
+      this.container.y = val;
+      // we don't allow to change pos in group for now
+    } else {
+      this.container.y = val;
+    }
   }
 
   get scale() {
@@ -89,14 +67,66 @@ export default class BoardElement {
   }
 
   set scale(val: number) {
-    this.container.scale.x = val;
-    this.container.scale.y = val;
+    if (this.inGroup) {
+      // we don't allow to change pos in group for now
+      this.container.scale.x = val;
+      this.container.scale.y = val;
+    } else {
+      this.container.scale.x = val;
+      this.container.scale.y = val;
+    }
   }
 
+  get width() {
+    // does it call getLocalBounds anyway?
+    return this.container.width;
+  }
+
+  get height() {
+    // does it call getLocalBounds anyway?
+    return this.container.height;
+  }
+
+  /** width/height	Implemented in Container. Scaling. The width property calculates scale.x/scale.y by dividing
+   * the "requested" width/height by the local bounding box width/height. It is indirectly an abstraction over scale.x/scale.y,
+   * and there is no concept of user-defined width. https://pixijs.download/dev/docs/PIXI.DisplayObject.html */
+
+  /** First, remember that in pixi, width and height are just another way of expressing scale.
+   // Second, a containers width and height are expressed by the bounds of its children, but express no dimensions themselves.
+   // https://github.com/pixijs/pixi.js/issues/4990#issuecomment-401556950 */
+
+  // set width(val: number) {
+  //   this.container.width = val;
+  // }
+
+  // set height(val: number) {
+  //   this.container.height = val;
+  // }
+
+  // get pivotX() {
+  //   return this.container.pivot.x;
+  // }
+  //
+  // set pivotX(val: number) {
+  //   this.container.pivot.x = val;
+  // }
+  //
+  // get pivotY() {
+  //   return this.container.pivot.y;
+  // }
+  //
+  // set pivotY(val: number) {
+  //   this.container.pivot.y = val;
+  // }
+
   public select() {
-    this.app.board.addElementToSelected(this);
-    this.selected = true;
-    this.drawSelection();
+    if (this.inGroup) {
+      this.inGroup.selectGroup(); // TODO: make proper selection
+    } else {
+      this.app.board.addElementToSelected(this);
+      this.selected = true;
+      this.drawSelection();
+    }
   }
 
   public deselect() {
@@ -136,13 +166,8 @@ export default class BoardElement {
       .drawRect(0, 0, width, height);
   }
 
-  private eraseSelection() {
+  public eraseSelection() {
     this.selectionDrawing.clear();
-  }
-
-  private updateCenterPivot() {
-    this.pivotX = this.width / 2;
-    this.pivotY = this.height / 2;
   }
 }
 
@@ -154,4 +179,17 @@ export class BoardElementContainer extends PIXI.Container implements IBoardEleme
   constructor(public boardElement: BoardElement) {
     super();
   }
+
+  // public addChild<TChildren extends PIXI.DisplayObject[]>(...children: TChildren): TChildren[0] {
+  //   const originReturn = super.addChild.call(this, ...arguments);
+  //   // if (this instanceof Memo) {
+  //   //   this.updateCenterPivot();
+  //   // }
+  //   return originReturn;
+  // }
+  //
+  // public updateCenterPivot() {
+  //   this.pivot.x = this.width / 2;
+  //   this.pivot.y = this.height / 2;
+  // }
 }

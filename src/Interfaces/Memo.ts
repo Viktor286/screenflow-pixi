@@ -10,12 +10,8 @@ export default class Memo extends BoardElement {
   constructor(texture: PIXI.Texture, public app: FlowApp) {
     super(app);
     this.snapshot = new Snapshot(texture, this);
-    this.container.addChild(this.snapshot.sprite);
 
-    // TODO: Why this working like that?
-    //  why we cant remove lines above?
-    this.width = this.snapshot.width;
-    this.height = this.snapshot.height;
+    this.container.addChild(this.snapshot.sprite);
 
     this.container.interactive = true;
   }

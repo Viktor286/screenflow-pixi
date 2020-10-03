@@ -208,8 +208,8 @@ export default class TimedGesture {
     // ImmediatePressDown event could be too frequent,
     // its probably best choice to use ImmediatePressUp
     this.app.gui.focusPoint.putFocusPoint(e.worldClick);
-    // console.log('worldClick', e.worldClick.wX, e.worldClick.wY);
-    // console.log('screenClick', e.screenClick.sX, e.screenClick.sY);
+    console.log('worldClick', e.worldClick.wX, e.worldClick.wY);
+    console.log('screenClick', e.screenClick.sX, e.screenClick.sY);
     this.sendToMonitor('Immediate Press Down', this.getClickInfoStr(e));
   }
 

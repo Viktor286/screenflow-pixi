@@ -69,5 +69,6 @@ export default class SlideControls {
 
   private onSliderZoomed = () => {
     this.app.board.updateSelectionGraphics();
+    this.app.webUi.updateZoomBtn();
   };
 }
