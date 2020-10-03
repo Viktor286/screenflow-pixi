@@ -18,6 +18,8 @@ export default class Group extends BoardElement {
 
     this.container.interactive = true;
     this.groupDrawing.zIndex = 1;
+
+    // TODO: looks like this is not good nesting because this interferes with group size
     this.container.addChild(this.groupDrawing);
 
     // PIXI.DisplayObjectContainer
@@ -29,17 +31,53 @@ export default class Group extends BoardElement {
     // https://github.com/pixijs/pixi.js/wiki/v4-Performance-Tips
   }
 
-  public selectGroup() {
+  public select() {
     this.app.board.addElementToSelected(this);
     this.selected = true;
+
+    this.drawSelection();
+
+    this.container.children.forEach((elm) => {
+      if (elm instanceof BoardElementContainer) {
+        this.selected = true;
+      }
+    });
+  }
+
+  public deselect() {
+    this.app.board.removeElementFromSelected(this);
+    this.selected = false;
+
+    this.eraseSelection();
+
+    this.container.children.forEach((elm) => {
+      if (elm instanceof BoardElementContainer) {
+        this.selected = false;
+      }
+    });
+  }
+
+  public drawSelection(): void {
+    this.groupDrawing
+      .clear()
+      .lineStyle(2 / this.app.viewport.scale / this.scale, 0xe3d891)
+      .drawRect(0, 0, this.width, this.height);
 
     this.container.children.forEach((elm) => {
       if (elm instanceof BoardElementContainer) {
         elm.boardElement.drawSelection();
       }
     });
+  }
 
-    this.drawGroupBorder();
+  public eraseSelection() {
+    this.groupDrawing.clear();
+
+    this.container.children.forEach((elm) => {
+      if (elm instanceof BoardElementContainer) {
+        elm.boardElement.eraseSelection();
+      }
+    });
   }
 
   public addToGroup<T extends BoardElement>(boardElement: T) {
@@ -79,6 +117,7 @@ export default class Group extends BoardElement {
 
     elementMap.forEach((coords, elm) => {
       elm.boardElement.inGroup = undefined;
+      elm.boardElement.eraseSelection();
       this.app.viewport.instance.addChild(elm);
       elm.x = coords.x;
       elm.y = coords.y;
@@ -136,19 +175,11 @@ export default class Group extends BoardElement {
       }
     });
 
-    // Draw border before scale
-    this.drawGroupBorder(initialScale);
-
     // Apply needed group scale
     this.scale = initialScale;
     // this.container.cacheAsBitmap = true;
-  }
 
-  public drawGroupBorder(scale = 1): void {
-    console.log('this.scale', this.scale);
-    this.groupDrawing
-      .clear()
-      .lineStyle(1 / scale, 0xe3d891)
-      .drawRect(0, 0, this.width, this.height);
+    // Draw for debug
+    // this.drawSelection();
   }
 }

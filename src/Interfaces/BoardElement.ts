@@ -31,22 +31,12 @@ export default class BoardElement {
     this.container.addChild(this.selectionDrawing);
   }
 
-  public getLocalDimensions() {
-    const { width, height } = this.container.getLocalBounds();
-    return { width, height };
-  }
-
   get x() {
     return this.container.x;
   }
 
   set x(val: number) {
-    if (this.inGroup) {
-      // we don't allow to change pos in group for now
-      this.container.x = val;
-    } else {
-      this.container.x = val;
-    }
+    this.container.x = val;
   }
 
   get y() {
@@ -54,12 +44,7 @@ export default class BoardElement {
   }
 
   set y(val: number) {
-    if (this.inGroup) {
-      this.container.y = val;
-      // we don't allow to change pos in group for now
-    } else {
-      this.container.y = val;
-    }
+    this.container.y = val;
   }
 
   get scale() {
@@ -67,23 +52,15 @@ export default class BoardElement {
   }
 
   set scale(val: number) {
-    if (this.inGroup) {
-      // we don't allow to change pos in group for now
-      this.container.scale.x = val;
-      this.container.scale.y = val;
-    } else {
-      this.container.scale.x = val;
-      this.container.scale.y = val;
-    }
+    this.container.scale.x = val;
+    this.container.scale.y = val;
   }
 
   get width() {
-    // does it call getLocalBounds anyway?
     return this.container.width;
   }
 
   get height() {
-    // does it call getLocalBounds anyway?
     return this.container.height;
   }
 
@@ -103,25 +80,25 @@ export default class BoardElement {
   //   this.container.height = val;
   // }
 
-  // get pivotX() {
-  //   return this.container.pivot.x;
-  // }
-  //
-  // set pivotX(val: number) {
-  //   this.container.pivot.x = val;
-  // }
-  //
-  // get pivotY() {
-  //   return this.container.pivot.y;
-  // }
-  //
-  // set pivotY(val: number) {
-  //   this.container.pivot.y = val;
-  // }
+  get pivotX() {
+    return this.container.pivot.x;
+  }
+
+  set pivotX(val: number) {
+    this.container.pivot.x = val;
+  }
+
+  get pivotY() {
+    return this.container.pivot.y;
+  }
+
+  set pivotY(val: number) {
+    this.container.pivot.y = val;
+  }
 
   public select() {
     if (this.inGroup) {
-      this.inGroup.selectGroup(); // TODO: make proper selection
+      this.inGroup.select();
     } else {
       this.app.board.addElementToSelected(this);
       this.selected = true;
@@ -133,6 +110,18 @@ export default class BoardElement {
     this.app.board.removeElementFromSelected(this);
     this.selected = false;
     this.eraseSelection();
+  }
+
+  public drawSelection(): void {
+    // Compensate selection draw scale which is child for this.container's scale
+    this.selectionDrawing
+      .clear()
+      .lineStyle(4 / this.app.viewport.scale / this.scale, 0x73b2ff)
+      .drawRect(0, 0, this.width / this.scale, this.height / this.scale);
+  }
+
+  public eraseSelection() {
+    this.selectionDrawing.clear();
   }
 
   public animateBoardElement(boardElementProps: IBoardElementState): Promise<IBoardElementState> {
@@ -156,18 +145,6 @@ export default class BoardElement {
         },
       });
     });
-  }
-
-  public drawSelection(): void {
-    const { width, height } = this.getLocalDimensions();
-    this.selectionDrawing
-      .clear()
-      .lineStyle(4 / this.app.viewport.scale / this.scale, 0x73b2ff)
-      .drawRect(0, 0, width, height);
-  }
-
-  public eraseSelection() {
-    this.selectionDrawing.clear();
   }
 }
 

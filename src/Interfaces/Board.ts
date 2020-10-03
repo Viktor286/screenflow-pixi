@@ -1,5 +1,6 @@
 import FlowApp from './FlowApp';
 import BoardElement, { IBoardElementState } from './BoardElement';
+import Group from './Group';
 
 export interface IPublicBoardState {
   [key: string]: IBoardElementState;
