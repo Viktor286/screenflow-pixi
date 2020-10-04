@@ -1,7 +1,7 @@
 import * as PIXI from 'pixi.js';
 import FlowApp from './FlowApp';
 import BoardElement, { BoardElementContainer } from './BoardElement';
-import { Point } from '../types/global';
+import { ITransforms } from '../types/global';
 
 export interface IExplodedGroup {
   boardElements: BoardElement[];
@@ -17,17 +17,24 @@ export default class Group extends BoardElement {
   constructor(public app: FlowApp) {
     super(app);
 
+    this.container = new BoardElementContainer(this);
+    this.container.zIndex = 1;
     this.container.interactive = true;
-    this.groupDrawing.zIndex = 2;
+    this.container.sortableChildren = true;
 
+    this.groupDrawing.zIndex = 2;
     this.container.addChild(this.groupDrawing);
+
+    this.app.board.addBoardElement(this);
 
     // PIXI.DisplayObjectContainer
 
     // If an object has no interactive children use interactiveChildren = false
     // the interaction manager will then be able to avoid crawling through the object.
 
-    // Set this.container.hitArea = new PIXI.Rectangle(x,y,w,h). As above should stop the interaction manager from crawling through the object.
+    // TODO: try this optimization
+    // Set this.container.hitArea = new PIXI.Rectangle(x,y,w,h).
+    // As above should stop the interaction manager from crawling through the object.
     // https://github.com/pixijs/pixi.js/wiki/v4-Performance-Tips
   }
 
@@ -104,36 +111,36 @@ export default class Group extends BoardElement {
     }
   }
 
-  // TODO: fix explode
   public explodeGroup(): IExplodedGroup {
     const initialScale = this.scale;
 
     if (this.container) {
-      const elementMap = new Map<BoardElementContainer, Point>();
+      const elementMap = new Map<BoardElementContainer, ITransforms>();
       const boardElements: BoardElement[] = [];
 
       // Prepare future position
       this.container.children.forEach((elm) => {
         if (elm instanceof BoardElementContainer) {
-          elementMap.set(elm, { x: elm.x + this.x, y: elm.y + this.y });
+          elementMap.set(elm, {
+            x: (elm.x + this.x * this.scale) * this.scale,
+            y: (elm.y + this.y * this.scale) * this.scale,
+            s: elm.scale.x * this.scale,
+          });
         }
       });
 
       // Remove children from group & apply prepared position
       elementMap.forEach((coords, boardElementContainer) => {
-        boardElementContainer.boardElement.inGroup = undefined;
-        boardElementContainer.zIndex = 0;
-        boardElementContainer.boardElement.eraseSelection();
+        const { boardElement } = boardElementContainer;
+        boardElement.inGroup = undefined;
+        boardElement.eraseSelection();
         this.app.viewport.instance.addChild(boardElementContainer);
-        boardElementContainer.x = coords.x;
-        boardElementContainer.y = coords.y;
-        // elm.boardElement.scale = elm.boardElement.scale / fScale;
-        // elm.boardElement.scale = elm.boardElement.scale / fScale;
-        boardElements.push(boardElementContainer.boardElement);
+        boardElement.x = coords.x;
+        boardElement.y = coords.y;
+        boardElement.scale = coords.s;
+        boardElements.push(boardElement);
       });
 
-      this.container.removeChildren();
-      this.container.destroy();
       return { boardElements, initialScale };
     }
 
@@ -144,14 +151,6 @@ export default class Group extends BoardElement {
   }
 
   public implodeGroup({ boardElements, initialScale = 1 }: IExplodedGroup) {
-    this.container = new BoardElementContainer(this);
-    this.container.zIndex = 1;
-    this.container.interactive = true;
-    this.groupDrawing.zIndex = 2;
-    this.container.addChild(this.groupDrawing);
-
-    this.app.board.addBoardElement(this);
-
     // Calculate group transforms
     const fScale = 1 / initialScale;
 
@@ -161,9 +160,8 @@ export default class Group extends BoardElement {
       boardElement.y *= fScale;
       boardElement.scale *= fScale;
 
-      this.container.addChildAt(boardElement.container, 0);
+      this.container.addChildAt(boardElement.container, 1);
       boardElement.inGroup = this;
-      boardElement.container.zIndex = 1;
     });
 
     // After all children are ready, calc group transforms

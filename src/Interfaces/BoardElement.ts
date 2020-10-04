@@ -56,12 +56,28 @@ export default class BoardElement {
     this.container.scale.y = val;
   }
 
-  get width() {
-    return this.container.width;
+  get zIndex() {
+    return this.container.zIndex;
   }
 
-  get height() {
-    return this.container.height;
+  set zIndex(val: number) {
+    this.container.zIndex = val;
+  }
+
+  get pivotX() {
+    return this.container.pivot.x;
+  }
+
+  set pivotX(val: number) {
+    this.container.pivot.x = val;
+  }
+
+  get pivotY() {
+    return this.container.pivot.y;
+  }
+
+  set pivotY(val: number) {
+    this.container.pivot.y = val;
   }
 
   /** width/height	Implemented in Container. Scaling. The width property calculates scale.x/scale.y by dividing
@@ -80,20 +96,20 @@ export default class BoardElement {
   //   this.container.height = val;
   // }
 
-  get pivotX() {
-    return this.container.pivot.x;
+  get width() {
+    return this.container.width;
   }
 
-  set pivotX(val: number) {
-    this.container.pivot.x = val;
+  get height() {
+    return this.container.height;
   }
 
-  get pivotY() {
-    return this.container.pivot.y;
+  get centerX() {
+    return this.x + this.width / 2;
   }
 
-  set pivotY(val: number) {
-    this.container.pivot.y = val;
+  get centerY() {
+    return this.y + this.height / 2;
   }
 
   public remove() {
