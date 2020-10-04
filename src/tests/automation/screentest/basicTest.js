@@ -4,7 +4,7 @@ const path = require('path');
 const puppeteer = require('puppeteer');
 const pixelmatch = require('pixelmatch');
 const PNG = require('pngjs').PNG;
-const { time, windowSet } = require('./utils');
+const { time, windowSet } = require('../../utils');
 
 const targetDir = '/initialView';
 const targetPath = path.normalize(__dirname + targetDir);

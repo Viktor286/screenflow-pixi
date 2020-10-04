@@ -1,6 +1,6 @@
 const start = new Date();
 
-function delay(time) {
+function wait(time) {
   return new Promise(function (resolve) {
     setTimeout(resolve, time);
   });
@@ -22,6 +22,6 @@ function windowSet(page, name, value) {
 
 module.exports = {
   time,
-  delay,
+  wait,
   windowSet,
 };

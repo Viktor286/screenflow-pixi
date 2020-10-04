@@ -302,10 +302,11 @@ export default class Viewport {
         },
         onUpdate: () => {
           this.app.gui.stageBackTile.updateGraphics();
+          this.app.board.updateSelectionGraphics();
         },
         onComplete: () => {
           // this.app.viewport.interactive = true;
-          this.app.viewport.onCameraAnimationEnds();
+          setTimeout(() => this.app.viewport.onCameraAnimationEnds()); // send exec to next frame
           resolve({ ...animateProps, cwX, cwY });
         },
       });

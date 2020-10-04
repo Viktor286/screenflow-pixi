@@ -1,5 +1,5 @@
 import * as PIXI from 'pixi.js';
-import { Memo } from './Memo';
+import Memo from './Memo';
 
 /** TODO: Snapshot needs to have its own set of events, extends PIXI.Container ? **/
 

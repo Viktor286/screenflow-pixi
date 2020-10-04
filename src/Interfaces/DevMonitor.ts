@@ -1,5 +1,5 @@
 type StreamMessage = string;
-type Monitor = 'stageEvents' | 'viewportEvents' | 'memoEvents';
+type Monitor = 'stageEvents' | 'viewportEvents' | 'boardEvents';
 
 interface IMonitorStreams {
   [key: string]: MonitoringStream;

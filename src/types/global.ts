@@ -1,6 +1,8 @@
-// most of the types via FlowApp should belong to corresponding interfaces
-
-export type Point = {
+export interface IPoint {
   x: number;
   y: number;
-};
+}
+
+export interface ITransforms extends IPoint {
+  s: number;
+}

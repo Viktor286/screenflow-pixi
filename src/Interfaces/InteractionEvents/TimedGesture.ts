@@ -1,7 +1,7 @@
 import StageEvents, { StageEvent } from './StageEvents';
 import FlowApp from '../FlowApp';
+import { BoardElementContainer } from '../BoardElement';
 import { IScreenCoords, IWorldCoords } from '../Viewport';
-import { MemoContainer } from '../Memo';
 
 type IGestureEvent = {
   screenClick: IScreenCoords;
@@ -144,16 +144,18 @@ export default class TimedGesture {
       y: e.screenClick.sY,
     });
 
-    if (hit instanceof MemoContainer) {
-      const memo = hit.memo;
-      if (memo.selected) {
+    if (hit instanceof BoardElementContainer) {
+      const boardElement = hit.boardElement;
+      if (boardElement.selected) {
         // fitToArea action adds more confusion than benefit when user clicked on selected memo
         // this.app.actions.viewport.fitToArea({ wX: x, wY: y }, width, height);
       } else {
-        memo.select();
+        boardElement.select();
       }
 
-      console.log(`pressUpImmediate Memo clicked "${memo.id}" `, memo);
+      console.log(`pressUpImmediate Memo clicked "${boardElement.id}" `, boardElement);
+    } else {
+      this.app.board.clearSelectedElements();
     }
 
     this.sendToMonitor('Immediate Press Up', this.getClickInfoStr(e));
@@ -182,20 +184,20 @@ export default class TimedGesture {
     });
 
     // fitToArea Or ZoomIn
-    if (hit instanceof MemoContainer) {
-      const { x, y, width, height } = hit.memo;
-      const targetScale = this.app.viewport.findScaleFit(width, height);
-      if (
-        this.app.viewport.scale >=
-          targetScale + (targetScale / 100) * this.app.viewport.fitAreaMarginPercent ||
-        (Math.round(this.app.viewport.getScreenCenterInWord().wX) === x &&
-          Math.round(this.app.viewport.getScreenCenterInWord().wY) === y)
-      ) {
-        this.app.actions.viewport.zoomIn(e.worldClick);
-      } else {
-        this.app.actions.viewport.fitToArea({ wX: x, wY: y }, width, height);
-        hit.memo.select();
+    if (hit instanceof BoardElementContainer) {
+      let targetElement = hit.boardElement;
+
+      // rout to group if group member
+      if (targetElement.inGroup) {
+        targetElement = targetElement.inGroup;
       }
+
+      let { x, y, width, height } = targetElement;
+      x += width / 2;
+      y += height / 2;
+
+      this.app.actions.viewport.fitToArea({ wX: x, wY: y }, width, height);
+      hit.boardElement.select();
     } else {
       this.app.actions.viewport.zoomIn(e.worldClick);
     }
@@ -206,8 +208,8 @@ export default class TimedGesture {
     // ImmediatePressDown event could be too frequent,
     // its probably best choice to use ImmediatePressUp
     this.app.gui.focusPoint.putFocusPoint(e.worldClick);
-    // console.log('worldClick', e.worldClick.wX, e.worldClick.wY);
-    // console.log('screenClick', e.screenClick.sX, e.screenClick.sY);
+    console.log('worldClick', e.worldClick.wX, e.worldClick.wY);
+    console.log('screenClick', e.screenClick.sX, e.screenClick.sY);
     this.sendToMonitor('Immediate Press Down', this.getClickInfoStr(e));
   }
 

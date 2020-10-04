@@ -1,11 +1,11 @@
 import FlowApp from './FlowApp';
 import { IPublicCameraState } from './Viewport';
-import { IPublicMemosState } from './Memos';
-import { IPublicMemo, Memo } from './Memo';
+import { IPublicBoardState } from './Board';
+import BoardElement, { IBoardElementState } from './BoardElement';
 
 interface IAppState {
   camera: IPublicCameraState;
-  memos: IPublicMemosState;
+  board: IPublicBoardState;
   [key: string]: any;
 }
 
@@ -18,7 +18,7 @@ interface IStateSlice {
 export default class StateManager {
   public readonly publicState: IAppState = {
     camera: this.app.viewport.publicCameraState,
-    memos: this.app.memos.publicMemosState,
+    board: this.app.board.state,
   };
   public history: IStateSlice[] = [];
   public historyLevel = 50;
@@ -121,17 +121,17 @@ export default class StateManager {
     updateValue: number | IPublicCameraState,
     stateScope: IStateScope,
   ): number | IPublicCameraState | Promise<IPublicCameraState> | boolean {
-    if (stateScope.startsWith('/memos')) {
+    if (stateScope.startsWith('/board')) {
       if (this.isScopeWithSubDomain(stateScope)) {
         const { target: id } = this.parseSubdomainScope(stateScope);
-        const memo = this.app.memos.innerMemoMap.get(id);
+        const boardElement = this.app.board.state[id].element;
 
-        if (memo) {
+        if (boardElement) {
           if (property === 'animation' && typeof updateValue === 'object') {
-            this.asyncMemoAnimationOperation(memo, updateValue);
+            this.asyncBoardElementAnimationOperation(boardElement, updateValue);
             return true;
           }
-          memo[property] = updateValue;
+          boardElement[property] = updateValue;
           this.getOriginState(stateScope)[property] = updateValue;
         }
       }
@@ -171,10 +171,12 @@ export default class StateManager {
     this.app.viewport.animateCamera(value).then((cameraProps) => this.setState('camera', { ...cameraProps }));
   }
 
-  private asyncMemoAnimationOperation(targetMemo: Memo, value: IPublicMemo) {
-    targetMemo
-      .animateMemo(value)
-      .then((memoProps) => this.setState(`/memos/${targetMemo.id}`, { ...memoProps }));
+  private asyncBoardElementAnimationOperation(targetBoardElement: BoardElement, value: IBoardElementState) {
+    targetBoardElement
+      .animateBoardElement(value)
+      .then((boardElementProps) =>
+        this.setState(`/board/${targetBoardElement.id}`, { ...boardElementProps }),
+      );
   }
 
   private isScopeWithSubDomain(inputStr: string): boolean {

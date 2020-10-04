@@ -4,6 +4,8 @@ import FlowApp from './Interfaces/FlowApp';
 import { getImageUrlSet } from './fixtures/imagesDataSet';
 import FilesIO from './Interfaces/FilesIO';
 import { SpaceModifiers } from './modifiers/SpaceModifiers';
+import Memo from './Interfaces/Memo';
+import { basicGroupWithScaling } from './tests/automation/interaction-scripts/groupWithScaling';
 
 async function main() {
   const appDiv = document.querySelector('.app');
@@ -20,10 +22,10 @@ async function main() {
     const loader = await FilesIO.loadUrlSet(getImageUrlSet(12));
 
     for (const resource of Object.values(loader.resources)) {
-      app.memos.addMemo(resource.texture);
+      app.board.addBoardElement(new Memo(resource.texture, app));
     }
 
-    SpaceModifiers.setPositionGrid(app.memos.innerMemoMap, 3, 400, 230, 0.2);
+    SpaceModifiers.setPositionGrid(app, 3, 400, 230, 0.2);
 
     // /** Auto update from store **/
     // app.state.snapshots.store.forEach((snapShot, i) => {
@@ -59,4 +61,6 @@ async function main() {
   }
 }
 
-main();
+main().then(async () => {
+  await basicGroupWithScaling();
+});

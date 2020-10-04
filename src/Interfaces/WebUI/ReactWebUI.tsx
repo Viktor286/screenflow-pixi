@@ -9,6 +9,7 @@ let app: FlowApp;
 
 type IState = {
   zoomIndicator: string;
+  isMemoSelected: boolean;
 };
 
 class ReactWebUI extends Component {
@@ -18,12 +19,35 @@ class ReactWebUI extends Component {
     super(props);
     this.state = {
       zoomIndicator: app.viewport.getZoomString(),
+      isMemoSelected: false,
     };
   }
 
   public render() {
     return (
       <main className={styles.mainContainer}>
+        {this.state.isMemoSelected ? (
+          <>
+            <SquareButton
+              text="s-"
+              action={() =>
+                app.actions.board.scaleTo(
+                  app.board.tempGetFirstSelectedId(),
+                  app.stateManager.getState(`/board/${app.board.tempGetFirstSelectedId()}`).scale / 2,
+                )
+              }
+            />
+            <SquareButton
+              text="s+"
+              action={() =>
+                app.actions.board.scaleTo(
+                  app.board.tempGetFirstSelectedId(),
+                  app.stateManager.getState(`/board/${app.board.tempGetFirstSelectedId()}`).scale * 2,
+                )
+              }
+            />
+          </>
+        ) : null}
         <SquareButton text="-" action={() => app.actions.viewport.zoomOut()} />
         <RectangleButton text={this.state.zoomIndicator} action={() => app.actions.viewport.zoom100()} />
         <SquareButton text="+" action={() => app.actions.viewport.zoomIn()} />
