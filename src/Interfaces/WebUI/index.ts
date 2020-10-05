@@ -1,6 +1,7 @@
 import FlowApp from '../FlowApp';
 import { reactInitializer } from './ReactWebUI';
 import { Component } from 'react';
+import { ShiftModeState } from '../InteractionEvents/Keyboard';
 
 export default class WebUI {
   reactWebUI: Component = reactInitializer(this.app);
@@ -16,6 +17,12 @@ export default class WebUI {
   public updateSelectedMode() {
     this.reactWebUI.setState({
       isMemoSelected: this.app.board.selected.size,
+    });
+  }
+
+  public updateShiftMode(state: ShiftModeState) {
+    this.reactWebUI.setState({
+      isShiftActive: state !== 'off',
     });
   }
 }

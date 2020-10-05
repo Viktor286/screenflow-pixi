@@ -10,6 +10,7 @@ let app: FlowApp;
 type IState = {
   zoomIndicator: string;
   isMemoSelected: boolean;
+  isShiftActive: boolean;
 };
 
 class ReactWebUI extends Component {
@@ -20,6 +21,7 @@ class ReactWebUI extends Component {
     this.state = {
       zoomIndicator: app.viewport.getZoomString(),
       isMemoSelected: false,
+      isShiftActive: false,
     };
   }
 
@@ -51,6 +53,7 @@ class ReactWebUI extends Component {
         <SquareButton text="-" action={() => app.actions.viewport.zoomOut()} />
         <RectangleButton text={this.state.zoomIndicator} action={() => app.actions.viewport.zoom100()} />
         <SquareButton text="+" action={() => app.actions.viewport.zoomIn()} />
+        <SquareButton text={this.state.isShiftActive.toString()} action={() => true} />
       </main>
     );
   }

@@ -1,6 +1,7 @@
 import GraphicsEngine from './GraphicsEngine';
 import Viewport from './Viewport';
 import StageEvents from './InteractionEvents/StageEvents';
+import Keyboard from './InteractionEvents/Keyboard';
 import DevMonitor from './DevMonitor';
 import Board from './Board';
 import WebUI from './WebUI';
@@ -26,6 +27,7 @@ export default class FlowApp {
   public readonly actions: Actions;
   public readonly stageEvents: StageEvents;
   public readonly stateManager: StateManager;
+  public readonly keyboard: Keyboard;
   public readonly env: string | undefined;
 
   constructor(targetDiv: HTMLElement) {
@@ -41,6 +43,7 @@ export default class FlowApp {
     this.stateManager = new StateManager(this);
     this.gui = new GUI(this);
     this.webUi = new WebUI(this);
+    this.keyboard = new Keyboard(this);
 
     if (this.env !== 'production') {
       window.app = this;
