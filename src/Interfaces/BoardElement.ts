@@ -14,6 +14,7 @@ export interface IBoardElementState {
 export default class BoardElement {
   public selected = false;
   public isDragging = false;
+  public isScaleFromCenter = false;
   public inGroup: Group | undefined = undefined;
   public container = new BoardElementContainer(this);
   private selectionDrawing = new PIXI.Graphics();
@@ -60,18 +61,23 @@ export default class BoardElement {
   }
 
   set scale(val: number) {
-    // offset approach
-    const oWidth = this.container.width;
-    const oHeight = this.container.height;
+    if (this.isScaleFromCenter) {
+      // offset approach
+      const oWidth = this.container.width;
+      const oHeight = this.container.height;
 
-    this.container.scale.x = val;
-    this.container.scale.y = val;
+      this.container.scale.x = val;
+      this.container.scale.y = val;
 
-    const width = this.container.width;
-    const height = this.container.height;
+      const width = this.container.width;
+      const height = this.container.height;
 
-    this.container.position.x -= (width - oWidth) / 2;
-    this.container.position.y -= (height - oHeight) / 2;
+      this.container.position.x -= (width - oWidth) / 2;
+      this.container.position.y -= (height - oHeight) / 2;
+    } else {
+      this.container.scale.x = val;
+      this.container.scale.y = val;
+    }
   }
 
   get zIndex() {
@@ -200,6 +206,7 @@ export default class BoardElement {
   };
 
   public animateBoardElement(boardElementProps: IBoardElementState): Promise<IBoardElementState> {
+    this.isScaleFromCenter = true;
     return new Promise((resolve) => {
       gsap.to(this, {
         ...boardElementProps,
@@ -216,6 +223,7 @@ export default class BoardElement {
         },
         onComplete: () => {
           this.container.zIndex = 0; // bring back zIndex after sorting operation
+          this.isScaleFromCenter = false;
           resolve({ ...boardElementProps });
         },
       });
