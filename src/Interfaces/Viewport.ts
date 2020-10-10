@@ -259,6 +259,13 @@ export default class Viewport {
     };
   }
 
+  public getWorldCoordsFromMouse() {
+    return this.instance.toLocal(
+      // this.app.engine.renderer.plugins.interaction.mouse.global,
+      this.app.engine.renderer.plugins.interaction.eventData.data.global,
+    );
+  }
+
   public findScaleFit(width: number, height: number) {
     return this.app.viewport.instance.findFit(width, height);
   }

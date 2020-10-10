@@ -30,6 +30,7 @@ class ReactWebUI extends Component {
       <main className={styles.mainContainer}>
         {this.state.isMemoSelected ? (
           <>
+            <SquareButton text={this.state.isShiftActive.toString()} action={() => true} />
             <SquareButton
               text="s-"
               action={() =>

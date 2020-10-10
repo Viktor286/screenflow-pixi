@@ -33,6 +33,21 @@ export default class SlideControls {
     this.activated = true;
   }
 
+  public pauseSlideControls() {
+    this.viewport.instance.plugins.pause('drag');
+    this.viewport.instance.plugins.pause('pinch');
+    this.viewport.instance.plugins.pause('wheel');
+    this.activated = false;
+  }
+
+  public unpauseSlideControls() {
+    console.log('unpauseSlideControls');
+    this.viewport.instance.plugins.resume('drag');
+    this.viewport.instance.plugins.resume('pinch');
+    this.viewport.instance.plugins.resume('wheel');
+    this.activated = true;
+  }
+
   public removeSlideControls() {
     this.viewport.instance.plugins.remove('drag');
     this.viewport.instance.plugins.remove('pinch');

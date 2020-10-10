@@ -15,4 +15,14 @@ export default class Memo extends BoardElement {
 
     this.container.interactive = true;
   }
+
+  startDrag() {
+    super.startDrag();
+    this.snapshot.sprite.tint = 0x91b6e3;
+  }
+
+  stopDrag() {
+    super.stopDrag();
+    this.snapshot.sprite.tint = 0xffffff;
+  }
 }
