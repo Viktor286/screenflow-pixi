@@ -36,7 +36,7 @@ class ReactWebUI extends Component {
               action={() =>
                 app.actions.board.scaleTo(
                   app.board.tempGetFirstSelectedId(),
-                  app.stateManager.getState(`/board/${app.board.tempGetFirstSelectedId()}`).scale / 2,
+                  app.stateManager.getState(`/board/${app.board.tempGetFirstSelectedId()}`).scale / 1.3,
                 )
               }
             />
@@ -45,7 +45,7 @@ class ReactWebUI extends Component {
               action={() =>
                 app.actions.board.scaleTo(
                   app.board.tempGetFirstSelectedId(),
-                  app.stateManager.getState(`/board/${app.board.tempGetFirstSelectedId()}`).scale * 2,
+                  app.stateManager.getState(`/board/${app.board.tempGetFirstSelectedId()}`).scale * 1.3,
                 )
               }
             />

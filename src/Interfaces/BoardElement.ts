@@ -60,8 +60,18 @@ export default class BoardElement {
   }
 
   set scale(val: number) {
+    // offset approach
+    const oWidth = this.container.width;
+    const oHeight = this.container.height;
+
     this.container.scale.x = val;
     this.container.scale.y = val;
+
+    const width = this.container.width;
+    const height = this.container.height;
+
+    this.container.position.x -= (width - oWidth) / 2;
+    this.container.position.y -= (height - oHeight) / 2;
   }
 
   get zIndex() {
