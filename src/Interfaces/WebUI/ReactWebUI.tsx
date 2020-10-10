@@ -54,7 +54,7 @@ class ReactWebUI extends Component {
         <SquareButton text="-" action={() => app.actions.viewport.zoomOut()} />
         <RectangleButton text={this.state.zoomIndicator} action={() => app.actions.viewport.zoom100()} />
         <SquareButton text="+" action={() => app.actions.viewport.zoomIn()} />
-        <SquareButton text={this.state.isShiftActive.toString()} action={() => true} />
+        <SquareButton text="[v]" action={() => app.actions.viewport.fitToBoard()} />
       </main>
     );
   }
