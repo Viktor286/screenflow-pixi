@@ -104,10 +104,14 @@ export default class Group extends BoardElement {
       const explodedGroup = this.explodeGroup();
       const boardElements = explodedGroup.boardElements.filter((item) => item !== boardElement);
 
-      this.implodeGroup({
-        boardElements,
-        initialScale: explodedGroup.initialScale,
-      });
+      if (boardElements.length > 1) {
+        this.implodeGroup({
+          boardElements,
+          initialScale: explodedGroup.initialScale,
+        });
+      } else {
+        boardElements[0].select();
+      }
     }
   }
 
@@ -122,8 +126,8 @@ export default class Group extends BoardElement {
       this.container.children.forEach((elm) => {
         if (elm instanceof BoardElementContainer) {
           elementMap.set(elm, {
-            x: (elm.x + this.x * this.scale) * this.scale,
-            y: (elm.y + this.y * this.scale) * this.scale,
+            x: this.x + elm.x * this.scale,
+            y: this.y + elm.y * this.scale,
             s: elm.scale.x * this.scale,
           });
         }
@@ -141,9 +145,11 @@ export default class Group extends BoardElement {
         boardElements.push(boardElement);
       });
 
+      this.eraseSelection();
       return { boardElements, initialScale };
     }
 
+    this.eraseSelection();
     return {
       boardElements: [],
       initialScale,
@@ -160,7 +166,7 @@ export default class Group extends BoardElement {
       boardElement.y *= fScale;
       boardElement.scale *= fScale;
 
-      this.container.addChildAt(boardElement.container, 1);
+      this.container.addChild(boardElement.container);
       boardElement.inGroup = this;
     });
 
@@ -192,6 +198,6 @@ export default class Group extends BoardElement {
     // this.container.cacheAsBitmap = true;
 
     // Draw for debug
-    // this.drawSelection();
+    this.drawSelection();
   }
 }

@@ -9,6 +9,7 @@ export interface IPublicBoardState {
 
 export default class Board {
   public readonly state: IPublicBoardState = {};
+  public isMemberDragging: boolean | string = false;
   public selected: Map<string, BoardElement> = new Map();
   private isMultiSelect: boolean = false;
 

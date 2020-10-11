@@ -2,6 +2,7 @@ import * as PIXI from 'pixi.js';
 import FlowApp from './FlowApp';
 import { gsap } from 'gsap';
 import Group from './Group';
+import { IPoint } from '../types/global';
 
 export interface IBoardElementState {
   x?: number;
@@ -12,9 +13,12 @@ export interface IBoardElementState {
 
 export default class BoardElement {
   public selected = false;
+  public isDragging = false;
+  public isScaleFromCenter = false;
   public inGroup: Group | undefined = undefined;
   public container = new BoardElementContainer(this);
   private selectionDrawing = new PIXI.Graphics();
+  private dragPoint: IPoint = { x: 0, y: 0 };
   public readonly id: string;
 
   public readonly state: IBoardElementState = {
@@ -47,13 +51,33 @@ export default class BoardElement {
     this.container.y = val;
   }
 
+  public setCoords(point: IPoint) {
+    this.x = point.x;
+    this.y = point.y;
+  }
+
   get scale() {
     return this.container.scale.x;
   }
 
   set scale(val: number) {
-    this.container.scale.x = val;
-    this.container.scale.y = val;
+    if (this.isScaleFromCenter) {
+      // offset approach
+      const oWidth = this.container.width;
+      const oHeight = this.container.height;
+
+      this.container.scale.x = val;
+      this.container.scale.y = val;
+
+      const width = this.container.width;
+      const height = this.container.height;
+
+      this.container.position.x -= (width - oWidth) / 2;
+      this.container.position.y -= (height - oHeight) / 2;
+    } else {
+      this.container.scale.x = val;
+      this.container.scale.y = val;
+    }
   }
 
   get zIndex() {
@@ -105,11 +129,11 @@ export default class BoardElement {
   }
 
   get centerX() {
-    return this.x + this.width / 2;
+    return this.container.x + this.container.width / 2;
   }
 
   get centerY() {
-    return this.y + this.height / 2;
+    return this.container.y + this.container.height / 2;
   }
 
   public remove() {
@@ -146,7 +170,43 @@ export default class BoardElement {
     this.selectionDrawing.clear();
   }
 
+  public startDrag() {
+    if (this.inGroup) {
+      this.inGroup.startDrag();
+    } else {
+      this.app.engine.ticker.add(this.onDrag);
+      // this.app.viewport.instance.pause = true;
+      this.app.board.isMemberDragging = this.id;
+      this.isDragging = true;
+      this.container.alpha = 0.5;
+      this.zIndex = 1;
+      const { x: wMx, y: wMy } = this.app.viewport.getWorldCoordsFromMouse();
+      this.dragPoint = { x: wMx - this.x, y: wMy - this.y };
+    }
+  }
+
+  public stopDrag() {
+    if (this.inGroup) {
+      this.inGroup.stopDrag();
+    } else {
+      this.app.engine.ticker.remove(this.onDrag);
+      // this.app.viewport.instance.pause = false;
+      this.app.board.isMemberDragging = false;
+      this.isDragging = false;
+      this.container.alpha = 1;
+      this.zIndex = 0;
+      this.dragPoint = { x: 0, y: 0 };
+    }
+  }
+
+  private onDrag = (delta: any) => {
+    const mouseCoords = this.app.viewport.getWorldCoordsFromMouse();
+    this.x = mouseCoords.x - this.dragPoint.x;
+    this.y = mouseCoords.y - this.dragPoint.y;
+  };
+
   public animateBoardElement(boardElementProps: IBoardElementState): Promise<IBoardElementState> {
+    this.isScaleFromCenter = true;
     return new Promise((resolve) => {
       gsap.to(this, {
         ...boardElementProps,
@@ -163,6 +223,7 @@ export default class BoardElement {
         },
         onComplete: () => {
           this.container.zIndex = 0; // bring back zIndex after sorting operation
+          this.isScaleFromCenter = false;
           resolve({ ...boardElementProps });
         },
       });

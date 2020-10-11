@@ -1,12 +1,13 @@
 import StageEvents, { StageEvent } from './StageEvents';
 import FlowApp from '../FlowApp';
-import { BoardElementContainer } from '../BoardElement';
+import BoardElement, { BoardElementContainer } from '../BoardElement';
 import { IScreenCoords, IWorldCoords } from '../Viewport';
 
-type IGestureEvent = {
+interface IGestureEvent extends StageEvent {
   screenClick: IScreenCoords;
   worldClick: IWorldCoords;
-};
+  isBoardElementHit?: BoardElement | undefined;
+}
 
 export default class TimedGesture {
   private app: FlowApp;
@@ -35,6 +36,9 @@ export default class TimedGesture {
 
   private getGestureEvent(e: StageEvent): IGestureEvent {
     return {
+      ...e,
+      stopPropagation: e.stopPropagation,
+      reset: e.reset,
       screenClick: this.app.viewport.getScreenCoordsFromEvent(e),
       worldClick: this.app.viewport.getWorldScreenCoordsFromEvent(e),
     };
@@ -94,6 +98,13 @@ export default class TimedGesture {
 
   public pointerUpGate(e: StageEvent) {
     // Timed-gestures handlers
+    if (typeof this.app.board.isMemberDragging === 'string') {
+      const boardElement = this.app.board.state[this.app.board.isMemberDragging].element as BoardElement;
+      boardElement.stopDrag();
+      this.awaiting = false;
+      return;
+    }
+
     if (this.app.viewport.slideControls.isSliding) {
       this.awaiting = false;
       return;
@@ -102,6 +113,16 @@ export default class TimedGesture {
     // Required data from the input event should be preserved here
     // otherwise event data will be obtained respecting the Gestures delay state (not state from a click)
     const gestureEvent = this.getGestureEvent(e);
+
+    // Perform preliminary hit detection
+    const hit = this.app.engine.renderer.plugins.interaction.hitTest({
+      x: gestureEvent.screenClick.sX,
+      y: gestureEvent.screenClick.sY,
+    });
+
+    if (hit instanceof BoardElementContainer) {
+      gestureEvent.isBoardElementHit = hit.boardElement;
+    }
 
     // Distinguish single click and double click handlers
     // filter out timed gestures while double-click
@@ -127,6 +148,8 @@ export default class TimedGesture {
 
       // Tier 3: long-press
       if (this.awaiting === 'long') this.pressUpLong(gestureEvent);
+
+      this.app.viewport.slideControls.unpauseSlideControls();
     } else {
       // Double click handlers
       this.doubleClick(gestureEvent);
@@ -139,20 +162,11 @@ export default class TimedGesture {
   // Timed-gestures special events
   // Press Up events
   private pressUpImmediate(e: IGestureEvent) {
-    const hit = this.app.engine.renderer.plugins.interaction.hitTest({
-      x: e.screenClick.sX,
-      y: e.screenClick.sY,
-    });
-
-    if (hit instanceof BoardElementContainer) {
-      const boardElement = hit.boardElement;
-      if (boardElement.selected) {
-        // fitToArea action adds more confusion than benefit when user clicked on selected memo
-        // this.app.actions.viewport.fitToArea({ wX: x, wY: y }, width, height);
-      } else {
+    if (e.isBoardElementHit instanceof BoardElement) {
+      const boardElement = e.isBoardElementHit;
+      if (!boardElement.selected) {
         boardElement.select();
       }
-
       console.log(`pressUpImmediate Memo clicked "${boardElement.id}" `, boardElement);
     } else {
       this.app.board.clearSelectedElements();
@@ -162,7 +176,16 @@ export default class TimedGesture {
   }
 
   private pressUpQuick(e: IGestureEvent) {
-    this.app.actions.viewport.moveTo(e.worldClick);
+    if (e.isBoardElementHit instanceof BoardElement) {
+      if (!e.isBoardElementHit.selected) {
+        e.isBoardElementHit.select();
+      }
+      e.isBoardElementHit.startDrag();
+      this.awaiting = false;
+    } else {
+      this.app.actions.viewport.moveTo(e.worldClick);
+    }
+
     this.sendToMonitor('Quick Press Up', this.getClickInfoStr(e));
   }
 
@@ -214,6 +237,7 @@ export default class TimedGesture {
   }
 
   private pressDownQuick(e: IGestureEvent) {
+    this.app.viewport.slideControls.pauseSlideControls();
     this.app.gui.focusPoint.putFocusPoint(e.worldClick);
     this.sendToMonitor('Quick Press Down', this.getClickInfoStr(e));
   }

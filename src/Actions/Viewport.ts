@@ -7,6 +7,11 @@ export default class ViewportActions {
 
   constructor(public app: FlowApp) {}
 
+  public fitToBoard() {
+    const { x: wX, y: wY, width, height } = this.app.viewport.instance.getLocalBounds();
+    this.app.actions.viewport.fitToArea({ wX: wX + width / 2, wY: wY + height / 2 }, width, height);
+  }
+
   public fitToArea(targetPoint: IWorldCoords, width: number, height: number) {
     const targetScale = this.app.viewport.findScaleFit(width, height);
 

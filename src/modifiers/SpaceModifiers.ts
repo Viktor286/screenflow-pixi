@@ -20,13 +20,13 @@ export class SpaceModifiers {
 
     for (let eId in elements) {
       if (Object.prototype.hasOwnProperty.call(elements, eId)) {
-        const x = (idx % colLimit) * cellWidth;
+        const x = (idx % colLimit) * cellWidth + cellWidth / 2;
         if (col >= colLimit) {
           col = 0;
           row++;
         }
         col++;
-        const y = row * cellHeight;
+        const y = row * cellHeight + cellHeight / 2;
 
         // Apply transforms
         // TODO: how would we access state here?

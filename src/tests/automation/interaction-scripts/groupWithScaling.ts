@@ -45,7 +45,20 @@ export async function basicGroupWithScaling() {
   app.actions.board.scaleTo(group.id, 1.4);
   await wait(700 * stepDelayFactor);
 
+  app.actions.board.moveTo(group.id, { wX: 100, wY: 100 });
+  await wait(700 * stepDelayFactor);
+
   group.removeFromGroup(Memos[5]);
   group.select();
+  group.addToGroup(Memos[2]);
   app.actions.viewport.moveTo({ wX: group.centerX, wY: group.centerY }, 0.45);
+  await wait(700 * stepDelayFactor);
+
+  group.removeFromGroup(Memos[0]);
+  await wait(700 * stepDelayFactor);
+
+  group.removeFromGroup(Memos[7]);
+  await wait(700 * stepDelayFactor);
+
+  group.removeFromGroup(Memos[9]);
 }
