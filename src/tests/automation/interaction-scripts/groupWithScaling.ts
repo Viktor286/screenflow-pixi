@@ -12,7 +12,7 @@ export async function basicGroupWithScaling() {
   app.actions.viewport.moveTo({ wX: 0, wY: 0 }, 0.2);
   await wait(500);
 
-  app.actions.board.scaleTo(Memos[5].id, 0.1);
+  app.actions.board.scaleElementById(Memos[5].id, 0.1);
 
   await wait(500);
   const stepDelayFactor = 1;
@@ -24,12 +24,12 @@ export async function basicGroupWithScaling() {
   group.select();
   await wait(700 * stepDelayFactor);
 
-  app.actions.viewport.fitToArea({ wX: group.centerX, wY: group.centerY }, group.width, group.height);
+  app.actions.viewport.fitToBoard();
   group.removeFromGroup(Memos[0]);
   group.select();
   await wait(700 * stepDelayFactor);
 
-  app.actions.board.scaleTo(group.id, 0.8);
+  app.actions.board.scaleElementById(group.id, 0.8);
   await wait(700 * stepDelayFactor);
 
   Memos[7].select();
@@ -42,10 +42,10 @@ export async function basicGroupWithScaling() {
   group.select();
   await wait(700 * stepDelayFactor);
 
-  app.actions.board.scaleTo(group.id, 1.4);
+  app.actions.board.scaleElementById(group.id, 1.4);
   await wait(700 * stepDelayFactor);
 
-  app.actions.board.moveTo(group.id, { wX: 100, wY: 100 });
+  app.actions.board.moveElementById(group.id, { wX: 100, wY: 100 });
   await wait(700 * stepDelayFactor);
 
   group.removeFromGroup(Memos[5]);

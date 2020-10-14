@@ -33,8 +33,8 @@ export class SpaceModifiers {
         //  we should return array of mutation orders
         //  instead of modifying origin here here
 
-        app.actions.board.moveTo(eId, { wX: x, wY: y });
-        app.actions.board.scaleTo(eId, scale);
+        app.actions.board.moveElementById(eId, { wX: x, wY: y });
+        app.actions.board.scaleElementById(eId, scale);
 
         // elements[el].x = x;
         // elements[el].y = y;

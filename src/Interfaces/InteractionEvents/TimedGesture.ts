@@ -35,13 +35,25 @@ export default class TimedGesture {
   }
 
   private getGestureEvent(e: StageEvent): IGestureEvent {
-    return {
+    const gestureEvent: IGestureEvent = {
       ...e,
       stopPropagation: e.stopPropagation,
       reset: e.reset,
       screenClick: this.app.viewport.getScreenCoordsFromEvent(e),
       worldClick: this.app.viewport.getWorldScreenCoordsFromEvent(e),
     };
+
+    // Perform preliminary hit detection
+    const hit = this.app.engine.renderer.plugins.interaction.hitTest({
+      x: gestureEvent.screenClick.sX,
+      y: gestureEvent.screenClick.sY,
+    });
+
+    if (hit instanceof BoardElementContainer) {
+      gestureEvent.isBoardElementHit = hit.boardElement;
+    }
+
+    return gestureEvent;
   }
 
   public pointerDownGate(e: StageEvent) {
@@ -83,11 +95,11 @@ export default class TimedGesture {
                   return;
                 }
 
-                if (this.awaiting) {
-                  // Tier 3: long-press
-                  this.awaiting = 'long';
-                  this.pressDownLong(gestureEvent);
-                }
+                // if (this.awaiting) {
+                //   // Tier 3: long-press
+                //   this.awaiting = 'long';
+                //   this.pressDownLong(gestureEvent);
+                // }
               }, 1000);
             }
           }, 800);
@@ -98,13 +110,6 @@ export default class TimedGesture {
 
   public pointerUpGate(e: StageEvent) {
     // Timed-gestures handlers
-    if (typeof this.app.board.isMemberDragging === 'string') {
-      const boardElement = this.app.board.state[this.app.board.isMemberDragging].element as BoardElement;
-      boardElement.stopDrag();
-      this.awaiting = false;
-      return;
-    }
-
     if (this.app.viewport.slideControls.isSliding) {
       this.awaiting = false;
       return;
@@ -114,14 +119,16 @@ export default class TimedGesture {
     // otherwise event data will be obtained respecting the Gestures delay state (not state from a click)
     const gestureEvent = this.getGestureEvent(e);
 
-    // Perform preliminary hit detection
-    const hit = this.app.engine.renderer.plugins.interaction.hitTest({
-      x: gestureEvent.screenClick.sX,
-      y: gestureEvent.screenClick.sY,
-    });
-
-    if (hit instanceof BoardElementContainer) {
-      gestureEvent.isBoardElementHit = hit.boardElement;
+    if (typeof this.app.board.isMemberDragging === 'string') {
+      const boardElement = this.app.board.state[this.app.board.isMemberDragging].element as BoardElement;
+      if (
+        boardElement.startDragPoint &&
+        gestureEvent.worldClick.wX !== boardElement.startDragPoint.wX &&
+        gestureEvent.worldClick.wY !== boardElement.startDragPoint.wY
+      ) {
+        this.app.actions.board.stopDragElement(boardElement);
+        this.awaiting = false;
+      }
     }
 
     // Distinguish single click and double click handlers
@@ -146,8 +153,8 @@ export default class TimedGesture {
       // Tier 2: medium-press
       if (this.awaiting === 'medium') this.pressUpMedium(gestureEvent);
 
-      // Tier 3: long-press
-      if (this.awaiting === 'long') this.pressUpLong(gestureEvent);
+      // // Tier 3: long-press
+      // if (this.awaiting === 'long') this.pressUpLong(gestureEvent);
 
       this.app.viewport.slideControls.unpauseSlideControls();
     } else {
@@ -163,28 +170,17 @@ export default class TimedGesture {
   // Press Up events
   private pressUpImmediate(e: IGestureEvent) {
     if (e.isBoardElementHit instanceof BoardElement) {
-      const boardElement = e.isBoardElementHit;
-      if (!boardElement.selected) {
-        boardElement.select();
-      }
-      console.log(`pressUpImmediate Memo clicked "${boardElement.id}" `, boardElement);
+      this.app.actions.board.selectElement(e.isBoardElementHit);
+      console.log(`pressUpImmediate Memo clicked "${e.isBoardElementHit.id}" `, e.isBoardElementHit);
     } else {
-      this.app.board.clearSelectedElements();
+      this.app.actions.board.deselectElements();
     }
 
     this.sendToMonitor('Immediate Press Up', this.getClickInfoStr(e));
   }
 
   private pressUpQuick(e: IGestureEvent) {
-    if (e.isBoardElementHit instanceof BoardElement) {
-      if (!e.isBoardElementHit.selected) {
-        e.isBoardElementHit.select();
-      }
-      e.isBoardElementHit.startDrag();
-      this.awaiting = false;
-    } else {
-      this.app.actions.viewport.moveTo(e.worldClick);
-    }
+    this.app.actions.viewport.moveTo(e.worldClick);
 
     this.sendToMonitor('Quick Press Up', this.getClickInfoStr(e));
   }
@@ -193,34 +189,20 @@ export default class TimedGesture {
     this.sendToMonitor('Medium Press Up', this.getClickInfoStr(e));
   }
 
-  private pressUpLong(e: IGestureEvent) {
-    this.sendToMonitor('Long Press Up', this.getClickInfoStr(e));
-  }
+  // private pressUpLong(e: IGestureEvent) {
+  //   this.sendToMonitor('Long Press Up', this.getClickInfoStr(e));
+  // }
 
   // Additional events
   private doubleClick(e: IGestureEvent) {
     this.sendToMonitor('DoubleClick', this.getClickInfoStr(e));
 
-    const hit = this.app.engine.renderer.plugins.interaction.hitTest({
-      x: e.screenClick.sX,
-      y: e.screenClick.sY,
-    });
+    const gestureEvent = this.getGestureEvent(e);
 
     // fitToArea Or ZoomIn
-    if (hit instanceof BoardElementContainer) {
-      let targetElement = hit.boardElement;
-
-      // rout to group if group member
-      if (targetElement.inGroup) {
-        targetElement = targetElement.inGroup;
-      }
-
-      let { x, y, width, height } = targetElement;
-      x += width / 2;
-      y += height / 2;
-
-      this.app.actions.viewport.fitToArea({ wX: x, wY: y }, width, height);
-      hit.boardElement.select();
+    if (gestureEvent.isBoardElementHit instanceof BoardElement) {
+      this.app.actions.viewport.fitToBoardElement(gestureEvent.isBoardElementHit);
+      this.app.actions.board.selectElement(gestureEvent.isBoardElementHit);
     } else {
       this.app.actions.viewport.zoomIn(e.worldClick);
     }
@@ -230,7 +212,16 @@ export default class TimedGesture {
   private pressDownImmediate(e: IGestureEvent) {
     // ImmediatePressDown event could be too frequent,
     // its probably best choice to use ImmediatePressUp
-    this.app.gui.focusPoint.putFocusPoint(e.worldClick);
+    if (e.isBoardElementHit instanceof BoardElement) {
+      if (e.isBoardElementHit.isDragging) {
+        this.app.viewport.slideControls.pauseSlideControls();
+
+        this.app.actions.board.stopDragElement(e.isBoardElementHit);
+        this.awaiting = false;
+      }
+    }
+
+    // this.app.gui.focusPoint.putFocusPoint(e.worldClick);
     console.log('worldClick', e.worldClick.wX, e.worldClick.wY);
     console.log('screenClick', e.screenClick.sX, e.screenClick.sY);
     this.sendToMonitor('Immediate Press Down', this.getClickInfoStr(e));
@@ -238,6 +229,16 @@ export default class TimedGesture {
 
   private pressDownQuick(e: IGestureEvent) {
     this.app.viewport.slideControls.pauseSlideControls();
+
+    if (e.isBoardElementHit instanceof BoardElement) {
+      this.app.actions.board.selectElement(e.isBoardElementHit);
+
+      if (!e.isBoardElementHit.isDragging) {
+        this.app.actions.board.startDragElement(e.isBoardElementHit, e.worldClick);
+        this.awaiting = false;
+      }
+    }
+
     this.app.gui.focusPoint.putFocusPoint(e.worldClick);
     this.sendToMonitor('Quick Press Down', this.getClickInfoStr(e));
   }
@@ -247,8 +248,8 @@ export default class TimedGesture {
     this.sendToMonitor('Medium Press Down', this.getClickInfoStr(e));
   }
 
-  private pressDownLong(e: IGestureEvent) {
-    this.app.gui.focusPoint.putFocusPoint(e.worldClick);
-    this.sendToMonitor('Long Press Down', this.getClickInfoStr(e));
-  }
+  // private pressDownLong(e: IGestureEvent) {
+  //   this.app.gui.focusPoint.putFocusPoint(e.worldClick);
+  //   this.sendToMonitor('Long Press Down', this.getClickInfoStr(e));
+  // }
 }

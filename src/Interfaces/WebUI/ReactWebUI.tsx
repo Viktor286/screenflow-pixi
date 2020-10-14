@@ -31,24 +31,8 @@ class ReactWebUI extends Component {
         {this.state.isMemoSelected ? (
           <>
             <SquareButton text={this.state.isShiftActive.toString()} action={() => true} />
-            <SquareButton
-              text="s-"
-              action={() =>
-                app.actions.board.scaleTo(
-                  app.board.tempGetFirstSelectedId(),
-                  app.stateManager.getState(`/board/${app.board.tempGetFirstSelectedId()}`).scale / 1.3,
-                )
-              }
-            />
-            <SquareButton
-              text="s+"
-              action={() =>
-                app.actions.board.scaleTo(
-                  app.board.tempGetFirstSelectedId(),
-                  app.stateManager.getState(`/board/${app.board.tempGetFirstSelectedId()}`).scale * 1.3,
-                )
-              }
-            />
+            <SquareButton text="s-" action={() => app.actions.board.decreaseSelectedElementScale()} />
+            <SquareButton text="s+" action={() => app.actions.board.increaseSelectedElementScale()} />
           </>
         ) : null}
         <SquareButton text="-" action={() => app.actions.viewport.zoomOut()} />
