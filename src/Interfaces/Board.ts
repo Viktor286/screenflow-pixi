@@ -1,10 +1,10 @@
 import FlowApp from './FlowApp';
-import BoardElement, { BoardElementContainer, IBoardElementState } from './BoardElement';
+import BoardElement, { BoardElementContainer, IBoardElementPublicState } from './BoardElement';
 import Memo from './Memo';
 import Group from './Group';
 
 export interface IPublicBoardState {
-  [key: string]: IBoardElementState;
+  [key: string]: IBoardElementPublicState;
 }
 
 export default class Board {
@@ -55,11 +55,22 @@ export default class Board {
     }
   }
 
-  // TODO remove this method
-  public tempGetFirstSelectedId() {
-    if (this.app.board.selected.size > 0) {
-      return this.app.board.selected.keys().next().value;
+  public getElementById(elementId: string): BoardElement | undefined {
+    const boardStateElement = this.state[elementId];
+    if (
+      Object.prototype.hasOwnProperty.call(boardStateElement, 'element') &&
+      boardStateElement.element instanceof BoardElement
+    ) {
+      return boardStateElement.element;
     }
+    return undefined;
+  }
+
+  public getSelectedBoardElement(): BoardElement | undefined {
+    if (this.app.board.selected.size > 0) {
+      return (this.app.board.selected.values().next().value as unknown) as BoardElement;
+    }
+    return undefined;
   }
 
   public getMemos() {

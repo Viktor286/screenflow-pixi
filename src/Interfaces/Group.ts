@@ -39,29 +39,39 @@ export default class Group extends BoardElement {
   }
 
   public select() {
-    this.app.board.addElementToSelected(this);
-    this.selected = true;
+    if (!this.isSelected) {
+      this.app.board.addElementToSelected(this);
+      this.isSelected = true;
 
-    this.drawSelection();
+      this.drawSelection();
 
-    this.container.children.forEach((elm) => {
-      if (elm instanceof BoardElementContainer) {
-        this.selected = true;
-      }
-    });
+      this.container.children.forEach((elm) => {
+        if (elm instanceof BoardElementContainer) {
+          this.isSelected = true;
+        }
+      });
+      return true;
+    }
+    return false;
   }
 
   public deselect() {
-    this.app.board.removeElementFromSelected(this);
-    this.selected = false;
+    if (this.isSelected) {
+      this.app.board.removeElementFromSelected(this);
+      this.isSelected = false;
 
-    this.eraseSelection();
+      this.eraseSelection();
 
-    this.container.children.forEach((elm) => {
-      if (elm instanceof BoardElementContainer) {
-        this.selected = false;
-      }
-    });
+      this.container.children.forEach((elm) => {
+        if (elm instanceof BoardElementContainer) {
+          this.isSelected = false;
+        }
+      });
+
+      return true;
+    }
+
+    return false;
   }
 
   public drawSelection(): void {

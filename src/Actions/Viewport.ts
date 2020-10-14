@@ -1,5 +1,6 @@
 import FlowApp from '../Interfaces/FlowApp';
 import { IWorldCoords } from '../Interfaces/Viewport';
+import BoardElement from '../Interfaces/BoardElement';
 
 export default class ViewportActions {
   private runAheadZoomIn = 0;
@@ -9,7 +10,20 @@ export default class ViewportActions {
 
   public fitToBoard() {
     const { x: wX, y: wY, width, height } = this.app.viewport.instance.getLocalBounds();
-    this.app.actions.viewport.fitToArea({ wX: wX + width / 2, wY: wY + height / 2 }, width, height);
+    this.fitToArea({ wX: wX + width / 2, wY: wY + height / 2 }, width, height);
+  }
+
+  public fitToBoardElement(boardElement: BoardElement) {
+    // rout to group if group's member
+    if (boardElement.inGroup) {
+      boardElement = boardElement.inGroup;
+    }
+
+    let { x, y, width, height } = boardElement;
+    x += width / 2;
+    y += height / 2;
+
+    this.fitToArea({ wX: x, wY: y }, width, height);
   }
 
   public fitToArea(targetPoint: IWorldCoords, width: number, height: number) {

@@ -3,17 +3,20 @@ import FlowApp from './FlowApp';
 import { gsap } from 'gsap';
 import Group from './Group';
 import { IPoint } from '../types/global';
+import { IWorldCoords } from './Viewport';
 
-export interface IBoardElementState {
+export interface IBoardElementPublicState {
   x?: number;
   y?: number;
   scale?: number;
   element?: BoardElement;
+  isSelected?: boolean;
 }
 
 export default class BoardElement {
-  public selected = false;
+  public isSelected = false;
   public isDragging = false;
+  public startDragPoint: IWorldCoords | undefined = undefined;
   public isScaleFromCenter = false;
   public inGroup: Group | undefined = undefined;
   public container = new BoardElementContainer(this);
@@ -21,7 +24,7 @@ export default class BoardElement {
   private dragPoint: IPoint = { x: 0, y: 0 };
   public readonly id: string;
 
-  public readonly state: IBoardElementState = {
+  public readonly state: IBoardElementPublicState = {
     x: 0,
     y: 0,
     scale: 1,
@@ -145,16 +148,25 @@ export default class BoardElement {
     if (this.inGroup) {
       this.inGroup.select();
     } else {
-      this.app.board.addElementToSelected(this);
-      this.selected = true;
-      this.drawSelection();
+      if (!this.isSelected) {
+        this.app.board.addElementToSelected(this);
+        this.isSelected = true;
+        this.drawSelection();
+        return true;
+      }
+      return false;
     }
   }
 
   public deselect() {
-    this.app.board.removeElementFromSelected(this);
-    this.selected = false;
-    this.eraseSelection();
+    if (this.isSelected) {
+      this.app.board.removeElementFromSelected(this);
+      this.isSelected = false;
+      this.eraseSelection();
+      return true;
+    }
+
+    return false;
   }
 
   public drawSelection(): void {
@@ -170,14 +182,15 @@ export default class BoardElement {
     this.selectionDrawing.clear();
   }
 
-  public startDrag() {
+  public startDrag(startPoint: IWorldCoords) {
     if (this.inGroup) {
-      this.inGroup.startDrag();
+      this.inGroup.startDrag(startPoint);
     } else {
       this.app.engine.ticker.add(this.onDrag);
       // this.app.viewport.instance.pause = true;
       this.app.board.isMemberDragging = this.id;
       this.isDragging = true;
+      this.startDragPoint = startPoint;
       this.container.alpha = 0.5;
       this.zIndex = 1;
       const { x: wMx, y: wMy } = this.app.viewport.getWorldCoordsFromMouse();
@@ -193,6 +206,7 @@ export default class BoardElement {
       // this.app.viewport.instance.pause = false;
       this.app.board.isMemberDragging = false;
       this.isDragging = false;
+      this.startDragPoint = undefined;
       this.container.alpha = 1;
       this.zIndex = 0;
       this.dragPoint = { x: 0, y: 0 };
@@ -205,7 +219,7 @@ export default class BoardElement {
     this.y = mouseCoords.y - this.dragPoint.y;
   };
 
-  public animateBoardElement(boardElementProps: IBoardElementState): Promise<IBoardElementState> {
+  public animateBoardElement(boardElementProps: IBoardElementPublicState): Promise<IBoardElementPublicState> {
     this.isScaleFromCenter = true;
     return new Promise((resolve) => {
       gsap.to(this, {
@@ -216,7 +230,7 @@ export default class BoardElement {
           this.container.zIndex = 1;
         },
         onUpdate: () => {
-          if (this.selected) {
+          if (this.isSelected) {
             this.drawSelection();
           }
           // this.app.gui.stageBackTile.updateGraphics();
