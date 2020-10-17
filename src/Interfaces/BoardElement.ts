@@ -144,12 +144,11 @@ export default class BoardElement {
     this.selectionDrawing.destroy();
   }
 
-  public select() {
+  public onSelect() {
     if (this.inGroup) {
-      this.inGroup.select();
+      this.inGroup.onSelect();
     } else {
       if (!this.isSelected) {
-        this.app.board.addElementToSelected(this);
         this.isSelected = true;
         this.drawSelection();
         return true;
@@ -158,11 +157,10 @@ export default class BoardElement {
     }
   }
 
-  public deselect() {
+  public onDeselect() {
     if (this.isSelected) {
-      this.app.board.removeElementFromSelected(this);
       this.isSelected = false;
-      this.eraseSelection();
+      this.eraseSelectionDrawing();
       return true;
     }
 
@@ -178,7 +176,7 @@ export default class BoardElement {
       .drawRect(0, 0, this.width / this.scale, this.height / this.scale);
   }
 
-  public eraseSelection() {
+  public eraseSelectionDrawing() {
     this.selectionDrawing.clear();
   }
 

@@ -8,7 +8,7 @@ export default class BoardActions {
   public selectElementById(id: string) {
     const el = this.app.board.getElementById(id);
     if (el instanceof BoardElement) {
-      el.select();
+      this.app.board.selectElement(el);
     }
     // TODO: implement state management for element and group selection
     // this.app.stateManager.setState(`/board/${id}`, {
@@ -17,7 +17,7 @@ export default class BoardActions {
   }
 
   public selectElement(boardElement: BoardElement) {
-    boardElement.select();
+    this.app.board.selectElement(boardElement);
     // TODO: implement state management for element and group selection
     // this.app.stateManager.setState(`/board/${id}`, {
     //   isSelected: true,
@@ -25,7 +25,7 @@ export default class BoardActions {
   }
 
   public deselectElements() {
-    this.app.board.clearSelectedElements();
+    this.app.board.deselectElement();
     // TODO: implement state management for element and group selection
     // this.app.stateManager.setState(`/board/${id}`, {
     //   isSelected: true,
@@ -62,14 +62,14 @@ export default class BoardActions {
   }
 
   public decreaseSelectedElementScale() {
-    const boardElement = this.app.board.getSelectedBoardElement();
+    const boardElement = this.app.board.getSelectedElement();
     if (boardElement) {
       this.app.actions.board.scaleElementById(boardElement.id, boardElement.scale / 1.3);
     }
   }
 
   public increaseSelectedElementScale() {
-    const boardElement = this.app.board.getSelectedBoardElement();
+    const boardElement = this.app.board.getSelectedElement();
     if (boardElement) {
       this.app.actions.board.scaleElementById(boardElement.id, boardElement.scale * 1.3);
     }

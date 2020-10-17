@@ -22,7 +22,7 @@ async function main() {
     const loader = await FilesIO.loadUrlSet(getImageUrlSet(12));
 
     for (const resource of Object.values(loader.resources)) {
-      app.board.addBoardElement(new Memo(resource.texture, app));
+      app.board.addElementToBoard(new Memo(resource.texture, app));
     }
 
     /** Load test Layout **/

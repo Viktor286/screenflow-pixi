@@ -64,7 +64,7 @@ export default class TimedGesture {
     // reset for doubleClick
     setTimeout(() => (this.clickCnt = 0), this.doubleClickThreshold);
 
-    // Tier 0: Immediate "select" press
+    // Tier 0: Immediate "Select" press
     // Block second immediate click for double-click case
     if (this.clickCnt < 2) {
       // Required data from the input event should be preserved here
@@ -134,7 +134,7 @@ export default class TimedGesture {
     // Distinguish single click and double click handlers
     // filter out timed gestures while double-click
     if (this.clickCnt < 2) {
-      // Tier 0: Immediate "select" press
+      // Tier 0: Immediate "Select" press
       // No ImmediatePressUp while timed gestures are active
       if (this.awaiting !== 'quick' && this.awaiting !== 'medium' && this.awaiting !== 'long') {
         // this is experimental hack to workaround stageImmediatePressUp intersection with double click
@@ -181,6 +181,7 @@ export default class TimedGesture {
 
   private pressUpQuick(e: IGestureEvent) {
     this.app.actions.viewport.moveTo(e.worldClick);
+    // here most likely will be rectangular selection start
 
     this.sendToMonitor('Quick Press Up', this.getClickInfoStr(e));
   }

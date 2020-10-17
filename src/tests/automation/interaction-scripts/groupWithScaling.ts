@@ -6,7 +6,7 @@ export async function basicGroupWithScaling() {
   const app = window.app;
   await wait(1000);
 
-  const group = app.board.addBoardElement(new Group(app));
+  const group = app.board.addElementToBoard(new Group(app));
   const Memos = app.board.getMemos();
 
   app.actions.viewport.moveTo({ wX: 0, wY: 0 }, 0.2);
@@ -21,25 +21,25 @@ export async function basicGroupWithScaling() {
   group.addToGroup(Memos[3]);
   group.addToGroup(Memos[5]);
   group.addToGroup(Memos[9]);
-  group.select();
+  app.board.selectElement(group);
   await wait(700 * stepDelayFactor);
 
   app.actions.viewport.fitToBoard();
   group.removeFromGroup(Memos[0]);
-  group.select();
+  app.board.selectElement(group);
   await wait(700 * stepDelayFactor);
 
   app.actions.board.scaleElementById(group.id, 0.8);
   await wait(700 * stepDelayFactor);
 
-  Memos[7].select();
+  app.board.selectElement(Memos[7]);
   group.addToGroup(Memos[7]);
-  group.select();
+  app.board.selectElement(group);
 
   await wait(700 * stepDelayFactor);
 
   group.removeFromGroup(Memos[3]);
-  group.select();
+  app.board.selectElement(group);
   await wait(700 * stepDelayFactor);
 
   app.actions.board.scaleElementById(group.id, 1.4);
@@ -49,7 +49,7 @@ export async function basicGroupWithScaling() {
   await wait(700 * stepDelayFactor);
 
   group.removeFromGroup(Memos[5]);
-  group.select();
+  app.board.selectElement(group);
   group.addToGroup(Memos[2]);
   app.actions.viewport.moveTo({ wX: group.centerX, wY: group.centerY }, 0.45);
   await wait(700 * stepDelayFactor);

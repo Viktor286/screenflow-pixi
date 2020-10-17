@@ -25,7 +25,7 @@ export default class Group extends BoardElement {
     this.groupDrawing.zIndex = 2;
     this.container.addChild(this.groupDrawing);
 
-    this.app.board.addBoardElement(this);
+    this.app.board.addElementToBoard(this);
 
     // PIXI.DisplayObjectContainer
 
@@ -38,11 +38,9 @@ export default class Group extends BoardElement {
     // https://github.com/pixijs/pixi.js/wiki/v4-Performance-Tips
   }
 
-  public select() {
+  public onSelect() {
     if (!this.isSelected) {
-      this.app.board.addElementToSelected(this);
       this.isSelected = true;
-
       this.drawSelection();
 
       this.container.children.forEach((elm) => {
@@ -55,12 +53,10 @@ export default class Group extends BoardElement {
     return false;
   }
 
-  public deselect() {
+  public onDeselect() {
     if (this.isSelected) {
-      this.app.board.removeElementFromSelected(this);
       this.isSelected = false;
-
-      this.eraseSelection();
+      this.eraseSelectionDrawing();
 
       this.container.children.forEach((elm) => {
         if (elm instanceof BoardElementContainer) {
@@ -89,12 +85,12 @@ export default class Group extends BoardElement {
       .drawRect(0, 0, this.width / this.scale - lineWidth, this.height / this.scale - lineWidth);
   }
 
-  public eraseSelection() {
+  public eraseSelectionDrawing() {
     this.groupDrawing.clear();
 
     this.container.children.forEach((elm) => {
       if (elm instanceof BoardElementContainer) {
-        elm.boardElement.eraseSelection();
+        elm.boardElement.eraseSelectionDrawing();
       }
     });
   }
@@ -120,7 +116,7 @@ export default class Group extends BoardElement {
           initialScale: explodedGroup.initialScale,
         });
       } else {
-        boardElements[0].select();
+        this.app.board.selectElement(boardElements[0]);
       }
     }
   }
@@ -147,7 +143,7 @@ export default class Group extends BoardElement {
       elementMap.forEach((coords, boardElementContainer) => {
         const { boardElement } = boardElementContainer;
         boardElement.inGroup = undefined;
-        boardElement.eraseSelection();
+        boardElement.eraseSelectionDrawing();
         this.app.viewport.instance.addChild(boardElementContainer);
         boardElement.x = coords.x;
         boardElement.y = coords.y;
@@ -155,11 +151,11 @@ export default class Group extends BoardElement {
         boardElements.push(boardElement);
       });
 
-      this.eraseSelection();
+      this.eraseSelectionDrawing();
       return { boardElements, initialScale };
     }
 
-    this.eraseSelection();
+    this.eraseSelectionDrawing();
     return {
       boardElements: [],
       initialScale,

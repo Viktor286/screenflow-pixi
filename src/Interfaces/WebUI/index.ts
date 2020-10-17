@@ -16,7 +16,7 @@ export default class WebUI {
 
   public updateSelectedMode() {
     this.reactWebUI.setState({
-      isMemoSelected: this.app.board.selected.size,
+      isMemoSelected: !!this.app.board.selection,
     });
   }
 

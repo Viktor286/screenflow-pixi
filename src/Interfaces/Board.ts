@@ -10,8 +10,7 @@ export interface IPublicBoardState {
 export default class Board {
   public readonly state: IPublicBoardState = {};
   public isMemberDragging: boolean | string = false;
-  public selected: Map<string, BoardElement> = new Map();
-  private isMultiSelect: boolean = false;
+  public selection: BoardElement | undefined = undefined;
 
   constructor(public app: FlowApp) {
     if (this.app.devMonitor) {
@@ -19,40 +18,41 @@ export default class Board {
     }
   }
 
-  public addBoardElement<T extends BoardElement>(boardElement: T): T {
+  public addElementToBoard<T extends BoardElement>(boardElement: T): T {
     this.state[boardElement.id] = boardElement.state;
     this.app.viewport.addToViewport(boardElement.container);
     this.app.viewport.instance.setChildIndex(boardElement.container, 0);
     return boardElement;
   }
 
-  public addElementToSelected(boardElement: BoardElement) {
-    if (!this.selected.has(boardElement.id)) {
-      if (!this.isMultiSelect) this.clearSelectedElements();
-      this.selected.set(boardElement.id, boardElement);
+  public selectElement(boardElement: BoardElement) {
+    if (this.selection && this.selection.id !== boardElement.id) {
+      this.deselectElement();
+    }
+
+    if (!this.selection) {
+      this.selection = boardElement;
+      this.selection.onSelect();
       this.app.webUi.updateSelectedMode();
     }
   }
 
-  public removeElementFromSelected(boardElement: BoardElement) {
-    this.selected.delete(boardElement.id);
-    this.app.webUi.updateSelectedMode();
-  }
-
-  public sendEventToMonitor(boardElement: BoardElement, eventName: string, msg: string = '') {
-    if (this.app.devMonitor) {
-      this.app.devMonitor.dispatchMonitor('boardEvents', `[${boardElement.id}] ${eventName}`, msg);
+  public deselectElement() {
+    if (this.selection) {
+      this.selection.onDeselect();
+      this.selection = undefined;
+      this.app.webUi.updateSelectedMode();
     }
-  }
-
-  public clearSelectedElements() {
-    this.selected.forEach((boardElement: BoardElement) => boardElement.deselect());
   }
 
   public updateSelectionGraphics() {
-    if (this.selected.size > 0) {
-      this.selected.forEach((boardElement) => boardElement.drawSelection());
+    if (this.selection) {
+      this.selection.drawSelection();
     }
+  }
+
+  public getSelectedElement(): BoardElement | undefined {
+    return this.app.board.selection;
   }
 
   public getElementById(elementId: string): BoardElement | undefined {
@@ -62,13 +62,6 @@ export default class Board {
       boardStateElement.element instanceof BoardElement
     ) {
       return boardStateElement.element;
-    }
-    return undefined;
-  }
-
-  public getSelectedBoardElement(): BoardElement | undefined {
-    if (this.app.board.selected.size > 0) {
-      return (this.app.board.selected.values().next().value as unknown) as BoardElement;
     }
     return undefined;
   }
@@ -87,5 +80,11 @@ export default class Board {
     ) as BoardElementContainer[];
 
     return displayObject.map((container) => container.boardElement);
+  }
+
+  public sendEventToMonitor(boardElement: BoardElement, eventName: string, msg: string = '') {
+    if (this.app.devMonitor) {
+      this.app.devMonitor.dispatchMonitor('boardEvents', `[${boardElement.id}] ${eventName}`, msg);
+    }
   }
 }
