@@ -229,6 +229,10 @@ export default class Viewport {
     return this.instance.addChild(displayObject);
   }
 
+  public removeFromViewport(displayObject: PIXI.DisplayObject): PIXI.DisplayObject {
+    return this.instance.removeChild(displayObject);
+  }
+
   public getZoomString(): string {
     return Math.round(this.instance.scale.x * 100).toString();
   }
