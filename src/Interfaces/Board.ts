@@ -47,7 +47,10 @@ export default class Board {
   }
 
   public stopDragElement(boardElement: BoardElement) {
-    this.app.board.isMemberDragging = false;
+    // Small delay to prevent soma immediate actions after stopDrag, e.g. removeFromGroup on shift+select
+    setTimeout(() => {
+      this.app.board.isMemberDragging = false;
+    }, 500);
     boardElement.stopDrag();
   }
 
@@ -69,7 +72,9 @@ export default class Board {
           if (!this.selection.isElementInGroup(boardElement)) {
             this.selection.addToGroup(boardElement);
           } else {
-            this.selection.removeFromGroup(boardElement);
+            if (!this.isMemberDragging) {
+              this.selection.removeFromGroup(boardElement);
+            }
           }
         } else {
           if (!this.selection.isElementInGroup(boardElement)) {

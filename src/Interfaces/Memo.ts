@@ -17,13 +17,21 @@ export default class Memo extends BoardElement {
     this.container.interactive = true;
   }
 
-  startDrag(startPoint: IWorldCoords) {
-    super.startDrag(startPoint);
+  public setDragState() {
     this.snapshot.sprite.tint = 0x91b6e3;
   }
 
-  stopDrag() {
-    super.stopDrag();
+  public unsetDragState() {
     this.snapshot.sprite.tint = 0xffffff;
+  }
+
+  public startDrag(startPoint: IWorldCoords) {
+    this.setDragState();
+    super.startDrag(startPoint);
+  }
+
+  public stopDrag() {
+    this.unsetDragState();
+    super.stopDrag();
   }
 }

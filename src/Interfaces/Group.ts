@@ -3,6 +3,7 @@ import FlowApp from './FlowApp';
 import BoardElement, { BoardElementContainer } from './BoardElement';
 import { ITransforms } from '../types/global';
 import { IWorldCoords } from './Viewport';
+import Memo from './Memo';
 
 export interface IExplodedGroup {
   boardElements: BoardElement[];
@@ -105,6 +106,10 @@ export default class Group extends BoardElement {
     this.container.children.forEach((elm) => {
       if (elm instanceof BoardElementContainer) {
         elm.boardElement.isDragging = true;
+
+        if (elm.boardElement instanceof Memo) {
+          elm.boardElement.setDragState();
+        }
       }
     });
     super.startDrag(startPoint);
@@ -114,6 +119,10 @@ export default class Group extends BoardElement {
     this.container.children.forEach((elm) => {
       if (elm instanceof BoardElementContainer) {
         elm.boardElement.isDragging = false;
+
+        if (elm.boardElement instanceof Memo) {
+          elm.boardElement.unsetDragState();
+        }
       }
     });
     super.stopDrag();
@@ -126,6 +135,10 @@ export default class Group extends BoardElement {
   }
 
   public addToGroup<T extends BoardElement>(boardElement: T) {
+    if (this.app.board.isMemberDragging) {
+      return;
+    }
+
     if (!this.isElementInGroup(boardElement)) {
       const explodedGroup = this.explodeGroup();
       explodedGroup.boardElements.push(boardElement);
@@ -134,6 +147,10 @@ export default class Group extends BoardElement {
   }
 
   public removeFromGroup<T extends BoardElement>(boardElement: T) {
+    if (this.app.board.isMemberDragging) {
+      return;
+    }
+
     if (this.isElementInGroup(boardElement)) {
       const explodedGroup = this.explodeGroup();
       const boardElements = explodedGroup.boardElements.filter((item) => item !== boardElement);

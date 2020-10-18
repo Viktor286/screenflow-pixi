@@ -171,7 +171,8 @@ export default class TimedGesture {
   // Press Up events
   private pressUpImmediate(e: IGestureEvent) {
     if (e.isBoardElementHit instanceof BoardElement) {
-      this.app.actions.board.selectElement(e.isBoardElementHit, e.data.originalEvent.shiftKey);
+      const withMultiSelect = this.app.keyboard.shiftModeState !== 'off';
+      this.app.actions.board.selectElement(e.isBoardElementHit, withMultiSelect);
       console.log(`pressUpImmediate Memo clicked "${e.isBoardElementHit.id}" `, e.isBoardElementHit);
     } else {
       this.app.actions.board.deselectElements();

@@ -34,11 +34,14 @@ class ReactWebUI extends Component {
     return this.state.isShiftActive ? 'yellow' : 'blue';
   }
 
+  // Symbols ⊹, ⯐, ⌗, ⊡, ⌬, ⌾, ⍟, ⍰, ▣, ◉, ⛶, ✛, ⧉, ⭲,
+  // https://www.fileformat.info/info/charset/UTF-32/list.htm?start=7168
+
   public render() {
     return (
       <main className={styles.mainContainer}>
         <SquareButton
-          text={this.state.isShiftActive ? 'B' : 'A'}
+          text={this.state.isShiftActive ? '⇩' : '⇧'}
           theme={this.theme()}
           action={() => this.toggleShiftMode()}
         />
@@ -58,12 +61,12 @@ class ReactWebUI extends Component {
         ) : null}
         <SquareButton text="-" theme={this.theme()} action={() => app.actions.viewport.zoomOut()} />
         <RectangleButton
-          text={this.state.zoomIndicator}
+          text={this.state.isShiftActive ? '⛶' : this.state.zoomIndicator}
           theme={this.theme()}
           action={() => app.actions.viewport.zoom100()}
         />
         <SquareButton text="+" theme={this.theme()} action={() => app.actions.viewport.zoomIn()} />
-        <SquareButton text="[v]" theme={this.theme()} action={() => app.actions.viewport.fitToBoard()} />
+        <SquareButton text="⊡" theme={this.theme()} action={() => app.actions.viewport.fitToBoard()} />
       </main>
     );
   }
