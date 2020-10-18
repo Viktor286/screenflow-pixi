@@ -184,15 +184,14 @@ export default class BoardElement {
     if (this.inGroup) {
       this.inGroup.startDrag(startPoint);
     } else {
-      this.app.engine.ticker.add(this.onDrag);
       // this.app.viewport.instance.pause = true;
-      this.app.board.isMemberDragging = this.id;
       this.isDragging = true;
       this.startDragPoint = startPoint;
       this.container.alpha = 0.5;
       this.zIndex = 1;
       const { x: wMx, y: wMy } = this.app.viewport.getWorldCoordsFromMouse();
       this.dragPoint = { x: wMx - this.x, y: wMy - this.y };
+      this.app.engine.ticker.add(this.onDrag);
     }
   }
 
@@ -200,14 +199,13 @@ export default class BoardElement {
     if (this.inGroup) {
       this.inGroup.stopDrag();
     } else {
-      this.app.engine.ticker.remove(this.onDrag);
       // this.app.viewport.instance.pause = false;
-      this.app.board.isMemberDragging = false;
       this.isDragging = false;
       this.startDragPoint = undefined;
       this.container.alpha = 1;
       this.zIndex = 0;
       this.dragPoint = { x: 0, y: 0 };
+      this.app.engine.ticker.remove(this.onDrag);
     }
   }
 

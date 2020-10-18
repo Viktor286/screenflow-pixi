@@ -2,6 +2,7 @@ import * as PIXI from 'pixi.js';
 import FlowApp from './FlowApp';
 import BoardElement, { BoardElementContainer } from './BoardElement';
 import { ITransforms } from '../types/global';
+import { IWorldCoords } from './Viewport';
 
 export interface IExplodedGroup {
   boardElements: BoardElement[];
@@ -13,8 +14,9 @@ export default class Group extends BoardElement {
   private groupDrawing = new PIXI.Graphics();
 
   leftMostChild: BoardElementContainer | undefined;
+  isTempGroup: boolean = true;
 
-  constructor(public app: FlowApp) {
+  constructor(public app: FlowApp, public isTempGroup = true) {
     super(app);
 
     this.container = new BoardElementContainer(this);
@@ -60,9 +62,13 @@ export default class Group extends BoardElement {
 
       this.container.children.forEach((elm) => {
         if (elm instanceof BoardElementContainer) {
-          this.isSelected = false;
+          elm.boardElement.isSelected = false;
         }
       });
+
+      if (this.isTempGroup) {
+        this.explodeGroup();
+      }
 
       return true;
     }
@@ -95,18 +101,40 @@ export default class Group extends BoardElement {
     });
   }
 
+  public startDrag(startPoint: IWorldCoords) {
+    this.container.children.forEach((elm) => {
+      if (elm instanceof BoardElementContainer) {
+        elm.boardElement.isDragging = true;
+      }
+    });
+    super.startDrag(startPoint);
+  }
+
+  public stopDrag() {
+    this.container.children.forEach((elm) => {
+      if (elm instanceof BoardElementContainer) {
+        elm.boardElement.isDragging = false;
+      }
+    });
+    super.stopDrag();
+  }
+
+  public isElementInGroup(boardElement: BoardElement) {
+    return this.container.children.find(
+      (elm) => elm instanceof BoardElementContainer && elm.boardElement === boardElement,
+    );
+  }
+
   public addToGroup<T extends BoardElement>(boardElement: T) {
-    const explodedGroup = this.explodeGroup();
-    explodedGroup.boardElements.push(boardElement);
-    this.implodeGroup(explodedGroup);
+    if (!this.isElementInGroup(boardElement)) {
+      const explodedGroup = this.explodeGroup();
+      explodedGroup.boardElements.push(boardElement);
+      this.implodeGroup(explodedGroup);
+    }
   }
 
   public removeFromGroup<T extends BoardElement>(boardElement: T) {
-    if (
-      this.container.children.find(
-        (elm) => elm instanceof BoardElementContainer && elm.boardElement === boardElement,
-      )
-    ) {
+    if (this.isElementInGroup(boardElement)) {
       const explodedGroup = this.explodeGroup();
       const boardElements = explodedGroup.boardElements.filter((item) => item !== boardElement);
 
@@ -116,6 +144,7 @@ export default class Group extends BoardElement {
           initialScale: explodedGroup.initialScale,
         });
       } else {
+        this.app.board.deselectElement(); // force deselect last remain item in group
         this.app.board.selectElement(boardElements[0]);
       }
     }

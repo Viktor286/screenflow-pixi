@@ -16,8 +16,12 @@ export default class BoardActions {
     // });
   }
 
-  public selectElement(boardElement: BoardElement) {
+  public selectElement(boardElement: BoardElement, withMultiSelect = false) {
+    const originMultiSelectState = this.app.board.isMultiSelect;
+    if (!originMultiSelectState && withMultiSelect) this.app.board.activateMultiselect();
     this.app.board.selectElement(boardElement);
+    if (!originMultiSelectState) this.app.board.deactivateMultiselect();
+
     // TODO: implement state management for element and group selection
     // this.app.stateManager.setState(`/board/${id}`, {
     //   isSelected: true,
@@ -33,7 +37,7 @@ export default class BoardActions {
   }
 
   public startDragElement(boardElement: BoardElement, startPoint: IWorldCoords) {
-    boardElement.startDrag(startPoint);
+    this.app.board.startDragElement(boardElement, startPoint);
     // TODO: implement state management for element and group dragging
     // this.app.stateManager.setState(`/board/${id}`, {
     //   ???: true,
@@ -41,7 +45,7 @@ export default class BoardActions {
   }
 
   public stopDragElement(boardElement: BoardElement) {
-    boardElement.stopDrag();
+    this.app.board.stopDragElement(boardElement);
     // TODO: implement state management for element and group dragging
     // this.app.stateManager.setState(`/board/${id}`, {
     //   ???: true,

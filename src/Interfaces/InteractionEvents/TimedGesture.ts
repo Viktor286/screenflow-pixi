@@ -119,9 +119,10 @@ export default class TimedGesture {
     // otherwise event data will be obtained respecting the Gestures delay state (not state from a click)
     const gestureEvent = this.getGestureEvent(e);
 
-    if (typeof this.app.board.isMemberDragging === 'string') {
-      const boardElement = this.app.board.state[this.app.board.isMemberDragging].element as BoardElement;
+    if (this.app.board.isMemberDragging) {
+      const boardElement = this.app.board.getSelectedElement();
       if (
+        boardElement &&
         boardElement.startDragPoint &&
         gestureEvent.worldClick.wX !== boardElement.startDragPoint.wX &&
         gestureEvent.worldClick.wY !== boardElement.startDragPoint.wY
@@ -170,7 +171,7 @@ export default class TimedGesture {
   // Press Up events
   private pressUpImmediate(e: IGestureEvent) {
     if (e.isBoardElementHit instanceof BoardElement) {
-      this.app.actions.board.selectElement(e.isBoardElementHit);
+      this.app.actions.board.selectElement(e.isBoardElementHit, e.data.originalEvent.shiftKey);
       console.log(`pressUpImmediate Memo clicked "${e.isBoardElementHit.id}" `, e.isBoardElementHit);
     } else {
       this.app.actions.board.deselectElements();
@@ -215,8 +216,6 @@ export default class TimedGesture {
     // its probably best choice to use ImmediatePressUp
     if (e.isBoardElementHit instanceof BoardElement) {
       if (e.isBoardElementHit.isDragging) {
-        this.app.viewport.slideControls.pauseSlideControls();
-
         this.app.actions.board.stopDragElement(e.isBoardElementHit);
         this.awaiting = false;
       }
@@ -232,8 +231,6 @@ export default class TimedGesture {
     this.app.viewport.slideControls.pauseSlideControls();
 
     if (e.isBoardElementHit instanceof BoardElement) {
-      this.app.actions.board.selectElement(e.isBoardElementHit);
-
       if (!e.isBoardElementHit.isDragging) {
         this.app.actions.board.startDragElement(e.isBoardElementHit, e.worldClick);
         this.awaiting = false;

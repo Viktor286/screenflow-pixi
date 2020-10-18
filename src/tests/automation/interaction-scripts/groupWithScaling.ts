@@ -32,7 +32,6 @@ export async function basicGroupWithScaling() {
   app.actions.board.scaleElementById(group.id, 0.8);
   await wait(700 * stepDelayFactor);
 
-  app.board.selectElement(Memos[7]);
   group.addToGroup(Memos[7]);
   app.board.selectElement(group);
 
