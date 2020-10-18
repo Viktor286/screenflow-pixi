@@ -1,16 +1,25 @@
 import React from 'react';
-import { Button, buttonBaseCss, buttonIconBaseCss } from './Button';
 import { css } from 'emotion';
+import BaseButton, { IDecoratedButtonProps } from './BaseButton';
+import {
+  buttonsTheme,
+  buttonBaseCss,
+  buttonIconBaseCss,
+  blueButtonsTheme,
+  yellowButtonsTheme,
+} from './ButtonStyles';
 
-export interface IDecoratedButtonProps {
-  text: string;
-  action: Function;
-}
+const squareButton = (theme: buttonsTheme) => {
+  let themeDeclaration = '';
+  if (theme === 'blue') themeDeclaration = blueButtonsTheme;
+  if (theme === 'yellow') themeDeclaration = yellowButtonsTheme;
 
-const squareButton = css`
-  ${buttonBaseCss};
-  width: 45px;
-`;
+  return css`
+    ${buttonBaseCss};
+    width: 45px;
+    ${themeDeclaration}
+  `;
+};
 
 const buttonLabel = css`
   ${buttonIconBaseCss};
@@ -21,10 +30,10 @@ const buttonLabel = css`
 
 export default function SquareButton(props: IDecoratedButtonProps) {
   return (
-    <Button
+    <BaseButton
       {...props}
       styles={{
-        button: squareButton,
+        button: squareButton(props.theme),
         label: buttonLabel,
       }}
     />

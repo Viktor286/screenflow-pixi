@@ -1,16 +1,25 @@
 import React from 'react';
-import { Button, buttonBaseCss, buttonIconBaseCss } from './Button';
+import BaseButton, { IDecoratedButtonProps } from './BaseButton';
+import {
+  blueButtonsTheme,
+  buttonBaseCss,
+  buttonIconBaseCss,
+  buttonsTheme,
+  yellowButtonsTheme,
+} from './ButtonStyles';
 import { css } from 'emotion';
 
-export interface IDecoratedButtonProps {
-  text: string;
-  action: Function;
-}
+const rectangleButton = (theme: buttonsTheme) => {
+  let themeDeclaration = '';
+  if (theme === 'blue') themeDeclaration = blueButtonsTheme;
+  if (theme === 'yellow') themeDeclaration = yellowButtonsTheme;
 
-const labeledButton = css`
-  ${buttonBaseCss};
-  width: 55px;
-`;
+  return css`
+    ${buttonBaseCss};
+    width: 55px;
+    ${themeDeclaration}
+  `;
+};
 
 const buttonTextLabel = css`
   ${buttonIconBaseCss};
@@ -21,10 +30,10 @@ const buttonTextLabel = css`
 
 export default function RectangleButton(props: IDecoratedButtonProps) {
   return (
-    <Button
+    <BaseButton
       {...props}
       styles={{
-        button: labeledButton,
+        button: rectangleButton(props.theme),
         label: buttonTextLabel,
       }}
     />
