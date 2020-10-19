@@ -161,10 +161,19 @@ export default class Group extends BoardElement {
           initialScale: explodedGroup.initialScale,
         });
       } else {
+        // Last element left in group
         this.app.board.deselectElement(); // force deselect last remain item in group
         this.app.board.selectElement(boardElements[0]);
+        if (this.isTempGroup) {
+          this.deleteGroup();
+        }
       }
     }
+  }
+
+  public deleteGroup() {
+    this.app.board.removeElementFromBoard(this);
+    this.container.destroy();
   }
 
   public explodeGroup(): IExplodedGroup {

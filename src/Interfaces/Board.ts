@@ -27,6 +27,12 @@ export default class Board {
     return boardElement;
   }
 
+  public removeElementFromBoard<T extends BoardElement>(boardElement: T): boolean {
+    delete this.state[boardElement.id];
+    this.app.viewport.removeFromViewport(boardElement.container);
+    return true;
+  }
+
   public activateMultiselect() {
     this.isMultiSelect = true;
   }
@@ -47,7 +53,7 @@ export default class Board {
   }
 
   public stopDragElement(boardElement: BoardElement) {
-    // Small delay to prevent soma immediate actions after stopDrag, e.g. removeFromGroup on shift+select
+    // Small delay to prevent immediate actions after stopDrag, e.g. removeFromGroup on shift+select
     setTimeout(() => {
       this.app.board.isMemberDragging = false;
     }, 500);
@@ -100,6 +106,11 @@ export default class Board {
   public deselectElement() {
     if (this.selection) {
       this.selection.onDeselect();
+
+      if (this.selection instanceof Group && this.selection.isTempGroup) {
+        this.selection.deleteGroup();
+      }
+
       this.selection = undefined;
       this.app.webUi.updateSelectedMode();
     }
