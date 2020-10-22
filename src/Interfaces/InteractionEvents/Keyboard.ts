@@ -1,10 +1,7 @@
 import FlowApp from '../FlowApp';
 import Mousetrap from 'mousetrap';
 
-export type ShiftModeState = 'off' | 'hold' | 'lock';
-
 export default class Keyboard {
-  public shiftModeState: ShiftModeState = 'off';
   public holdTimer: ReturnType<typeof setTimeout> | null = null;
   private firstTimeHold = false;
 
@@ -17,11 +14,6 @@ export default class Keyboard {
     Mousetrap.bind('shift', this.shiftUp, 'keyup');
   }
 
-  setShiftModeState(state: ShiftModeState) {
-    this.shiftModeState = state;
-    this.app.webUi.updateShiftMode(this.shiftModeState);
-  }
-
   resetHoldTimer() {
     if (this.holdTimer !== null) {
       clearTimeout(this.holdTimer);
@@ -32,25 +24,25 @@ export default class Keyboard {
   shiftDown = () => {
     if (this.holdTimer === null) {
       this.holdTimer = setTimeout(() => {
-        this.setShiftModeState('hold');
+        this.app.board.setShiftModeState('hold');
         this.firstTimeHold = true;
-      }, 200);
+      }, 100);
     }
   };
 
   shiftUp = () => {
-    if (this.shiftModeState === 'lock') {
-      this.setShiftModeState('off');
+    if (this.app.board.shiftModeState === 'lock') {
+      this.app.board.setShiftModeState('off');
       if (this.holdTimer) this.resetHoldTimer();
       return;
     }
 
-    if (this.shiftModeState === 'off') {
-      this.setShiftModeState('lock');
+    if (this.app.board.shiftModeState === 'off') {
+      this.app.board.setShiftModeState('lock');
     }
 
-    if (this.shiftModeState === 'hold') {
-      this.setShiftModeState('off');
+    if (this.app.board.shiftModeState === 'hold') {
+      this.app.board.setShiftModeState('off');
     }
 
     if (this.holdTimer) this.resetHoldTimer();

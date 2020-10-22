@@ -139,9 +139,42 @@ export default class BoardElement {
     return this.container.y + this.container.height / 2;
   }
 
-  public remove() {
-    // TODO: make proper remove
-    this.selectionDrawing.destroy();
+  public delete() {
+    const children = this.container.children.map((e) => e);
+    this.container.removeChildren();
+
+    children.forEach((element) => {
+      if (element instanceof BoardElementContainer) {
+        element.boardElement.delete();
+      }
+
+      // One level enough at the moment
+      if (element instanceof PIXI.Container) {
+        element.removeChildren();
+      }
+
+      // if (element instanceof PIXI.Sprite) {
+      //   element.destroy();
+      // }
+
+      // looks like there is only one exception with usage of .destroy on DisplayObject.
+      // More info below...
+      if (!(element instanceof PIXI.Graphics)) {
+        element.destroy();
+      }
+
+      // if (element instanceof PIXI.Graphics) {
+      //   element.destroy();
+      //   // looks like pixi counts refs for PIXI.Graphics and garbage collects
+      //   //
+      //   // super.destroy(options);
+      //   // this._geometry.refCount--;
+      //   // if (this._geometry.refCount === 0) {
+      //   //   this._geometry.dispose();
+      // }
+    });
+
+    this.container.destroy();
   }
 
   public onSelect() {
@@ -184,7 +217,6 @@ export default class BoardElement {
     if (this.inGroup) {
       this.inGroup.startDrag(startPoint);
     } else {
-      // this.app.viewport.instance.pause = true;
       this.isDragging = true;
       this.startDragPoint = startPoint;
       this.container.alpha = 0.5;
@@ -199,7 +231,6 @@ export default class BoardElement {
     if (this.inGroup) {
       this.inGroup.stopDrag();
     } else {
-      // this.app.viewport.instance.pause = false;
       this.isDragging = false;
       this.startDragPoint = undefined;
       this.container.alpha = 1;

@@ -27,7 +27,7 @@ class ReactWebUI extends Component {
   }
 
   public toggleShiftMode() {
-    app.keyboard.setShiftModeState(this.state.isShiftActive ? 'off' : 'lock');
+    app.board.setShiftModeState(this.state.isShiftActive ? 'off' : 'lock');
   }
 
   theme(): buttonsTheme {
@@ -47,6 +47,11 @@ class ReactWebUI extends Component {
         />
         {this.state.isMemoSelected ? (
           <>
+            <SquareButton
+              text="🗑"
+              theme={this.theme()}
+              action={() => app.actions.board.deleteSelectedElement()}
+            />
             <SquareButton
               text="s-"
               theme={this.theme()}

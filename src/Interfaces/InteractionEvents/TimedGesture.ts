@@ -102,9 +102,11 @@ export default class TimedGesture {
                 // }
               }, 1000);
             }
-          }, 800);
+          }, 700);
         }
-      }, 250);
+      }, 220);
+      // the lowest value 220 was determined by trackpad tap speed length
+      // it could be different on different laptops, but 220 seems long enough
     }
   }
 
@@ -145,7 +147,7 @@ export default class TimedGesture {
           if (this.clickCnt < 2) {
             this.pressUpImmediate(gestureEvent);
           }
-        }, 200);
+        }, 160);
       }
 
       // Tier 1: quick-press
@@ -171,8 +173,7 @@ export default class TimedGesture {
   // Press Up events
   private pressUpImmediate(e: IGestureEvent) {
     if (e.isBoardElementHit instanceof BoardElement) {
-      const withMultiSelect = this.app.keyboard.shiftModeState !== 'off';
-      this.app.actions.board.selectElement(e.isBoardElementHit, withMultiSelect);
+      this.app.actions.board.selectElement(e.isBoardElementHit);
       console.log(`pressUpImmediate Memo clicked "${e.isBoardElementHit.id}" `, e.isBoardElementHit);
     } else {
       this.app.actions.board.deselectElements();

@@ -4,6 +4,8 @@ import Memo from './Memo';
 import Group from './Group';
 import { IWorldCoords } from './Viewport';
 
+export type ShiftModeState = 'off' | 'hold' | 'lock';
+
 export interface IPublicBoardState {
   [key: string]: IBoardElementPublicState;
 }
@@ -11,6 +13,7 @@ export interface IPublicBoardState {
 export default class Board {
   public readonly state: IPublicBoardState = {};
   public isMemberDragging: boolean | string = false;
+  public shiftModeState: ShiftModeState = 'off';
   public selection: BoardElement | undefined = undefined;
   public isMultiSelect: boolean = false;
 
@@ -27,27 +30,32 @@ export default class Board {
     return boardElement;
   }
 
-  public removeElementFromBoard<T extends BoardElement>(boardElement: T): boolean {
-    delete this.state[boardElement.id];
-    this.app.viewport.removeFromViewport(boardElement.container);
+  // todo: how to make "undo" for "hard" delete of Sprites? never really delete BoardElement?
+  public deleteBoardElement<T extends BoardElement>(boardElement: T): boolean {
+    if (boardElement instanceof Group) {
+      boardElement.isTempGroup = false; // keep from rm on deselect
+
+      boardElement.getGroupMembers().forEach((boardElement) => {
+        if (boardElement && this.state[boardElement.id]) delete this.state[boardElement.id];
+      });
+    }
+
+    if (this.selection === boardElement) this.deselectElement();
+
+    if (this.state[boardElement.id]) delete this.state[boardElement.id];
+
+    boardElement.delete();
     return true;
-  }
-
-  public activateMultiselect() {
-    this.isMultiSelect = true;
-  }
-
-  public deactivateMultiselect() {
-    this.isMultiSelect = false;
   }
 
   public startDragElement(
     boardElement: BoardElement,
     startPoint: IWorldCoords = { wX: boardElement.x, wY: boardElement.y },
   ) {
-    if (!this.app.board.isMemberDragging) {
-      this.app.board.isMemberDragging = boardElement.id;
+    if (!this.isMemberDragging) {
+      this.isMemberDragging = boardElement.id;
       this.selectElement(boardElement);
+      this.app.viewport.instance.pause = true;
       boardElement.startDrag(startPoint);
     }
   }
@@ -55,9 +63,24 @@ export default class Board {
   public stopDragElement(boardElement: BoardElement) {
     // Small delay to prevent immediate actions after stopDrag, e.g. removeFromGroup on shift+select
     setTimeout(() => {
-      this.app.board.isMemberDragging = false;
+      this.isMemberDragging = false;
     }, 500);
+    this.app.viewport.instance.pause = false;
     boardElement.stopDrag();
+  }
+
+  public setShiftModeState(state: ShiftModeState = 'off') {
+    this.shiftModeState = state;
+
+    if (state === 'hold' || state === 'lock') {
+      this.isMultiSelect = true;
+    }
+
+    if (state === 'off') {
+      this.isMultiSelect = false;
+    }
+
+    this.app.webUi.updateShiftMode(this.shiftModeState);
   }
 
   private setSelection(boardElement: BoardElement) {
@@ -79,7 +102,17 @@ export default class Board {
             this.selection.addToGroup(boardElement);
           } else {
             if (!this.isMemberDragging) {
-              this.selection.removeFromGroup(boardElement);
+              const group = this.selection.removeFromGroup(boardElement);
+
+              if (group) {
+                const groupMembers = group.getGroupMembers();
+                if (groupMembers && groupMembers.length === 1) {
+                  const explodedGroup = group.explodeGroup();
+                  this.deselectElement();
+                  this.selectElement(explodedGroup.boardElements[0]);
+                  this.deleteBoardElement(group);
+                }
+              }
             }
           }
         } else {
@@ -106,11 +139,6 @@ export default class Board {
   public deselectElement() {
     if (this.selection) {
       this.selection.onDeselect();
-
-      if (this.selection instanceof Group && this.selection.isTempGroup) {
-        this.selection.deleteGroup();
-      }
-
       this.selection = undefined;
       this.app.webUi.updateSelectedMode();
     }
@@ -123,7 +151,7 @@ export default class Board {
   }
 
   public getSelectedElement(): BoardElement | undefined {
-    return this.app.board.selection;
+    return this.selection;
   }
 
   public getElementById(elementId: string): BoardElement | undefined {
@@ -137,7 +165,7 @@ export default class Board {
     return undefined;
   }
 
-  public getMemos() {
+  public getAllMemos() {
     const displayObject = this.app.viewport.instance.children.filter(
       (el) => el instanceof BoardElementContainer && el.boardElement instanceof Memo,
     ) as BoardElementContainer[];
@@ -145,7 +173,7 @@ export default class Board {
     return displayObject.map((container) => container.boardElement);
   }
 
-  public getGroups() {
+  public getAllGroups() {
     const displayObject = this.app.viewport.instance.children.filter(
       (el) => el instanceof BoardElementContainer && el.boardElement instanceof Group,
     ) as BoardElementContainer[];

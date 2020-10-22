@@ -28,8 +28,6 @@ export default class Group extends BoardElement {
     this.groupDrawing.zIndex = 2;
     this.container.addChild(this.groupDrawing);
 
-    this.app.board.addElementToBoard(this);
-
     // PIXI.DisplayObjectContainer
 
     // If an object has no interactive children use interactiveChildren = false
@@ -134,11 +132,20 @@ export default class Group extends BoardElement {
     );
   }
 
-  public addToGroup<T extends BoardElement>(boardElement: T) {
-    if (this.app.board.isMemberDragging) {
-      return;
-    }
+  public getGroupMembers() {
+    const boardElementContainers = this.container.children.filter(
+      (elm) => elm instanceof BoardElementContainer,
+    );
 
+    return boardElementContainers.map((elmC) => {
+      if (elmC instanceof BoardElementContainer) {
+        return elmC.boardElement;
+      }
+      return undefined;
+    });
+  }
+
+  public addToGroup<T extends BoardElement>(boardElement: T) {
     if (!this.isElementInGroup(boardElement)) {
       const explodedGroup = this.explodeGroup();
       explodedGroup.boardElements.push(boardElement);
@@ -146,34 +153,16 @@ export default class Group extends BoardElement {
     }
   }
 
-  public removeFromGroup<T extends BoardElement>(boardElement: T) {
-    if (this.app.board.isMemberDragging) {
-      return;
-    }
-
+  public removeFromGroup<T extends BoardElement>(boardElement: T): Group | undefined {
     if (this.isElementInGroup(boardElement)) {
       const explodedGroup = this.explodeGroup();
       const boardElements = explodedGroup.boardElements.filter((item) => item !== boardElement);
 
-      if (boardElements.length > 1) {
-        this.implodeGroup({
-          boardElements,
-          initialScale: explodedGroup.initialScale,
-        });
-      } else {
-        // Last element left in group
-        this.app.board.deselectElement(); // force deselect last remain item in group
-        this.app.board.selectElement(boardElements[0]);
-        if (this.isTempGroup) {
-          this.deleteGroup();
-        }
-      }
+      return this.implodeGroup({
+        boardElements,
+        initialScale: explodedGroup.initialScale,
+      });
     }
-  }
-
-  public deleteGroup() {
-    this.app.board.removeElementFromBoard(this);
-    this.container.destroy();
   }
 
   public explodeGroup(): IExplodedGroup {
@@ -217,7 +206,7 @@ export default class Group extends BoardElement {
     };
   }
 
-  public implodeGroup({ boardElements, initialScale = 1 }: IExplodedGroup) {
+  public implodeGroup({ boardElements, initialScale = 1 }: IExplodedGroup): Group {
     // Calculate group transforms
     const fScale = 1 / initialScale;
 
@@ -260,5 +249,7 @@ export default class Group extends BoardElement {
 
     // Draw for debug
     this.drawSelection();
+
+    return this;
   }
 }

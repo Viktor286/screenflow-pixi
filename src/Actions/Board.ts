@@ -1,6 +1,7 @@
 import FlowApp from '../Interfaces/FlowApp';
 import { IWorldCoords } from '../Interfaces/Viewport';
 import BoardElement from '../Interfaces/BoardElement';
+import { ShiftModeState } from '../Interfaces/Board';
 
 export default class BoardActions {
   constructor(public app: FlowApp) {}
@@ -16,11 +17,8 @@ export default class BoardActions {
     // });
   }
 
-  public selectElement(boardElement: BoardElement, withMultiSelect = false) {
-    const originMultiSelectState = this.app.board.isMultiSelect;
-    if (!originMultiSelectState && withMultiSelect) this.app.board.activateMultiselect();
+  public selectElement(boardElement: BoardElement) {
     this.app.board.selectElement(boardElement);
-    if (!originMultiSelectState) this.app.board.deactivateMultiselect();
 
     // TODO: implement state management for element and group selection
     // this.app.stateManager.setState(`/board/${id}`, {
@@ -34,6 +32,18 @@ export default class BoardActions {
     // this.app.stateManager.setState(`/board/${id}`, {
     //   isSelected: true,
     // });
+  }
+
+  public setShiftModeState(state: ShiftModeState = 'off') {
+    this.app.board.setShiftModeState(state);
+  }
+
+  public deleteSelectedElement() {
+    // TODO: implement state management for element deletion
+    const boardElement = this.app.board.getSelectedElement();
+    if (boardElement) {
+      this.app.board.deleteBoardElement(boardElement);
+    }
   }
 
   public startDragElement(boardElement: BoardElement, startPoint: IWorldCoords) {
