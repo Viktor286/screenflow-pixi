@@ -172,11 +172,13 @@ export default class TimedGesture {
   // Timed-gestures special events
   // Press Up events
   private pressUpImmediate(e: IGestureEvent) {
-    if (e.isBoardElementHit instanceof BoardElement) {
-      this.app.actions.board.selectElement(e.isBoardElementHit);
-      console.log(`pressUpImmediate Memo clicked "${e.isBoardElementHit.id}" `, e.isBoardElementHit);
-    } else {
-      this.app.actions.board.deselectElements();
+    if (!this.app.board.isMemberDragging) {
+      if (e.isBoardElementHit instanceof BoardElement) {
+        this.app.actions.board.selectElement(e.isBoardElementHit);
+        console.log(`pressUpImmediate Memo clicked "${e.isBoardElementHit.id}" `, e.isBoardElementHit);
+      } else {
+        this.app.actions.board.deselectElements();
+      }
     }
 
     this.sendToMonitor('Immediate Press Up', this.getClickInfoStr(e));
@@ -217,9 +219,31 @@ export default class TimedGesture {
     // ImmediatePressDown event could be too frequent,
     // its probably best choice to use ImmediatePressUp
     if (e.isBoardElementHit instanceof BoardElement) {
+      this.app.viewport.slideControls.pauseSlideControls();
+
       if (e.isBoardElementHit.isDragging) {
         this.app.actions.board.stopDragElement(e.isBoardElementHit);
         this.awaiting = false;
+      }
+
+      const { x: sX, y: sY } = this.app.engine.renderer.plugins.interaction.eventData.data.global;
+
+      if (!e.isBoardElementHit.isDragging) {
+        if (this.app.board.getSelectedElement() === e.isBoardElementHit) {
+          this.app.actions.board.startDragElement(e.isBoardElementHit, e.worldClick);
+          this.awaiting = false;
+          return;
+        }
+
+        if (
+          e.isBoardElementHit.inGroup === this.app.board.getSelectedElement() &&
+          e.screenClick.sX !== sX &&
+          e.screenClick.sY !== sY
+        ) {
+          this.app.actions.board.startDragElement(e.isBoardElementHit, e.worldClick);
+          this.awaiting = false;
+          return;
+        }
       }
     }
 
@@ -230,9 +254,9 @@ export default class TimedGesture {
   }
 
   private pressDownQuick(e: IGestureEvent) {
-    this.app.viewport.slideControls.pauseSlideControls();
-
     if (e.isBoardElementHit instanceof BoardElement) {
+      this.app.viewport.slideControls.pauseSlideControls();
+
       if (!e.isBoardElementHit.isDragging) {
         this.app.actions.board.startDragElement(e.isBoardElementHit, e.worldClick);
         this.awaiting = false;

@@ -14,7 +14,7 @@ export default class Board {
   public readonly state: IPublicBoardState = {};
   public isMemberDragging: boolean | string = false;
   public shiftModeState: ShiftModeState = 'off';
-  public selection: BoardElement | undefined = undefined;
+  public selection: BoardElement | null = null;
   public isMultiSelect: boolean = false;
 
   constructor(public app: FlowApp) {
@@ -139,7 +139,7 @@ export default class Board {
   public deselectElement() {
     if (this.selection) {
       this.selection.onDeselect();
-      this.selection = undefined;
+      this.selection = null;
       this.app.webUi.updateSelectedMode();
     }
   }
@@ -150,7 +150,7 @@ export default class Board {
     }
   }
 
-  public getSelectedElement(): BoardElement | undefined {
+  public getSelectedElement(): BoardElement | null {
     return this.selection;
   }
 
