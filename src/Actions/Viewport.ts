@@ -18,12 +18,8 @@ export default class ViewportActions {
     if (boardElement.inGroup) {
       boardElement = boardElement.inGroup;
     }
-
-    let { x, y, width, height } = boardElement;
-    x += width / 2;
-    y += height / 2;
-
-    this.fitToArea({ wX: x, wY: y }, width, height);
+    let { centerX, centerY, width, height } = boardElement;
+    this.fitToArea({ wX: centerX, wY: centerY }, width, height);
   }
 
   public fitToArea(targetPoint: IWorldCoords, width: number, height: number) {

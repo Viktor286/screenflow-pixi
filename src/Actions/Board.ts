@@ -1,6 +1,7 @@
 import FlowApp from '../Interfaces/FlowApp';
 import { IWorldCoords } from '../Interfaces/Viewport';
 import BoardElement from '../Interfaces/BoardElement';
+import { ShiftModeState } from '../Interfaces/Board';
 
 export default class BoardActions {
   constructor(public app: FlowApp) {}
@@ -8,7 +9,7 @@ export default class BoardActions {
   public selectElementById(id: string) {
     const el = this.app.board.getElementById(id);
     if (el instanceof BoardElement) {
-      el.select();
+      this.app.board.selectElement(el);
     }
     // TODO: implement state management for element and group selection
     // this.app.stateManager.setState(`/board/${id}`, {
@@ -17,7 +18,8 @@ export default class BoardActions {
   }
 
   public selectElement(boardElement: BoardElement) {
-    boardElement.select();
+    this.app.board.selectElement(boardElement);
+
     // TODO: implement state management for element and group selection
     // this.app.stateManager.setState(`/board/${id}`, {
     //   isSelected: true,
@@ -25,15 +27,27 @@ export default class BoardActions {
   }
 
   public deselectElements() {
-    this.app.board.clearSelectedElements();
+    this.app.board.deselectElement();
     // TODO: implement state management for element and group selection
     // this.app.stateManager.setState(`/board/${id}`, {
     //   isSelected: true,
     // });
   }
 
+  public setShiftModeState(state: ShiftModeState = 'off') {
+    this.app.board.setShiftModeState(state);
+  }
+
+  public deleteSelectedElement() {
+    // TODO: implement state management for element deletion
+    const boardElement = this.app.board.getSelectedElement();
+    if (boardElement) {
+      this.app.board.deleteBoardElement(boardElement);
+    }
+  }
+
   public startDragElement(boardElement: BoardElement, startPoint: IWorldCoords) {
-    boardElement.startDrag(startPoint);
+    this.app.board.startDragElement(boardElement, startPoint);
     // TODO: implement state management for element and group dragging
     // this.app.stateManager.setState(`/board/${id}`, {
     //   ???: true,
@@ -41,7 +55,7 @@ export default class BoardActions {
   }
 
   public stopDragElement(boardElement: BoardElement) {
-    boardElement.stopDrag();
+    this.app.board.stopDragElement(boardElement);
     // TODO: implement state management for element and group dragging
     // this.app.stateManager.setState(`/board/${id}`, {
     //   ???: true,
@@ -62,14 +76,14 @@ export default class BoardActions {
   }
 
   public decreaseSelectedElementScale() {
-    const boardElement = this.app.board.getSelectedBoardElement();
+    const boardElement = this.app.board.getSelectedElement();
     if (boardElement) {
       this.app.actions.board.scaleElementById(boardElement.id, boardElement.scale / 1.3);
     }
   }
 
   public increaseSelectedElementScale() {
-    const boardElement = this.app.board.getSelectedBoardElement();
+    const boardElement = this.app.board.getSelectedElement();
     if (boardElement) {
       this.app.actions.board.scaleElementById(boardElement.id, boardElement.scale * 1.3);
     }

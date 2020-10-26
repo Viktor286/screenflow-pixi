@@ -2,6 +2,8 @@ import * as PIXI from 'pixi.js';
 import FlowApp from './FlowApp';
 import BoardElement, { BoardElementContainer } from './BoardElement';
 import { ITransforms } from '../types/global';
+import { IWorldCoords } from './Viewport';
+import Memo from './Memo';
 
 export interface IExplodedGroup {
   boardElements: BoardElement[];
@@ -13,8 +15,9 @@ export default class Group extends BoardElement {
   private groupDrawing = new PIXI.Graphics();
 
   leftMostChild: BoardElementContainer | undefined;
+  isTempGroup: boolean = true;
 
-  constructor(public app: FlowApp) {
+  constructor(public app: FlowApp, public isTempGroup = true) {
     super(app);
 
     this.container = new BoardElementContainer(this);
@@ -24,8 +27,6 @@ export default class Group extends BoardElement {
 
     this.groupDrawing.zIndex = 2;
     this.container.addChild(this.groupDrawing);
-
-    this.app.board.addBoardElement(this);
 
     // PIXI.DisplayObjectContainer
 
@@ -38,11 +39,9 @@ export default class Group extends BoardElement {
     // https://github.com/pixijs/pixi.js/wiki/v4-Performance-Tips
   }
 
-  public select() {
+  public onSelect() {
     if (!this.isSelected) {
-      this.app.board.addElementToSelected(this);
       this.isSelected = true;
-
       this.drawSelection();
 
       this.container.children.forEach((elm) => {
@@ -55,18 +54,20 @@ export default class Group extends BoardElement {
     return false;
   }
 
-  public deselect() {
+  public onDeselect() {
     if (this.isSelected) {
-      this.app.board.removeElementFromSelected(this);
       this.isSelected = false;
-
-      this.eraseSelection();
+      this.eraseSelectionDrawing();
 
       this.container.children.forEach((elm) => {
         if (elm instanceof BoardElementContainer) {
-          this.isSelected = false;
+          elm.boardElement.isSelected = false;
         }
       });
+
+      if (this.isTempGroup) {
+        this.explodeGroup();
+      }
 
       return true;
     }
@@ -89,39 +90,78 @@ export default class Group extends BoardElement {
       .drawRect(0, 0, this.width / this.scale - lineWidth, this.height / this.scale - lineWidth);
   }
 
-  public eraseSelection() {
+  public eraseSelectionDrawing() {
     this.groupDrawing.clear();
 
     this.container.children.forEach((elm) => {
       if (elm instanceof BoardElementContainer) {
-        elm.boardElement.eraseSelection();
+        elm.boardElement.eraseSelectionDrawing();
       }
     });
   }
 
-  public addToGroup<T extends BoardElement>(boardElement: T) {
-    const explodedGroup = this.explodeGroup();
-    explodedGroup.boardElements.push(boardElement);
-    this.implodeGroup(explodedGroup);
+  public startDrag(startPoint: IWorldCoords) {
+    this.container.children.forEach((elm) => {
+      if (elm instanceof BoardElementContainer) {
+        elm.boardElement.isDragging = true;
+
+        if (elm.boardElement instanceof Memo) {
+          elm.boardElement.setDragState();
+        }
+      }
+    });
+    super.startDrag(startPoint);
   }
 
-  public removeFromGroup<T extends BoardElement>(boardElement: T) {
-    if (
-      this.container.children.find(
-        (elm) => elm instanceof BoardElementContainer && elm.boardElement === boardElement,
-      )
-    ) {
+  public stopDrag() {
+    this.container.children.forEach((elm) => {
+      if (elm instanceof BoardElementContainer) {
+        elm.boardElement.isDragging = false;
+
+        if (elm.boardElement instanceof Memo) {
+          elm.boardElement.unsetDragState();
+        }
+      }
+    });
+    super.stopDrag();
+  }
+
+  public isElementInGroup(boardElement: BoardElement) {
+    return this.container.children.find(
+      (elm) => elm instanceof BoardElementContainer && elm.boardElement === boardElement,
+    );
+  }
+
+  public getGroupMembers() {
+    const boardElementContainers = this.container.children.filter(
+      (elm) => elm instanceof BoardElementContainer,
+    );
+
+    return boardElementContainers.map((elmC) => {
+      if (elmC instanceof BoardElementContainer) {
+        return elmC.boardElement;
+      }
+      return undefined;
+    });
+  }
+
+  public addToGroup<T extends BoardElement>(boardElement: T) {
+    if (!this.isElementInGroup(boardElement)) {
+      const explodedGroup = this.explodeGroup();
+      explodedGroup.boardElements.push(boardElement);
+      this.implodeGroup(explodedGroup);
+    }
+  }
+
+  public removeFromGroup<T extends BoardElement>(boardElement: T): Group | undefined {
+    if (this.isElementInGroup(boardElement)) {
       const explodedGroup = this.explodeGroup();
       const boardElements = explodedGroup.boardElements.filter((item) => item !== boardElement);
 
-      if (boardElements.length > 1) {
-        this.implodeGroup({
-          boardElements,
-          initialScale: explodedGroup.initialScale,
-        });
-      } else {
-        boardElements[0].select();
-      }
+      return this.implodeGroup({
+        boardElements,
+        initialScale: explodedGroup.initialScale,
+      });
     }
   }
 
@@ -147,7 +187,7 @@ export default class Group extends BoardElement {
       elementMap.forEach((coords, boardElementContainer) => {
         const { boardElement } = boardElementContainer;
         boardElement.inGroup = undefined;
-        boardElement.eraseSelection();
+        boardElement.eraseSelectionDrawing();
         this.app.viewport.instance.addChild(boardElementContainer);
         boardElement.x = coords.x;
         boardElement.y = coords.y;
@@ -155,18 +195,18 @@ export default class Group extends BoardElement {
         boardElements.push(boardElement);
       });
 
-      this.eraseSelection();
+      this.eraseSelectionDrawing();
       return { boardElements, initialScale };
     }
 
-    this.eraseSelection();
+    this.eraseSelectionDrawing();
     return {
       boardElements: [],
       initialScale,
     };
   }
 
-  public implodeGroup({ boardElements, initialScale = 1 }: IExplodedGroup) {
+  public implodeGroup({ boardElements, initialScale = 1 }: IExplodedGroup): Group {
     // Calculate group transforms
     const fScale = 1 / initialScale;
 
@@ -209,5 +249,7 @@ export default class Group extends BoardElement {
 
     // Draw for debug
     this.drawSelection();
+
+    return this;
   }
 }

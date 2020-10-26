@@ -4,6 +4,7 @@ import * as styles from './Styles';
 import ReactDOM from 'react-dom';
 import SquareButton from './Components/SquareButton';
 import RectangleButton from './Components/RectangleButton';
+import { buttonsTheme } from './Components/ButtonStyles';
 
 let app: FlowApp;
 
@@ -25,20 +26,52 @@ class ReactWebUI extends Component {
     };
   }
 
+  public toggleShiftMode() {
+    app.board.setShiftModeState(this.state.isShiftActive ? 'off' : 'lock');
+  }
+
+  theme(): buttonsTheme {
+    return this.state.isShiftActive ? 'yellow' : 'blue';
+  }
+
+  // Symbols ⊹, ⯐, ⌗, ⊡, ⌬, ⌾, ⍟, ⍰, ▣, ◉, ⛶, ✛, ⧉, ⭲,
+  // https://www.fileformat.info/info/charset/UTF-32/list.htm?start=7168
+
   public render() {
     return (
       <main className={styles.mainContainer}>
+        <SquareButton
+          text={this.state.isShiftActive ? '⇩' : '⇧'}
+          theme={this.theme()}
+          action={() => this.toggleShiftMode()}
+        />
         {this.state.isMemoSelected ? (
           <>
-            <SquareButton text={this.state.isShiftActive.toString()} action={() => true} />
-            <SquareButton text="s-" action={() => app.actions.board.decreaseSelectedElementScale()} />
-            <SquareButton text="s+" action={() => app.actions.board.increaseSelectedElementScale()} />
+            <SquareButton
+              text="🗑"
+              theme={this.theme()}
+              action={() => app.actions.board.deleteSelectedElement()}
+            />
+            <SquareButton
+              text="s-"
+              theme={this.theme()}
+              action={() => app.actions.board.decreaseSelectedElementScale()}
+            />
+            <SquareButton
+              text="s+"
+              theme={this.theme()}
+              action={() => app.actions.board.increaseSelectedElementScale()}
+            />
           </>
         ) : null}
-        <SquareButton text="-" action={() => app.actions.viewport.zoomOut()} />
-        <RectangleButton text={this.state.zoomIndicator} action={() => app.actions.viewport.zoom100()} />
-        <SquareButton text="+" action={() => app.actions.viewport.zoomIn()} />
-        <SquareButton text="[v]" action={() => app.actions.viewport.fitToBoard()} />
+        <SquareButton text="-" theme={this.theme()} action={() => app.actions.viewport.zoomOut()} />
+        <RectangleButton
+          text={this.state.isShiftActive ? '⛶' : this.state.zoomIndicator}
+          theme={this.theme()}
+          action={() => app.actions.viewport.zoom100()}
+        />
+        <SquareButton text="+" theme={this.theme()} action={() => app.actions.viewport.zoomIn()} />
+        <SquareButton text="⊡" theme={this.theme()} action={() => app.actions.viewport.fitToBoard()} />
       </main>
     );
   }

@@ -139,17 +139,49 @@ export default class BoardElement {
     return this.container.y + this.container.height / 2;
   }
 
-  public remove() {
-    // TODO: make proper remove
-    this.selectionDrawing.destroy();
+  public delete() {
+    const children = this.container.children.map((e) => e);
+    this.container.removeChildren();
+
+    children.forEach((element) => {
+      if (element instanceof BoardElementContainer) {
+        element.boardElement.delete();
+      }
+
+      // One level enough at the moment
+      if (element instanceof PIXI.Container) {
+        element.removeChildren();
+      }
+
+      // if (element instanceof PIXI.Sprite) {
+      //   element.destroy();
+      // }
+
+      // looks like there is only one exception with usage of .destroy on DisplayObject.
+      // More info below...
+      if (!(element instanceof PIXI.Graphics)) {
+        element.destroy();
+      }
+
+      // if (element instanceof PIXI.Graphics) {
+      //   element.destroy();
+      //   // looks like pixi counts refs for PIXI.Graphics and garbage collects
+      //   //
+      //   // super.destroy(options);
+      //   // this._geometry.refCount--;
+      //   // if (this._geometry.refCount === 0) {
+      //   //   this._geometry.dispose();
+      // }
+    });
+
+    this.container.destroy();
   }
 
-  public select() {
+  public onSelect() {
     if (this.inGroup) {
-      this.inGroup.select();
+      this.inGroup.onSelect();
     } else {
       if (!this.isSelected) {
-        this.app.board.addElementToSelected(this);
         this.isSelected = true;
         this.drawSelection();
         return true;
@@ -158,11 +190,10 @@ export default class BoardElement {
     }
   }
 
-  public deselect() {
+  public onDeselect() {
     if (this.isSelected) {
-      this.app.board.removeElementFromSelected(this);
       this.isSelected = false;
-      this.eraseSelection();
+      this.eraseSelectionDrawing();
       return true;
     }
 
@@ -178,7 +209,7 @@ export default class BoardElement {
       .drawRect(0, 0, this.width / this.scale, this.height / this.scale);
   }
 
-  public eraseSelection() {
+  public eraseSelectionDrawing() {
     this.selectionDrawing.clear();
   }
 
@@ -186,15 +217,13 @@ export default class BoardElement {
     if (this.inGroup) {
       this.inGroup.startDrag(startPoint);
     } else {
-      this.app.engine.ticker.add(this.onDrag);
-      // this.app.viewport.instance.pause = true;
-      this.app.board.isMemberDragging = this.id;
       this.isDragging = true;
       this.startDragPoint = startPoint;
       this.container.alpha = 0.5;
       this.zIndex = 1;
       const { x: wMx, y: wMy } = this.app.viewport.getWorldCoordsFromMouse();
       this.dragPoint = { x: wMx - this.x, y: wMy - this.y };
+      this.app.engine.ticker.add(this.onDrag);
     }
   }
 
@@ -202,14 +231,12 @@ export default class BoardElement {
     if (this.inGroup) {
       this.inGroup.stopDrag();
     } else {
-      this.app.engine.ticker.remove(this.onDrag);
-      // this.app.viewport.instance.pause = false;
-      this.app.board.isMemberDragging = false;
       this.isDragging = false;
       this.startDragPoint = undefined;
       this.container.alpha = 1;
       this.zIndex = 0;
       this.dragPoint = { x: 0, y: 0 };
+      this.app.engine.ticker.remove(this.onDrag);
     }
   }
 

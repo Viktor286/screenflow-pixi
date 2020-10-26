@@ -1,21 +1,25 @@
-import React from 'react';
 import { css } from 'emotion';
 
-export interface IButtonProps {
-  text: string;
-  action: Function;
-  styles: IButtonStyles;
-}
+export type buttonsTheme = 'yellow' | 'blue';
 
-export interface IButtonStyles {
-  button: string;
-  label: string;
-}
+export const blueButtonsTheme = css`
+  background: #395062;
+  border: 1px solid #5f9ae2;
+  &:hover {
+    background: #416685;
+  }
+`;
+
+export const yellowButtonsTheme = css`
+  background: #625639;
+  border: 1px solid #e2b65f;
+  &:hover {
+    background: #8f7a4a;
+  }
+`;
 
 export const buttonBaseCss = css`
   height: 45px;
-  background: #395062;
-  border: 1px solid #5f9ae2;
   margin: 0 4px;
   opacity: 0.6;
   color: white;
@@ -40,11 +44,3 @@ export const buttonIconBaseCss = css`
   transform: translateY(-50%);
   position: absolute;
 `;
-
-export function Button({ text, action, styles }: IButtonProps) {
-  return (
-    <div className={styles.button} onClick={(e: React.MouseEvent) => action(e)}>
-      <div className={styles.label}>{text}</div>
-    </div>
-  );
-}

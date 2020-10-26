@@ -64,7 +64,7 @@ export default class TimedGesture {
     // reset for doubleClick
     setTimeout(() => (this.clickCnt = 0), this.doubleClickThreshold);
 
-    // Tier 0: Immediate "select" press
+    // Tier 0: Immediate "Select" press
     // Block second immediate click for double-click case
     if (this.clickCnt < 2) {
       // Required data from the input event should be preserved here
@@ -102,9 +102,11 @@ export default class TimedGesture {
                 // }
               }, 1000);
             }
-          }, 800);
+          }, 700);
         }
-      }, 250);
+      }, 220);
+      // the lowest value 220 was determined by trackpad tap speed length
+      // it could be different on different laptops, but 220 seems long enough
     }
   }
 
@@ -119,9 +121,10 @@ export default class TimedGesture {
     // otherwise event data will be obtained respecting the Gestures delay state (not state from a click)
     const gestureEvent = this.getGestureEvent(e);
 
-    if (typeof this.app.board.isMemberDragging === 'string') {
-      const boardElement = this.app.board.state[this.app.board.isMemberDragging].element as BoardElement;
+    if (this.app.board.isMemberDragging) {
+      const boardElement = this.app.board.getSelectedElement();
       if (
+        boardElement &&
         boardElement.startDragPoint &&
         gestureEvent.worldClick.wX !== boardElement.startDragPoint.wX &&
         gestureEvent.worldClick.wY !== boardElement.startDragPoint.wY
@@ -134,7 +137,7 @@ export default class TimedGesture {
     // Distinguish single click and double click handlers
     // filter out timed gestures while double-click
     if (this.clickCnt < 2) {
-      // Tier 0: Immediate "select" press
+      // Tier 0: Immediate "Select" press
       // No ImmediatePressUp while timed gestures are active
       if (this.awaiting !== 'quick' && this.awaiting !== 'medium' && this.awaiting !== 'long') {
         // this is experimental hack to workaround stageImmediatePressUp intersection with double click
@@ -144,7 +147,7 @@ export default class TimedGesture {
           if (this.clickCnt < 2) {
             this.pressUpImmediate(gestureEvent);
           }
-        }, 200);
+        }, 160);
       }
 
       // Tier 1: quick-press
@@ -169,11 +172,13 @@ export default class TimedGesture {
   // Timed-gestures special events
   // Press Up events
   private pressUpImmediate(e: IGestureEvent) {
-    if (e.isBoardElementHit instanceof BoardElement) {
-      this.app.actions.board.selectElement(e.isBoardElementHit);
-      console.log(`pressUpImmediate Memo clicked "${e.isBoardElementHit.id}" `, e.isBoardElementHit);
-    } else {
-      this.app.actions.board.deselectElements();
+    if (!this.app.board.isMemberDragging) {
+      if (e.isBoardElementHit instanceof BoardElement) {
+        this.app.actions.board.selectElement(e.isBoardElementHit);
+        console.log(`pressUpImmediate Memo clicked "${e.isBoardElementHit.id}" `, e.isBoardElementHit);
+      } else {
+        this.app.actions.board.deselectElements();
+      }
     }
 
     this.sendToMonitor('Immediate Press Up', this.getClickInfoStr(e));
@@ -181,6 +186,7 @@ export default class TimedGesture {
 
   private pressUpQuick(e: IGestureEvent) {
     this.app.actions.viewport.moveTo(e.worldClick);
+    // here most likely will be rectangular selection start
 
     this.sendToMonitor('Quick Press Up', this.getClickInfoStr(e));
   }
@@ -213,11 +219,31 @@ export default class TimedGesture {
     // ImmediatePressDown event could be too frequent,
     // its probably best choice to use ImmediatePressUp
     if (e.isBoardElementHit instanceof BoardElement) {
-      if (e.isBoardElementHit.isDragging) {
-        this.app.viewport.slideControls.pauseSlideControls();
+      this.app.viewport.slideControls.pauseSlideControls();
 
+      if (e.isBoardElementHit.isDragging) {
         this.app.actions.board.stopDragElement(e.isBoardElementHit);
         this.awaiting = false;
+      }
+
+      const { x: sX, y: sY } = this.app.engine.renderer.plugins.interaction.eventData.data.global;
+
+      if (!e.isBoardElementHit.isDragging) {
+        if (this.app.board.getSelectedElement() === e.isBoardElementHit) {
+          this.app.actions.board.startDragElement(e.isBoardElementHit, e.worldClick);
+          this.awaiting = false;
+          return;
+        }
+
+        if (
+          e.isBoardElementHit.inGroup === this.app.board.getSelectedElement() &&
+          e.screenClick.sX !== sX &&
+          e.screenClick.sY !== sY
+        ) {
+          this.app.actions.board.startDragElement(e.isBoardElementHit, e.worldClick);
+          this.awaiting = false;
+          return;
+        }
       }
     }
 
@@ -228,10 +254,8 @@ export default class TimedGesture {
   }
 
   private pressDownQuick(e: IGestureEvent) {
-    this.app.viewport.slideControls.pauseSlideControls();
-
     if (e.isBoardElementHit instanceof BoardElement) {
-      this.app.actions.board.selectElement(e.isBoardElementHit);
+      this.app.viewport.slideControls.pauseSlideControls();
 
       if (!e.isBoardElementHit.isDragging) {
         this.app.actions.board.startDragElement(e.isBoardElementHit, e.worldClick);

@@ -5,10 +5,10 @@ import { gsap } from 'gsap';
 
 export default class FocusPoint {
   private readonly touchGraphics: PIXI.Graphics = this.createTouchGraphics(0xfff796);
+  private readonly animationDuration = 0.7;
 
   constructor(public app: FlowApp) {
     // this.app.engine.stage.addChild(this.touchGraphics);
-    this.app.viewport.addToViewport(this.touchGraphics);
     this.touchGraphics.zIndex = 9999;
   }
 
@@ -41,8 +41,12 @@ export default class FocusPoint {
 
   public putFocusPoint({ wX, wY }: IWorldCoords) {
     // const { x, y } = this.app.viewport.instance.toGlobal({ x: wX, y: wY });
+    this.app.viewport.addToViewport(this.touchGraphics);
     this.touchGraphics.position.set(wX, wY);
     this.animateFocusPoint();
+    setTimeout(() => {
+      this.app.viewport.removeFromViewport(this.touchGraphics);
+    }, this.animationDuration * 1000);
   }
 
   private animateFocusPoint() {
@@ -55,7 +59,7 @@ export default class FocusPoint {
       {
         scale: 3.5 / this.app.viewport.scale,
         alpha: 0,
-        duration: 0.7,
+        duration: this.animationDuration,
         ease: 'expo.out',
       },
     );

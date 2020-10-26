@@ -1,4 +1,3 @@
-import * as PIXI from 'pixi.js';
 import './index.css';
 import FlowApp from './Interfaces/FlowApp';
 import { getImageUrlSet } from './fixtures/imagesDataSet';
@@ -12,17 +11,11 @@ async function main() {
   if (appDiv instanceof HTMLElement) {
     const app = new FlowApp(appDiv);
 
-    /** Temp Test sample **/
-    let rectangle = new PIXI.Graphics();
-    rectangle.lineStyle(1.1, 0xff3300, 1);
-    rectangle.drawRect(300, 300, 100, 100);
-    app.viewport.addToViewport(rectangle);
-
     /** Load test images **/
     const loader = await FilesIO.loadUrlSet(getImageUrlSet(12));
 
     for (const resource of Object.values(loader.resources)) {
-      app.board.addBoardElement(new Memo(resource.texture, app));
+      app.board.addElementToBoard(new Memo(resource.texture, app));
     }
 
     /** Load test Layout **/

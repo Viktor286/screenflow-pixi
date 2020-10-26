@@ -41,7 +41,6 @@ export default class SlideControls {
   }
 
   public unpauseSlideControls() {
-    console.log('unpauseSlideControls');
     this.viewport.instance.plugins.resume('drag');
     this.viewport.instance.plugins.resume('pinch');
     this.viewport.instance.plugins.resume('wheel');
