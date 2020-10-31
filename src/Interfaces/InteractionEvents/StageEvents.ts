@@ -26,9 +26,6 @@ export default class StageEvents {
   }
 
   public sendToMonitor = (eventName: string, msg: string = '') => {
-    // console.log('worldClick', e.worldClick.wX, e.worldClick.wY);
-    // console.log('screenClick', e.screenClick.sX, e.screenClick.sY);
-
     if (this.eventMonitor instanceof DevMonitor) {
       this.eventMonitor.dispatchMonitor('stageEvents', eventName, msg);
       console.log(`[stage] ${eventName} ${msg}`);

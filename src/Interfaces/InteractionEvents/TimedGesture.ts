@@ -73,7 +73,7 @@ export default class TimedGesture {
             }
           }, 700);
         }
-      }, 220);
+      }, 450);
       // the lowest value 220 (refined to 215) was determined by trackpad tap speed length
       // it could be different on different laptops, but 220 seems long enough
     }
@@ -108,23 +108,35 @@ export default class TimedGesture {
     if (this.isDoubleClick) {
       // Double click handlers
       this.doubleClick(gestureEvent);
-      this.isDoubleClick = false;
+      this.stopGesture();
+      setTimeout(() => {
+        this.isDoubleClick = false;
+      }, 160);
     } else {
-      // Tier 0: Immediate "Select" press
-      // No ImmediatePressUp while timed gestures are active
-      if (this.awaiting !== 'quick' && this.awaiting !== 'medium' && this.awaiting !== 'long')
-        this.pressUpImmediate(gestureEvent);
+      // wait until doubleClick resolved
+      setTimeout(() => {
+        if (!this.isDoubleClick) {
+          // Tier 0: Immediate "Select" press
+          // No ImmediatePressUp while timed gestures are active
+          if (this.awaiting !== 'quick' && this.awaiting !== 'medium' && this.awaiting !== 'long')
+            this.pressUpImmediate(gestureEvent);
 
-      // Tier 1: quick-press
-      if (this.awaiting === 'quick') this.pressUpQuick(gestureEvent);
+          // Tier 1: quick-press
+          if (this.awaiting === 'quick') this.pressUpQuick(gestureEvent);
 
-      // Tier 2: medium-press
-      if (this.awaiting === 'medium') this.pressUpMedium(gestureEvent);
+          // Tier 2: medium-press
+          if (this.awaiting === 'medium') this.pressUpMedium(gestureEvent);
 
-      // // Tier 3: long-press
-      // if (this.awaiting === 'long') this.pressUpLong(gestureEvent);
+          // // Tier 3: long-press
+          // if (this.awaiting === 'long') this.pressUpLong(gestureEvent);
+
+          this.stopGesture();
+        }
+      }, 160);
     }
+  }
 
+  private stopGesture() {
     this.awaiting = false;
     if (this.mainTimer) clearTimeout(this.mainTimer);
     this.app.viewport.slideControls.unpauseSlideControls();
@@ -140,7 +152,9 @@ export default class TimedGesture {
         this.app.actions.board.selectElement(e.isBoardElementHit);
         console.log(`pressUpImmediate Memo clicked "${e.isBoardElementHit.id}" `, e.isBoardElementHit);
       } else {
-        this.app.actions.board.deselectElements();
+        if (!this.app.viewport.slideControls.isSliding) {
+          this.app.actions.board.deselectElements();
+        }
       }
     }
 
@@ -178,7 +192,6 @@ export default class TimedGesture {
       this.app.actions.board.selectElement(gestureEvent.isBoardElementHit);
     } else {
       // this.app.actions.viewport.zoomIn(e.worldClick);
-      console.log('fitToBoard!! ');
       this.app.actions.viewport.fitToBoard();
     }
   }
@@ -253,8 +266,8 @@ export default class TimedGesture {
   }
 
   public sendToMonitor = (eventName: string, e: IGestureEvent) => {
-    console.log('worldClick', e.worldClick.wX, e.worldClick.wY);
-    console.log('screenClick', e.screenClick.sX, e.screenClick.sY);
+    // console.log('worldClick', e.worldClick.wX, e.worldClick.wY);
+    // console.log('screenClick', e.screenClick.sX, e.screenClick.sY);
 
     this.stageEvents.sendToMonitor(
       eventName,

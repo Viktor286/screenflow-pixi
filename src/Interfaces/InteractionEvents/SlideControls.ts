@@ -77,7 +77,9 @@ export default class SlideControls {
   private onSliderEnd = () => {
     // console.log('onSliderEnd');
 
-    this.isSliding = false;
+    setTimeout(() => {
+      this.isSliding = false;
+    }, 200);
     this.app.actions.viewport.amendCameraState();
   };
 
