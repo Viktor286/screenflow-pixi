@@ -2,7 +2,7 @@ import * as PIXI from 'pixi.js';
 import FlowApp from './FlowApp';
 import { gsap } from 'gsap';
 import Group from './Group';
-import { IPoint } from '../types/global';
+import { IPoint, IGsapProps } from '../types/global';
 import { IWorldCoords } from './Viewport';
 
 export interface IBoardElementPublicState {
@@ -222,6 +222,11 @@ export default class BoardElement {
       this.container.alpha = 0.5;
       this.zIndex = 1;
       const { wX: wMx, wY: wMy } = this.app.viewport.getWorldCoordsFromMouse();
+
+      // Compensate mouse movement and start point
+      this.x -= startPoint.wX - wMx;
+      this.y -= startPoint.wY - wMy;
+
       this.dragPoint = { x: wMx - this.x, y: wMy - this.y };
       this.app.engine.ticker.add(this.onDrag);
     }
@@ -246,13 +251,17 @@ export default class BoardElement {
     this.y = mouseCoords.wY - this.dragPoint.y;
   };
 
-  public animateBoardElement(boardElementProps: IBoardElementPublicState): Promise<IBoardElementPublicState> {
+  public animateBoardElement(
+    boardElementProps: IBoardElementPublicState,
+    gsapProps?: IGsapProps,
+  ): Promise<IBoardElementPublicState> {
     this.isScaleFromCenter = true;
     return new Promise((resolve) => {
       gsap.to(this, {
         ...boardElementProps,
         duration: 0.5,
         ease: 'power3.out',
+        ...gsapProps,
         onStart: () => {
           this.container.zIndex = 1;
         },

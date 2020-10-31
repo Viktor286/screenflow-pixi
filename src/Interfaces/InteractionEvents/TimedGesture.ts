@@ -86,7 +86,7 @@ export default class TimedGesture {
 
     this.wasGateUp = true;
     if (this.wasGateUpTimer) clearTimeout(this.wasGateUpTimer);
-    this.wasGateUpTimer = setTimeout(() => (this.wasGateUp = false), 200);
+    this.wasGateUpTimer = setTimeout(() => (this.wasGateUp = false), 160);
 
     // this.markGlc('Up Gate');
 
@@ -112,7 +112,8 @@ export default class TimedGesture {
     } else {
       // Tier 0: Immediate "Select" press
       // No ImmediatePressUp while timed gestures are active
-      if (this.awaiting === true) this.pressUpImmediate(gestureEvent);
+      if (this.awaiting !== 'quick' && this.awaiting !== 'medium' && this.awaiting !== 'long')
+        this.pressUpImmediate(gestureEvent);
 
       // Tier 1: quick-press
       if (this.awaiting === 'quick') this.pressUpQuick(gestureEvent);
@@ -212,13 +213,13 @@ export default class TimedGesture {
       }
     }
 
-    this.app.gui.focusPoint.putFocusPoint(e.worldClick);
+    this.app.gui.focusPoint.putFocusPoint();
     this.sendToMonitor('Quick Press Down', e);
   }
 
   private pressDownMedium(e: IGestureEvent) {
     // this.markGlc('Dw M');
-    this.app.gui.focusPoint.putFocusPoint(e.worldClick);
+    this.app.gui.focusPoint.putFocusPoint();
     this.sendToMonitor('Medium Press Down', e);
   }
 
