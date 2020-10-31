@@ -221,7 +221,7 @@ export default class BoardElement {
       this.startDragPoint = startPoint;
       this.container.alpha = 0.5;
       this.zIndex = 1;
-      const { x: wMx, y: wMy } = this.app.viewport.getWorldCoordsFromMouse();
+      const { wX: wMx, wY: wMy } = this.app.viewport.getWorldCoordsFromMouse();
       this.dragPoint = { x: wMx - this.x, y: wMy - this.y };
       this.app.engine.ticker.add(this.onDrag);
     }
@@ -242,8 +242,8 @@ export default class BoardElement {
 
   private onDrag = (delta: any) => {
     const mouseCoords = this.app.viewport.getWorldCoordsFromMouse();
-    this.x = mouseCoords.x - this.dragPoint.x;
-    this.y = mouseCoords.y - this.dragPoint.y;
+    this.x = mouseCoords.wX - this.dragPoint.x;
+    this.y = mouseCoords.wY - this.dragPoint.y;
   };
 
   public animateBoardElement(boardElementProps: IBoardElementPublicState): Promise<IBoardElementPublicState> {

@@ -12,7 +12,7 @@ export type StageEvent = PIXI.InteractionEvent;
 export default class StageEvents {
   public eventMonitor: DevMonitor | null = this.app.devMonitor;
   public stage: PIXI.Container = this.app.engine.stage;
-  private timedGesture = new TimedGesture(this);
+  public timedGesture = new TimedGesture(this);
 
   constructor(public app: FlowApp) {
     this.stage.interactive = true;
@@ -25,12 +25,15 @@ export default class StageEvents {
     this.initStageEvents();
   }
 
-  public sendToMonitor(eventName: string, msg: string = '') {
+  public sendToMonitor = (eventName: string, msg: string = '') => {
+    // console.log('worldClick', e.worldClick.wX, e.worldClick.wY);
+    // console.log('screenClick', e.screenClick.sX, e.screenClick.sY);
+
     if (this.eventMonitor instanceof DevMonitor) {
       this.eventMonitor.dispatchMonitor('stageEvents', eventName, msg);
       console.log(`[stage] ${eventName} ${msg}`);
     }
-  }
+  };
 
   private initStageEvents() {
     // Normalized "Pointer" events
@@ -40,10 +43,12 @@ export default class StageEvents {
 
   // Original events
   private stagePointerDown(e: StageEvent) {
+    // this.sendToMonitor('s.stagePointerDown');
     this.timedGesture.pointerDownGate(e);
   }
 
   private stagePointerUp(e: StageEvent) {
+    // this.sendToMonitor('s.stagePointerUp');
     this.timedGesture.pointerUpGate(e);
   }
 
