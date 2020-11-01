@@ -263,11 +263,16 @@ export default class Viewport {
     };
   }
 
-  public getWorldCoordsFromMouse() {
-    return this.instance.toLocal(
-      // this.app.engine.renderer.plugins.interaction.mouse.global,
+  public getWorldCoordsFromMouse(): IWorldCoords {
+    const { x: wX, y: wY } = this.instance.toLocal(
       this.app.engine.renderer.plugins.interaction.eventData.data.global,
     );
+    return { wX, wY };
+  }
+
+  public getScreenCoordsFromMouse(): IScreenCoords {
+    const { x: sX, y: sY } = this.app.engine.renderer.plugins.interaction.eventData.data.global;
+    return { sX, sY };
   }
 
   public findScaleFit(width: number, height: number) {

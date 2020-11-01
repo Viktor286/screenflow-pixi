@@ -13,6 +13,9 @@ declare global {
   interface Window {
     app: FlowApp;
     automationScreenshot: string | undefined;
+    performance: {
+      now(): number;
+    };
   }
 }
 

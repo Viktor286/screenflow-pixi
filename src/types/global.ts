@@ -6,3 +6,8 @@ export interface IPoint {
 export interface ITransforms extends IPoint {
   s: number;
 }
+
+export interface IGsapProps {
+  duration?: number;
+  ease?: string;
+}

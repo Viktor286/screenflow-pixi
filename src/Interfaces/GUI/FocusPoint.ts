@@ -1,6 +1,5 @@
 import * as PIXI from 'pixi.js';
 import FlowApp from '../FlowApp';
-import { IWorldCoords } from '../Viewport';
 import { gsap } from 'gsap';
 
 export default class FocusPoint {
@@ -39,9 +38,10 @@ export default class FocusPoint {
     return circle;
   }
 
-  public putFocusPoint({ wX, wY }: IWorldCoords) {
+  public putFocusPoint() {
     // const { x, y } = this.app.viewport.instance.toGlobal({ x: wX, y: wY });
     this.app.viewport.addToViewport(this.touchGraphics);
+    const { wX, wY } = this.app.viewport.getWorldCoordsFromMouse();
     this.touchGraphics.position.set(wX, wY);
     this.animateFocusPoint();
     setTimeout(() => {
