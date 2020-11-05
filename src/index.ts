@@ -4,7 +4,7 @@ import { getImageUrlSet } from './fixtures/imagesDataSet';
 import FilesIO from './Interfaces/FilesIO';
 import { SpaceModifiers } from './modifiers/SpaceModifiers';
 import Memo from './Interfaces/Memo';
-import { basicGroupWithScaling } from './tests/automation/interaction-scripts/groupWithScaling';
+// import { basicGroupWithScaling } from './tests/automation/interaction-scripts/groupWithScaling';
 
 async function main() {
   const appDiv = document.querySelector('.app');
@@ -25,5 +25,5 @@ async function main() {
 
 main().then(async () => {
   /** Launch test action script **/
-  await basicGroupWithScaling();
+  // await basicGroupWithScaling();
 });
