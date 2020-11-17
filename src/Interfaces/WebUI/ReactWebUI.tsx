@@ -72,7 +72,8 @@ class ReactWebUI extends Component {
         />
         <SquareButton text="+" theme={this.theme()} action={() => app.actions.viewport.zoomIn()} />
         <SquareButton text="⯐" theme={this.theme()} action={() => app.actions.viewport.fitToBoard()} />
-        <SquareButton text={'🗀'} theme={this.theme()} action={() => app.webUi.createFileUploader()} />
+        <SquareButton text={'🗀'} theme={this.theme()} action={() => app.webUi.createGlobalFileUploader()} />
+        <SquareButton text={'⍟'} theme={this.theme()} action={() => app.project.open()} />
       </main>
     );
   }
