@@ -5,12 +5,14 @@ import Group from './Group';
 import { IPoint, IGsapProps } from '../types/global';
 import { IWorldCoords } from './Viewport';
 
+// TODO: IMPORTANT -- can we remove PublicState approach with PublicProps for setters
+//  and return state like results of .toString() for getState consumers?
 export interface IBoardElementPublicState {
   x?: number;
   y?: number;
   scale?: number;
   element?: BoardElement;
-  isSelected?: boolean;
+  isSelected?: boolean; // is there any consumer of it?
 }
 
 export default class BoardElement {

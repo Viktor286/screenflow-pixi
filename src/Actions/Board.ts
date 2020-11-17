@@ -6,6 +6,10 @@ import { ShiftModeState } from '../Interfaces/Board';
 export default class BoardActions {
   constructor(public app: FlowApp) {}
 
+  public createNewMemoOnBoard() {
+    // todo: ^
+  }
+
   public selectElementById(id: string) {
     const el = this.app.board.getElementById(id);
     if (el instanceof BoardElement) {

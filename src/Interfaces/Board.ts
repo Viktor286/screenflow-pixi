@@ -23,6 +23,7 @@ export default class Board {
     }
   }
 
+  // TODO: we need to add elements through the actions
   public addNewMemosToBoardFromTextures(textures?: PIXI.Texture[]) {
     if (textures && textures.length > 0) {
       textures.forEach((texture) => {
@@ -32,7 +33,7 @@ export default class Board {
   }
 
   public addElementToBoard<T extends BoardElement>(boardElement: T): T {
-    this.state[boardElement.id] = boardElement.state;
+    this.state[boardElement.id] = boardElement.state; // TODO: IMPORTANT - can we keep it as boardElement without .state?
     boardElement.zIndex = 1;
     this.app.viewport.addToViewport(boardElement.container);
     return boardElement;
