@@ -35,6 +35,7 @@ export default class WebUI {
     });
   }
 
+  // TODO: refactor this into setupGlobalDragEvent
   public setupGlobalDragImage() {
     const handler = (event: DragEvent) => event.preventDefault();
     window.addEventListener('dragenter', handler, false);
@@ -49,6 +50,7 @@ export default class WebUI {
     });
   }
 
+  // TODO: refactor this into setupGlobalPasteEvent
   public setupGlobalPasteImage() {
     // @ts-ignore
     window.addEventListener('paste', async (pasteEvent: ClipboardEvent) => {
@@ -59,7 +61,7 @@ export default class WebUI {
     });
   }
 
-  public createFileUploader() {
+  public createGlobalFileUploader() {
     const input = window.document.createElement('input');
     input.setAttribute('type', 'file');
     input.setAttribute('name', 'myFiles');
