@@ -2,7 +2,7 @@ import FlowApp from '../FlowApp';
 import { reactInitializer } from './ReactWebUI';
 import { Component } from 'react';
 import { ShiftModeState } from '../Board';
-import FilesIO from '../FilesIO';
+import AssetConversion from '../AssetConversion';
 
 export interface HTMLInputEvent extends Event {
   target: HTMLInputElement & EventTarget;
@@ -43,9 +43,9 @@ export default class WebUI {
     window.addEventListener('dragover', handler, false);
     window.addEventListener('drop', async (event: DragEvent) => {
       event.preventDefault();
-      const imageBlobs = await FilesIO.getBlobsFromDropEvent(event);
-      const imageElements = await FilesIO.getHTMLImageElementsFromBlobs(imageBlobs);
-      const textures = await FilesIO.getTexturesFromImages(imageElements);
+      const imageBlobs = await AssetConversion.getBlobsFromDropEvent(event);
+      const imageElements = await AssetConversion.getHTMLImageElementsFromBlobs(imageBlobs);
+      const textures = await AssetConversion.getPixiTexturesFromImages(imageElements);
       this.app.board.addNewMemosToBoardFromTextures(textures);
     });
   }
@@ -54,9 +54,9 @@ export default class WebUI {
   public setupGlobalPasteImage() {
     // @ts-ignore
     window.addEventListener('paste', async (pasteEvent: ClipboardEvent) => {
-      const imageBlobs = await FilesIO.getBlobsFromClipboardEvent(pasteEvent);
-      const imageElements = await FilesIO.getHTMLImageElementsFromBlobs(imageBlobs);
-      const textures = await FilesIO.getTexturesFromImages(imageElements);
+      const imageBlobs = await AssetConversion.getBlobsFromClipboardEvent(pasteEvent);
+      const imageElements = await AssetConversion.getHTMLImageElementsFromBlobs(imageBlobs);
+      const textures = await AssetConversion.getPixiTexturesFromImages(imageElements);
       this.app.board.addNewMemosToBoardFromTextures(textures);
     });
   }
@@ -71,9 +71,9 @@ export default class WebUI {
     // @ts-ignore
     input.addEventListener('change', async (event: HTMLInputEvent) => {
       if (event.currentTarget.files && event.currentTarget.files.length > 0) {
-        const imageBlobs = await FilesIO.getBlobsFromInputEvent(event);
-        const imageElements = await FilesIO.getHTMLImageElementsFromBlobs(imageBlobs);
-        const textures = await FilesIO.getTexturesFromImages(imageElements);
+        const imageBlobs = await AssetConversion.getBlobsFromInputEvent(event);
+        const imageElements = await AssetConversion.getHTMLImageElementsFromBlobs(imageBlobs);
+        const textures = await AssetConversion.getPixiTexturesFromImages(imageElements);
         this.app.board.addNewMemosToBoardFromTextures(textures);
         window.document.body.removeChild(input);
       } else {
