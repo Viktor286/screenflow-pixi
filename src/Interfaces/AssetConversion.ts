@@ -1,6 +1,11 @@
 import * as PIXI from 'pixi.js';
 import { HTMLInputEvent } from './WebUI';
 
+/**
+ * There is an interesting lib image-conversion which might contain some solution directions
+ * https://github.com/WangYuLue/image-conversion/tree/master/src
+ * */
+
 export default class AssetConversion {
   static getBufferFromFileReader(file: File): Promise<ArrayBuffer> {
     return new Promise((resolve, reject) => {
@@ -17,8 +22,19 @@ export default class AssetConversion {
     });
   }
 
+  // // not supported by Safari and iOS Safari
+  // public static getImageBitmapsFromBlobs(imageBlobs?: Blob[]): Promise<ImageBitmap[]> | undefined {
+  //   if (imageBlobs && imageBlobs.length > 0) {
+  //     return Promise.all(imageBlobs.map((blob) => createImageBitmap(blob)));
+  //   }
+  //   return undefined;
+  // }
+
   // Note: unfortunately, in most cases we need to convert the image file data
   // into HTMLImageElement to get width and height.
+  // - Alternatively, ImageBitmap API could be used, but not supported by Safari and iOS Safari
+  // https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/createImageBitmap
+  // - One more complex option is to get some library that could work with different image formats on byte level
   public static getHTMLImageElementsFromBlobs(imageBlobs?: Blob[]): Promise<HTMLImageElement[]> | undefined {
     if (imageBlobs && imageBlobs.length > 0) {
       return Promise.all(imageBlobs.map((blob) => AssetConversion.getHTMLImageElementFromBlob(blob)));

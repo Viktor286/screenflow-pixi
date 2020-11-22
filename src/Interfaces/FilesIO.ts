@@ -1,6 +1,9 @@
 import * as PIXI from 'pixi.js';
 import { fileSave } from 'browser-nativefs';
 
+// browser-nativefs docs
+// https://github.com/GoogleChromeLabs/browser-nativefs#api-documentation
+
 export default class FilesIO {
   /** This function is mostly for tests */
   static async fileSavePng(blob: Blob, fileName = 'Untitled.png') {
