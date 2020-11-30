@@ -1,3 +1,5 @@
+import { imageServerUrl } from '../globalSettings';
+
 export const largeSet = [
   'vlc_1wg8lrOxvM',
   'vlc_2E3NKGFlYF',
@@ -122,8 +124,6 @@ export const largeSet = [
 
 export function getImageUrlSet(setAmount: number): string[] {
   return largeSet
-    .map((img, idx) =>
-      idx <= setAmount - 1 ? `http://192.168.1.152:5000/LargePNGCosmos/${img}.png` : undefined,
-    )
+    .map((img, idx) => (idx <= setAmount - 1 ? `${imageServerUrl}/LargePNGCosmos/${img}.png` : undefined))
     .filter(Boolean) as string[];
 }
