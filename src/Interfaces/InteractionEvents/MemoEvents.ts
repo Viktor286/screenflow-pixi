@@ -21,8 +21,6 @@ export class MemoEvents {
   }
 
   private initStageEvents() {
-    // TODO: we need to define list of universal events
-
     // Singe Press
     // Double Press
     // Triple Press

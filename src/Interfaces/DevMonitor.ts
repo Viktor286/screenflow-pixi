@@ -28,7 +28,7 @@ export default class DevMonitor {
     div.style.maxHeight = '50vh';
     div.style.display = 'flex';
     div.style.justifyContent = 'space-around';
-    div.style.zIndex = '9999'; // TODO: Inspect z-indexes
+    div.style.zIndex = '9999';
     return div;
   }
 

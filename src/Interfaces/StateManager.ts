@@ -2,8 +2,9 @@ import FlowApp from './FlowApp';
 import { IPublicCameraState } from './Viewport';
 import { IPublicBoardState } from './Board';
 import BoardElement, { IBoardElementPublicState } from './BoardElement';
+import clonedeep from 'lodash.clonedeep';
 
-interface IAppState {
+export interface IAppState {
   camera: IPublicCameraState;
   board: IPublicBoardState;
   [key: string]: any;
@@ -47,6 +48,25 @@ export default class StateManager {
     return {
       ...this.publicState,
     };
+  }
+
+  public exportState(stateScope?: IStateScope): string {
+    const storageState = clonedeep(this.getState(stateScope));
+
+    // rm real element references
+    for (const boardElement in storageState.board) {
+      if (Object.prototype.hasOwnProperty.call(storageState.board, boardElement)) {
+        // rename "scale" to "s" to condense text data
+        const scaleCopy = storageState.board[boardElement].scale;
+        delete storageState.board[boardElement].scale;
+        storageState.board[boardElement].s = scaleCopy;
+
+        // remove element objects
+        delete storageState.board[boardElement].element;
+      }
+    }
+
+    return JSON.stringify(storageState);
   }
 
   public setState = (stateScope: IStateScope, stateSlice: IStateSlice) => {

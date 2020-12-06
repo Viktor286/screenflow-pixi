@@ -174,12 +174,12 @@ export default class Board {
     return undefined;
   }
 
-  public getAllMemos() {
+  public getAllMemos(): Memo[] {
     const displayObject = this.app.viewport.instance.children.filter(
       (el) => el instanceof BoardElementContainer && el.boardElement instanceof Memo,
     ) as BoardElementContainer[];
 
-    return displayObject.map((container) => container.boardElement);
+    return displayObject.map((container) => container.boardElement) as Memo[];
   }
 
   public getAllGroups() {

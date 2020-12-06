@@ -4,6 +4,10 @@ import FlowApp from './FlowApp';
 import BoardElement from './BoardElement';
 import { IWorldCoords } from './Viewport';
 
+export type MemoImage = {
+  [key: string]: Blob;
+};
+
 export default class Memo extends BoardElement {
   private snapshot: Snapshot;
   [key: string]: any;
@@ -35,9 +39,18 @@ export default class Memo extends BoardElement {
     super.stopDrag();
   }
 
-  public extractPngBlob() {
+  public extractMemoImage(): Promise<MemoImage> {
     return new Promise((resolve) => {
       const renderer = this.app.engine.renderer;
+
+      if (this.isSelected) this.eraseSelectionDrawing();
+
+      const ctx = renderer.plugins.extract.canvas(this.container);
+      ctx.toBlob((blob: Blob) => {
+        resolve({ [this.id]: blob });
+      }, 'image/png'); // alternatively we can get jpg with compression
+
+      if (this.isSelected) this.drawSelection();
 
       // renderer.plugins.extract API has .image, .base64, .pixels
       // https://github.com/pixijs/pixi.js/blob/adaf4db0df0df58f84d9e8a59db31aa97f864a0e/packages/extract/src/Extract.ts#L13
@@ -47,15 +60,6 @@ export default class Memo extends BoardElement {
       // more examples of using .pixels (via gl.readPixels)
       // https://jsfiddle.net/bigtimebuddy/a6vc5ye8/
       // https://github.com/pixijs/pixi.js/issues/4895
-
-      if (this.isSelected) this.eraseSelectionDrawing();
-
-      const ctx = renderer.plugins.extract.canvas(this.container);
-      ctx.toBlob((blob: Blob) => {
-        resolve(blob);
-      }, 'image/png'); // alternatively we can get jpg with compression
-
-      if (this.isSelected) this.drawSelection();
 
       //  Other approach pixels array to PNG with some libs
       //  but then we can go down deep into manual png construction

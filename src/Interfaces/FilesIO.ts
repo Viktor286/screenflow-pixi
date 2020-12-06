@@ -5,12 +5,26 @@ import { fileSave } from 'browser-nativefs';
 // https://github.com/GoogleChromeLabs/browser-nativefs#api-documentation
 
 export default class FilesIO {
-  /** This function is mostly for tests */
   static async fileSavePng(blob: Blob, fileName = 'Untitled.png') {
     return await fileSave(blob, {
       fileName,
       extensions: ['.png'],
     });
+  }
+
+  static downloadFileToClient(data: Blob, filename: string, type: string) {
+    const file = new Blob([data], { type: type });
+    const a = document.createElement('a');
+    const url = URL.createObjectURL(file);
+    a.href = url;
+    a.download = filename;
+    a.style.display = 'none';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function () {
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+    }, 0);
   }
 
   static loadUrlSet(urlSet: string[]): Promise<PIXI.Loader> {
