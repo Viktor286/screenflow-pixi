@@ -4,18 +4,16 @@ import FlowApp from './FlowApp';
 import FilesIO from './FilesIO';
 import Memo, { MemoImage } from './Memo';
 
-// interface ProjectObject {
-//   assets: [];
-//   mainState: {};
-// }
-//
-// type ProjectFile = JSZip;
+interface IProjectObject {
+  fileName: string;
+  data: string | Blob;
+}
 
 export default class Project {
   constructor(public app: FlowApp) {}
 
   async open() {
-    await this.openFromLocal();
+    await this.importFromLocal();
     // from project file (need to unpack) or from project object in localstorage
     // this.openFileFromLocal
     // this.unpack
@@ -28,9 +26,9 @@ export default class Project {
       const projectArchive = new JSZip();
       projectArchive.file('application.json', this.app.stateManager.exportState());
 
-      // Save files into projectArchive
       const memoImagesPNG = await this.exportAllMemoImagesPNG();
 
+      // Save files into projectArchive
       for (const memoImage in memoImagesPNG) {
         if (Object.prototype.hasOwnProperty.call(memoImagesPNG, memoImage)) {
           // @ts-ignore
@@ -45,6 +43,7 @@ export default class Project {
         .generateAsync({
           type: 'blob',
           compression: 'STORE',
+          // compression: 'DEFLATE', // no benefit for png
           compressionOptions: {
             level: 9,
           },
@@ -59,54 +58,40 @@ export default class Project {
     // board["1gogrhcng4"]
   }
 
-  // async unpack(projectFile: ProjectFile): ProjectObject {
-  async unpack() {
-    // unpack from project file
-    // Zip open example
-    // https://stuk.github.io/jszip/documentation/examples.html
-    // // Async read files from project file
-    // let asyncProjectFilesRead = [];
-    //
-    // const zip = new JSZip();
-    // zip.loadAsync(projectFile).then((projectZip) => {
-    //   projectZip.forEach((relativePath, entry) => {
-    //     if (entry.name.startsWith('images') && !entry.dir) {
-    //       const fileName = entry.name.slice(7);
-    //       const hash = fileName.slice(0, fileName.lastIndexOf('.'));
-    //       const ext = fileName.substring(fileName.lastIndexOf('.') + 1);
-    //
-    //       let type = undefined;
-    //       if (ext === 'png') type = 'png';
-    //       if (ext === 'gif') type = 'gif';
-    //       if (ext === 'svg') type = 'svg+xml';
-    //       if (ext === 'jpeg' || ext === 'jpg') type = 'jpeg';
-    //
-    //       asyncProjectFilesRead.push(
-    //         entry.async('arraybuffer').then(async (arrayBuffer) => {
-    //           if (arrayBuffer.byteLength > 100) {
-    //             const imageBlob = new Blob([arrayBuffer], { type: `image/${type}` });
-    //             // Save image to Blob Store right away
-    //             const imageElement = await FilesIO.saveImageToBlobStore(imageBlob);
-    //             // Return finalized ImageFileData object
-    //             console.log('[progress] saved imageElement', imageElement);
-    //             return await FabricBridge.constructImageFileData(imageElement, imageBlob);
-    //           }
-    //         }),
-    //       );
-    //     } else {
-    //       // Handle application.json file
-    //       if (entry.name === 'application.json') {
-    //         asyncProjectFilesRead.push(
-    //           entry.async('string').then((appJsonStr) => ({
-    //             file: 'application',
-    //             data: JSON.parse(appJsonStr),
-    //             type: 'json',
-    //           })),
-    //         );
-    //       }
-    //     }
-    //   });
-    // });
+  async unpack(projectFile: Blob) {
+    // Zip open example: https://stuk.github.io/jszip/documentation/examples.html
+    const zip = new JSZip();
+
+    const asyncProjectFilesRead: Promise<IProjectObject>[] = [];
+
+    const projectZip = await zip.loadAsync(projectFile);
+
+    projectZip.forEach((relativePath, entry) => {
+      // Handle application.json file
+      if (entry.name === 'application.json') {
+        // console.log('entry.name', entry.name);
+        asyncProjectFilesRead.push(
+          entry.async('string').then((appJsonStr) => ({
+            fileName: 'application',
+            data: appJsonStr,
+          })),
+        );
+      }
+
+      // PNG image
+      if (entry.name.startsWith('images') && !entry.dir) {
+        const fileName = entry.name.slice(7);
+        // console.log('fileName', fileName);
+        asyncProjectFilesRead.push(
+          entry.async('arraybuffer').then((arrayBuffer) => ({
+            fileName: fileName,
+            data: (arrayBuffer as unknown) as Blob,
+          })),
+        );
+      }
+    });
+
+    return await Promise.all(asyncProjectFilesRead);
   }
 
   async mount() {
@@ -158,16 +143,20 @@ export default class Project {
     return fullPngCollection.reduce((acc, memoImage) => ({ ...acc, ...memoImage }), {});
   }
 
-  async openFromLocal() {
+  async importFromLocal() {
     const blob = await fileOpen({
-      mimeTypes: ['image/*'],
+      mimeTypes: ['application/zip'],
     });
-    console.log('!!! blob', blob);
+
+    const unpackedProject = await this.unpack(blob);
+
+    console.log('!!! openFromLocal, unpack finished', unpackedProject);
+
     // https://web.dev/file-system-access/
     // https://www.npmjs.com/package/browser-nativefs
   }
 
-  async saveToLocal() {
+  async exportToLocal() {
     // save File API established opened file or save new one on disk
     const projectFile = await this.pack();
 

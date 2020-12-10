@@ -50,6 +50,10 @@ export default class StateManager {
     };
   }
 
+  public importState(serializedState: string) {
+    // IAppState
+  }
+
   public exportState(stateScope?: IStateScope): string {
     const storageState = clonedeep(this.getState(stateScope));
 

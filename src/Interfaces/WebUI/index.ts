@@ -61,7 +61,7 @@ export default class WebUI {
     });
   }
 
-  public createGlobalFileUploader() {
+  public selectImageToUpload() {
     const input = window.document.createElement('input');
     input.setAttribute('type', 'file');
     input.setAttribute('name', 'myFiles');
@@ -75,11 +75,10 @@ export default class WebUI {
         const imageElements = await AssetConversion.getHTMLImageElementsFromBlobs(imageBlobs);
         const textures = await AssetConversion.getPixiTexturesFromImages(imageElements);
         this.app.board.addNewMemosToBoardFromTextures(textures);
-        window.document.body.removeChild(input);
-      } else {
-        window.document.body.removeChild(input);
       }
+      window.document.body.removeChild(input);
     });
+
     window.document.body.appendChild(input);
     input.click();
   }
