@@ -60,6 +60,16 @@ export default class GraphicsEngine {
   public addDisplayObject(...children: PIXI.DisplayObject[]): PIXI.DisplayObject {
     return this.instance.stage.addChild(...children);
   }
+
+  public pauseEngine(): void {
+    this.instance.stage.interactive = false;
+    this.instance.ticker.stop();
+  }
+
+  public unpauseEngine(): void {
+    this.instance.stage.interactive = true;
+    this.instance.ticker.start();
+  }
 }
 
 // import { gsap } from 'gsap';

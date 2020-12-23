@@ -1,5 +1,9 @@
 import FlowApp from './FlowApp';
-import BoardElement, { BoardElementContainer, IBoardElementPublicState } from './BoardElement';
+import BoardElement, {
+  BoardElementContainer,
+  IBoardElementPublicState,
+  IBoardElementPublicDepositState,
+} from './BoardElement';
 import Memo from './Memo';
 import Group from './Group';
 import { IWorldCoords } from './Viewport';
@@ -8,6 +12,10 @@ export type ShiftModeState = 'off' | 'hold' | 'lock';
 
 export interface IPublicBoardState {
   [key: string]: IBoardElementPublicState;
+}
+
+export interface IPublicBoardDepositState {
+  [key: string]: IBoardElementPublicDepositState;
 }
 
 export default class Board {
@@ -23,15 +31,25 @@ export default class Board {
     }
   }
 
+  // TODO: we need to add elements through the actions
+  public addNewMemosToBoardFromTextures(textures?: PIXI.Texture[]) {
+    if (textures && textures.length > 0) {
+      textures.forEach((texture) => {
+        this.addElementToBoard(new Memo(texture, this.app));
+      });
+    }
+  }
+
   public addElementToBoard<T extends BoardElement>(boardElement: T): T {
-    this.state[boardElement.id] = boardElement.state;
+    this.state[boardElement.id] = boardElement.state; // TODO: IMPORTANT - can we keep it as boardElement without .state?
+    boardElement.zIndex = 1;
     this.app.viewport.addToViewport(boardElement.container);
-    this.app.viewport.instance.setChildIndex(boardElement.container, 0);
     return boardElement;
   }
 
   // todo: how to make "undo" for "hard" delete of Sprites? never really delete BoardElement?
-  public deleteBoardElement<T extends BoardElement>(boardElement: T): boolean {
+  //   probably this need two variations: soft/hard deletion
+  public deleteBoardElement<T extends BoardElement>(boardElement: T, hard: boolean = false): boolean {
     if (boardElement instanceof Group) {
       boardElement.isTempGroup = false; // keep from rm on deselect
 
@@ -44,7 +62,14 @@ export default class Board {
 
     if (this.state[boardElement.id]) delete this.state[boardElement.id];
 
-    boardElement.delete();
+    boardElement.delete(hard);
+    return true;
+  }
+
+  public resetBoard() {
+    // Looks like in order to fully reset the board we just need to remove all board elements
+    const allBoardElements = this.getAllBoardElements();
+    allBoardElements.forEach((el) => this.deleteBoardElement(el, true));
     return true;
   }
 
@@ -165,20 +190,28 @@ export default class Board {
     return undefined;
   }
 
-  public getAllMemos() {
-    const displayObject = this.app.viewport.instance.children.filter(
+  public getAllBoardElements() {
+    const displayObjects = this.app.viewport.instance.children.filter(
+      (el) => el instanceof BoardElementContainer,
+    ) as BoardElementContainer[];
+
+    return displayObjects.map((container) => container.boardElement) as Memo[];
+  }
+
+  public getAllMemos(): Memo[] {
+    const displayObjects = this.app.viewport.instance.children.filter(
       (el) => el instanceof BoardElementContainer && el.boardElement instanceof Memo,
     ) as BoardElementContainer[];
 
-    return displayObject.map((container) => container.boardElement);
+    return displayObjects.map((container) => container.boardElement) as Memo[];
   }
 
   public getAllGroups() {
-    const displayObject = this.app.viewport.instance.children.filter(
+    const displayObjects = this.app.viewport.instance.children.filter(
       (el) => el instanceof BoardElementContainer && el.boardElement instanceof Group,
     ) as BoardElementContainer[];
 
-    return displayObject.map((container) => container.boardElement);
+    return displayObjects.map((container) => container.boardElement);
   }
 
   public sendEventToMonitor(boardElement: BoardElement, eventName: string, msg: string = '') {

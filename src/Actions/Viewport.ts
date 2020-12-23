@@ -85,14 +85,16 @@ export default class ViewportActions {
 
   public amendCameraState() {
     const { x, y, cwX, cwY, scale } = this.app.viewport;
-    this.app.stateManager.setState('camera', {
-      amend: {
+    this.app.stateManager.setState(
+      'camera',
+      {
         x,
         y,
         cwX,
         cwY,
         scale,
       },
-    });
+      true, // isNoOp
+    );
   }
 }

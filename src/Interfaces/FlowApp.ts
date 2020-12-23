@@ -8,6 +8,7 @@ import WebUI from './WebUI';
 import GUI from './GUI';
 import StateManager from './StateManager';
 import Actions from '../Actions';
+import Project from './Project';
 
 declare global {
   interface Window {
@@ -30,6 +31,7 @@ export default class FlowApp {
   public readonly actions: Actions;
   public readonly stageEvents: StageEvents;
   public readonly stateManager: StateManager;
+  public readonly project: Project;
   public readonly keyboard: Keyboard;
   public readonly env: string | undefined;
 
@@ -44,6 +46,7 @@ export default class FlowApp {
     this.board = new Board(this);
     this.actions = new Actions(this);
     this.stateManager = new StateManager(this);
+    this.project = new Project(this);
     this.gui = new GUI(this);
     this.webUi = new WebUI(this);
     this.keyboard = new Keyboard(this);

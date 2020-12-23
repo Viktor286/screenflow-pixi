@@ -5,12 +5,23 @@ import Group from './Group';
 import { IPoint, IGsapProps } from '../types/global';
 import { IWorldCoords } from './Viewport';
 
+// TODO: IMPORTANT -- can we remove PublicState approach with PublicProps for setters
+//  and return state like results of .toString() for getState consumers?
 export interface IBoardElementPublicState {
   x?: number;
   y?: number;
   scale?: number;
   element?: BoardElement;
-  isSelected?: boolean;
+  isSelected?: boolean; // is there any consumer of it?
+}
+
+export interface IBoardElementPublicDepositState {
+  x: number;
+  y: number;
+  s: number;
+  w: number;
+  h: number;
+  element?: BoardElement;
 }
 
 export default class BoardElement {
@@ -33,8 +44,8 @@ export default class BoardElement {
 
   [key: string]: any;
 
-  constructor(public app: FlowApp) {
-    this.id = Math.random().toString(32).slice(2);
+  constructor(public app: FlowApp, id?: string) {
+    this.id = id ? id : Math.random().toString(32).slice(2);
     this.container.addChild(this.selectionDrawing);
   }
 
@@ -139,42 +150,27 @@ export default class BoardElement {
     return this.container.y + this.container.height / 2;
   }
 
-  public delete() {
-    const children = this.container.children.map((e) => e);
-    this.container.removeChildren();
+  public delete(hard: boolean = false) {
+    // TODO: need to delete from state?
+    //  when we would be really ready to destroy?
+    //  probably this need two variations: soft/hard deletion (same as board.deleteBoardElement)
+    // temporary, just wipe it out without opt to "redo" the deletion
+    this.destroy();
+  }
 
-    children.forEach((element) => {
-      if (element instanceof BoardElementContainer) {
-        element.boardElement.delete();
+  public destroy() {
+    // Pass the destroy call to other BoardElementContainers
+    this.container.children.forEach((displayObject) => {
+      if (displayObject instanceof BoardElementContainer) {
+        displayObject.boardElement.destroy();
       }
-
-      // One level enough at the moment
-      if (element instanceof PIXI.Container) {
-        element.removeChildren();
-      }
-
-      // if (element instanceof PIXI.Sprite) {
-      //   element.destroy();
-      // }
-
-      // looks like there is only one exception with usage of .destroy on DisplayObject.
-      // More info below...
-      if (!(element instanceof PIXI.Graphics)) {
-        element.destroy();
-      }
-
-      // if (element instanceof PIXI.Graphics) {
-      //   element.destroy();
-      //   // looks like pixi counts refs for PIXI.Graphics and garbage collects
-      //   //
-      //   // super.destroy(options);
-      //   // this._geometry.refCount--;
-      //   // if (this._geometry.refCount === 0) {
-      //   //   this._geometry.dispose();
-      // }
     });
 
-    this.container.destroy();
+    this.container.destroy({
+      children: true,
+      texture: true,
+      baseTexture: true,
+    });
   }
 
   public onSelect() {

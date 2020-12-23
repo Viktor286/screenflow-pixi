@@ -33,7 +33,7 @@ export default class Group extends BoardElement {
     // If an object has no interactive children use interactiveChildren = false
     // the interaction manager will then be able to avoid crawling through the object.
 
-    // TODO: try this optimization
+    // TODO: try interaction manager optimization
     // Set this.container.hitArea = new PIXI.Rectangle(x,y,w,h).
     // As above should stop the interaction manager from crawling through the object.
     // https://github.com/pixijs/pixi.js/wiki/v4-Performance-Tips

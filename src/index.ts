@@ -13,7 +13,7 @@ async function main() {
 
     /** Load test images **/
     const loader = await FilesIO.loadUrlSet(getImageUrlSet(12));
-
+    console.log('#FilesIO', FilesIO);
     for (const resource of Object.values(loader.resources)) {
       app.board.addElementToBoard(new Memo(resource.texture, app));
     }

@@ -225,8 +225,8 @@ export default class Viewport {
     return 0;
   }
 
-  public addToViewport(displayObject: PIXI.DisplayObject): PIXI.DisplayObject {
-    return this.instance.addChild(displayObject);
+  public addToViewport(displayObject: PIXI.DisplayObject, index: number = 0): PIXI.DisplayObject {
+    return this.instance.addChildAt(displayObject, index);
   }
 
   public removeFromViewport(displayObject: PIXI.DisplayObject): PIXI.DisplayObject {

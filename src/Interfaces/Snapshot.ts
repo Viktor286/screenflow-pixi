@@ -1,8 +1,6 @@
 import * as PIXI from 'pixi.js';
 import Memo from './Memo';
 
-/** TODO: Snapshot needs to have its own set of events, extends PIXI.Container ? **/
-
 export class Snapshot {
   public title: string;
   public readonly parent: Memo;
@@ -17,7 +15,7 @@ export class Snapshot {
     this.parent = parent;
     this.parentList = undefined;
     this.sprite = sprite;
-    this.width = sprite.width;
-    this.height = sprite.height;
+    this.width = sprite.width; // or texture.width
+    this.height = sprite.height; // or texture.height
   }
 }
