@@ -4,16 +4,18 @@ import FlowApp from './FlowApp';
 import BoardElement from './BoardElement';
 import { IWorldCoords } from './Viewport';
 
-export type MemoImage = {
-  [key: string]: Blob;
+export type MemoSnapshot = {
+  data: Blob;
+  id: string;
 };
 
 export default class Memo extends BoardElement {
   private snapshot: Snapshot;
   [key: string]: any;
 
-  constructor(texture: PIXI.Texture, public app: FlowApp) {
-    super(app);
+  // TODO: maybe we want to remove app link from this instance?
+  constructor(texture: PIXI.Texture, public app: FlowApp, id?: string) {
+    super(app, id);
     this.snapshot = new Snapshot(texture, this);
 
     this.container.addChild(this.snapshot.sprite);
@@ -39,7 +41,7 @@ export default class Memo extends BoardElement {
     super.stopDrag();
   }
 
-  public extractMemoImage(): Promise<MemoImage> {
+  public extractMemoSnapshot(): Promise<MemoSnapshot> {
     return new Promise((resolve) => {
       const renderer = this.app.engine.renderer;
 
@@ -47,7 +49,7 @@ export default class Memo extends BoardElement {
 
       const ctx = renderer.plugins.extract.canvas(this.container);
       ctx.toBlob((blob: Blob) => {
-        resolve({ [this.id]: blob });
+        resolve({ id: this.id, data: blob });
       }, 'image/png'); // alternatively we can get jpg with compression
 
       if (this.isSelected) this.drawSelection();

@@ -15,7 +15,7 @@ export class Snapshot {
     this.parent = parent;
     this.parentList = undefined;
     this.sprite = sprite;
-    this.width = sprite.width;
-    this.height = sprite.height;
+    this.width = sprite.width; // or texture.width
+    this.height = sprite.height; // or texture.height
   }
 }

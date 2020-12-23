@@ -27,6 +27,19 @@ export default class FilesIO {
     }, 0);
   }
 
+  static saveImageToBlobStore(blob: Blob) {
+    return new Promise((resolve) => {
+      const imageObjectURL = window.URL.createObjectURL(blob);
+      console.log('imageObjectURL', imageObjectURL);
+      const imageElement = new Image();
+      imageElement.setAttribute('src', imageObjectURL);
+      imageElement.onload = () => {
+        URL.revokeObjectURL(imageObjectURL);
+        resolve(imageElement);
+      };
+    });
+  }
+
   static loadUrlSet(urlSet: string[]): Promise<PIXI.Loader> {
     return new Promise((resolve) => {
       const loader = new PIXI.Loader();

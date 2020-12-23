@@ -1,12 +1,15 @@
+import * as PIXI from 'pixi.js';
 import { fileOpen } from 'browser-nativefs';
 import JSZip from 'jszip';
 import FlowApp from './FlowApp';
 import FilesIO from './FilesIO';
-import Memo, { MemoImage } from './Memo';
+import Memo, { MemoSnapshot } from './Memo';
+import { IAppDepositState } from './StateManager';
 
-interface IProjectObject {
+export interface IProjectObject {
   fileName: string;
-  data: string | Blob;
+  data: string | ArrayBuffer;
+  type: string;
 }
 
 export default class Project {
@@ -26,18 +29,14 @@ export default class Project {
       const projectArchive = new JSZip();
       projectArchive.file('application.json', this.app.stateManager.exportState());
 
-      const memoImagesPNG = await this.exportAllMemoImagesPNG();
-
+      const memoSnapshotsPNG = await this.exportAllMemoSnapshotsPNG();
       // Save files into projectArchive
-      for (const memoImage in memoImagesPNG) {
-        if (Object.prototype.hasOwnProperty.call(memoImagesPNG, memoImage)) {
-          // @ts-ignore
-          projectArchive.file(`images/${memoImage}.png`, memoImagesPNG[memoImage] as Blob, {
-            binary: true,
-            type: 'blob',
-          });
-        }
-      }
+      memoSnapshotsPNG.forEach((memoSnapshot) => {
+        // @ts-ignore
+        projectArchive.file(`images/${memoSnapshot.id}.png`, memoSnapshot.data, {
+          binary: true,
+        });
+      });
 
       projectArchive
         .generateAsync({
@@ -58,7 +57,7 @@ export default class Project {
     // board["1gogrhcng4"]
   }
 
-  async unpack(projectFile: Blob) {
+  async unpack(projectFile: Blob): Promise<IProjectObject[]> {
     // Zip open example: https://stuk.github.io/jszip/documentation/examples.html
     const zip = new JSZip();
 
@@ -74,6 +73,7 @@ export default class Project {
           entry.async('string').then((appJsonStr) => ({
             fileName: 'application',
             data: appJsonStr,
+            type: 'app',
           })),
         );
       }
@@ -85,7 +85,8 @@ export default class Project {
         asyncProjectFilesRead.push(
           entry.async('arraybuffer').then((arrayBuffer) => ({
             fileName: fileName,
-            data: (arrayBuffer as unknown) as Blob,
+            data: arrayBuffer,
+            type: 'png',
           })),
         );
       }
@@ -94,10 +95,74 @@ export default class Project {
     return await Promise.all(asyncProjectFilesRead);
   }
 
-  async mount() {
-    // project object
-    // use Board API, StateManager, WebUI
-    // or move this method to FlowApp class
+  async mount(unpackedProject: IProjectObject[]) {
+    if (this.validateProject(unpackedProject)) {
+      console.log('IMPORT unpackedProject VALIDATED', unpackedProject);
+
+      this.app.engine.pauseEngine();
+      this.app.board.resetBoard();
+
+      // @ts-ignore -- ignore because we passed validation via validateProject
+      const serializedAppState = unpackedProject.find((el) => el.fileName === 'application').data as string;
+      const appDepositState: IAppDepositState = JSON.parse(serializedAppState);
+
+      // Add project objects to board
+      let n = 0;
+      for (const obj of unpackedProject) {
+        // PNG Objects
+        if (obj.type === 'png' && obj.data instanceof ArrayBuffer && n < 99) {
+          const imageBlob = new Blob([obj.data], { type: `image/png` });
+          const imageElementRef = await FilesIO.saveImageToBlobStore(imageBlob);
+          const pixiTexture = PIXI.Texture.from(imageElementRef as HTMLImageElement);
+
+          // set memo id
+          const memoId = obj.fileName.split('.')[0];
+          const memo = new Memo(pixiTexture, this.app, memoId);
+          this.app.board.addElementToBoard(memo);
+
+          // attach element ref to state
+          appDepositState.board[memoId].element = memo;
+
+          // todo: we need to finalize this mount API with localstorage system
+          //   1. Project: save .zip project to localstorage
+          //   2. Assets: (what advantage? 1. lazy sync with server, 2. quick ready state to reopen)
+          //   save blobs(most likely)/Base64/PIXI.Texture localForage(IndexedDB)
+          //   3. camera separate in localstorage?
+
+          n += 1;
+
+          //// 1. -------------- raw Uint8Array/Blob from PNG doesn't work right away ---------------
+          // const b = new Uint8Array(obj.data);
+          // const pixiTexture = PIXI.Texture.fromBuffer(b, w, h);
+          // this.app.board.addElementToBoard(new Memo(pixiTexture, this.app)); // Error:
+          // // "texImage2D: ArrayBufferView not big enough for request"
+
+          //// 2. ------------ extractChunks approach causes same error as raw Uint8Array -----------------
+          // // @ts-ignore
+          // import extractChunks from 'png-chunks-extract';
+
+          // let rgba = new Uint8Array();
+          // const chunks = extractChunks(new Uint8Array(obj.data));
+          //
+          // for (let i = 0; i < chunks.length; i++) {
+          //   if (chunks[i].name === 'IDAT') {
+          //     const a = new Uint8Array(rgba);
+          //     const b = new Uint8Array(chunks[i].data);
+          //     rgba = new Uint8Array(a.length + b.length);
+          //     rgba.set(a);
+          //     rgba.set(b, a.length);
+          //   }
+          // }
+          // const pixiTexture = PIXI.Texture.fromBuffer(rgba, w, h); // w & h previously were passed in application state
+          // this.app.board.addElementToBoard(new Memo(pixiTexture, this.app)); // Error:
+          // // "texImage2D: ArrayBufferView not big enough for request"
+        }
+      }
+
+      this.app.stateManager.importState(appDepositState);
+      this.app.engine.unpauseEngine();
+    }
+    console.log('Project doesnt seem to be valid');
   }
 
   async readCache() {
@@ -112,50 +177,82 @@ export default class Project {
     // remove all projects objects from localstorage
   }
 
-  extractedImages: number = 0;
-  extractedImagesTotal: number = 0;
+  extractedSnapshots: number = 0;
+  extractedSnapshotsTotal: number = 0;
 
-  private async memoImageExtraction(memo: Memo) {
-    const memoImage = await memo.extractMemoImage();
-    this.extractedImages++;
-    console.log(`[Export] ${this.extractedImages} MemoImage extracted from ${this.extractedImagesTotal}`);
-    return memoImage;
+  private async memoSnapshotsExtraction(memo: Memo) {
+    const memoSnapshot = await memo.extractMemoSnapshot();
+    const arraybuffer = await memoSnapshot.data.arrayBuffer();
+    this.extractedSnapshots++;
+    console.log(
+      `[Export] ${this.extractedSnapshots} MemoImage extracted from ${this.extractedSnapshotsTotal}`,
+    );
+    return {
+      id: memoSnapshot.id,
+      data: arraybuffer,
+    };
   }
 
-  public async exportAllMemoImagesPNG() {
+  public async exportAllMemoSnapshotsPNG() {
     // TODO: this is temp "progress" tracking
     console.log(`[Export] image extraction started...`);
 
-    const pngExtractionArr: Promise<MemoImage>[] = [];
+    const pngExtractionArr: Promise<MemoSnapshot>[] = [];
 
     const boardMemos = this.app.board.getAllMemos();
-    this.extractedImagesTotal = boardMemos.length;
+    this.extractedSnapshotsTotal = boardMemos.length;
 
-    boardMemos.forEach((memo) => pngExtractionArr.push(this.memoImageExtraction(memo)));
+    // @ts-ignore
+    boardMemos.forEach((memo) => pngExtractionArr.push(this.memoSnapshotsExtraction(memo)));
 
     const fullPngCollection = await Promise.all(pngExtractionArr);
 
     console.log(`[Export] all images extracted`);
 
-    this.extractedImages = 0;
-    this.extractedImagesTotal = 0;
+    this.extractedSnapshots = 0;
+    this.extractedSnapshotsTotal = 0;
 
-    return fullPngCollection.reduce((acc, memoImage) => ({ ...acc, ...memoImage }), {});
+    // return fullPngCollection.reduce((acc, memoImage) => ({ ...acc, ...memoImage }), {});
+    return fullPngCollection;
   }
 
   async importFromLocal() {
-    const blob = await fileOpen({
-      mimeTypes: ['application/zip'],
-    });
-
+    const blob = await fileOpen({ mimeTypes: ['application/flow'] });
     const unpackedProject = await this.unpack(blob);
 
-    console.log('!!! openFromLocal, unpack finished', unpackedProject);
-
-    // https://web.dev/file-system-access/
-    // https://www.npmjs.com/package/browser-nativefs
+    await this.mount(unpackedProject);
   }
 
+  validateProject(unpackedProject: IProjectObject[]) {
+    const appStateObj = unpackedProject.find((el) => el.fileName === 'application');
+    if (appStateObj && typeof appStateObj.data === 'string') {
+      try {
+        const appState = JSON.parse(appStateObj.data);
+        // All project objects should be part of appState.board except 'application' file
+        for (let i = 0; i < unpackedProject.length; i++) {
+          const projObj = unpackedProject[i];
+          if (projObj.fileName !== 'application' && !appState.board[projObj.fileName.split('.')[0]]) {
+            console.log(
+              'The file in project folder not found on project board.',
+              projObj.fileName,
+              appState.board,
+            );
+            return false;
+          }
+        }
+      } catch (e) {
+        console.log("Project doesn't contain parsable JSON state");
+        return false;
+      }
+    } else {
+      console.log("Project doesn't contain application file");
+      return false;
+    }
+    return true;
+  }
+
+  // TODO: Cool workflow could be if we couldn't "export" project until we "saved" it into localstorage
+  //  that would probably bloat localstorage but it also would allow "quick last open"
   async exportToLocal() {
     // save File API established opened file or save new one on disk
     const projectFile = await this.pack();
