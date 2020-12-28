@@ -4,7 +4,7 @@ import JSZip from 'jszip';
 import FlowApp from './FlowApp';
 import FilesIO from './FilesIO';
 import Memo, { MemoSnapshot } from './Memo';
-import { IAppDepositState } from './StateManager';
+import { IAppDepositState } from '../StateManager';
 
 export interface IProjectObject {
   fileName: string;
@@ -231,11 +231,14 @@ export default class Project {
         // All project objects should be part of appState.board except 'application' file
         for (let i = 0; i < unpackedProject.length; i++) {
           const projObj = unpackedProject[i];
-          if (projObj.fileName !== 'application' && !appState.board[projObj.fileName.split('.')[0]]) {
+          if (
+            projObj.fileName !== 'application' &&
+            !appState.boardOperations[projObj.fileName.split('.')[0]]
+          ) {
             console.log(
               'The file in project folder not found on project board.',
               projObj.fileName,
-              appState.board,
+              appState.boardOperations,
             );
             return false;
           }

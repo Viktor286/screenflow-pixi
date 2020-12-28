@@ -1,6 +1,6 @@
-import FlowApp from '../Interfaces/FlowApp';
-import { IWorldCoords } from '../Interfaces/Viewport';
-import BoardElement from '../Interfaces/BoardElement';
+import FlowApp from '../../Interfaces/FlowApp';
+import { IWorldCoords } from '../../Interfaces/Viewport';
+import BoardElement from '../../Interfaces/BoardElement';
 
 export default class ViewportActions {
   private runAheadZoomIn = 0;

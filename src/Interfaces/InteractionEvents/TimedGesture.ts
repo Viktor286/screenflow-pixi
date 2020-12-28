@@ -98,7 +98,7 @@ export default class TimedGesture {
     if (this.app.board.isMemberDragging) {
       const boardElement = this.app.board.getSelectedElement();
       if (boardElement && this.wasBoardElementMovedFromStartDragPoint(boardElement, gestureEvent)) {
-        this.app.actions.board.stopDragElement(boardElement);
+        this.app.stateManager.actions.board.stopDragElement(boardElement);
         this.awaiting = false;
       }
     }
@@ -149,11 +149,11 @@ export default class TimedGesture {
 
     if (!this.app.board.isMemberDragging) {
       if (e.isBoardElementHit instanceof BoardElement) {
-        this.app.actions.board.selectElement(e.isBoardElementHit);
+        this.app.stateManager.actions.board.selectElement(e.isBoardElementHit);
         console.log(`pressUpImmediate Memo clicked "${e.isBoardElementHit.id}" `, e.isBoardElementHit);
       } else {
         if (!this.app.viewport.slideControls.isSliding) {
-          this.app.actions.board.deselectElements();
+          this.app.stateManager.actions.board.deselectElements();
         }
       }
     }
@@ -163,7 +163,7 @@ export default class TimedGesture {
 
   private pressUpQuick(e: IGestureEvent) {
     // this.markGlc('Up Quick');
-    this.app.actions.viewport.moveTo(e.worldClick);
+    this.app.stateManager.actions.viewport.moveTo(e.worldClick);
 
     // here most likely will be rectangular selection start
 
@@ -188,11 +188,11 @@ export default class TimedGesture {
 
     // fitToArea Or ZoomIn
     if (gestureEvent.isBoardElementHit instanceof BoardElement) {
-      this.app.actions.viewport.fitToBoardElement(gestureEvent.isBoardElementHit);
-      this.app.actions.board.selectElement(gestureEvent.isBoardElementHit);
+      this.app.stateManager.actions.viewport.fitToBoardElement(gestureEvent.isBoardElementHit);
+      this.app.stateManager.actions.board.selectElement(gestureEvent.isBoardElementHit);
     } else {
-      // this.app.actions.viewport.zoomIn(e.worldClick);
-      this.app.actions.viewport.fitToBoard();
+      // this.app.stateManager.actions.viewport.zoomIn(e.worldClick);
+      this.app.stateManager.actions.viewport.fitToBoard();
     }
   }
 
@@ -207,7 +207,7 @@ export default class TimedGesture {
       this.app.viewport.slideControls.pauseSlideControls();
 
       if (e.isBoardElementHit.isDragging) {
-        this.app.actions.board.stopDragElement(e.isBoardElementHit);
+        this.app.stateManager.actions.board.stopDragElement(e.isBoardElementHit);
         this.awaiting = false;
       }
     }
@@ -221,7 +221,7 @@ export default class TimedGesture {
       this.app.viewport.slideControls.pauseSlideControls();
 
       if (!e.isBoardElementHit.isDragging) {
-        this.app.actions.board.startDragElement(e.isBoardElementHit, e.worldClick);
+        this.app.stateManager.actions.board.startDragElement(e.isBoardElementHit, e.worldClick);
         this.awaiting = false;
       }
     }
