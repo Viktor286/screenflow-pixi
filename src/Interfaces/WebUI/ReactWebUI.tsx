@@ -1,6 +1,6 @@
 import React, { Component, ComponentClass } from 'react';
 import FlowApp from '../FlowApp';
-import * as styles from './Styles';
+import * as styles from './styles';
 import ReactDOM from 'react-dom';
 import SquareButton from './Components/SquareButton';
 import RectangleButton from './Components/RectangleButton';
@@ -50,28 +50,40 @@ class ReactWebUI extends Component {
             <SquareButton
               text="🗑"
               theme={this.theme()}
-              action={() => app.actions.board.deleteSelectedElement()}
+              action={() => app.stateManager.actions.board.deleteSelectedElement()}
             />
             <SquareButton
               text="s-"
               theme={this.theme()}
-              action={() => app.actions.board.decreaseSelectedElementScale()}
+              action={() => app.stateManager.actions.board.decreaseSelectedElementScale()}
             />
             <SquareButton
               text="s+"
               theme={this.theme()}
-              action={() => app.actions.board.increaseSelectedElementScale()}
+              action={() => app.stateManager.actions.board.increaseSelectedElementScale()}
             />
           </>
         ) : null}
-        <SquareButton text="-" theme={this.theme()} action={() => app.actions.viewport.zoomOut()} />
+        <SquareButton
+          text="-"
+          theme={this.theme()}
+          action={() => app.stateManager.actions.viewport.zoomOut()}
+        />
         <RectangleButton
           text={this.state.isShiftActive ? '⛶' : this.state.zoomIndicator}
           theme={this.theme()}
-          action={() => app.actions.viewport.zoom100()}
+          action={() => app.stateManager.actions.viewport.zoom100()}
         />
-        <SquareButton text="+" theme={this.theme()} action={() => app.actions.viewport.zoomIn()} />
-        <SquareButton text="⛶" theme={this.theme()} action={() => app.actions.viewport.fitToBoard()} />
+        <SquareButton
+          text="+"
+          theme={this.theme()}
+          action={() => app.stateManager.actions.viewport.zoomIn()}
+        />
+        <SquareButton
+          text="⛶"
+          theme={this.theme()}
+          action={() => app.stateManager.actions.viewport.fitToBoard()}
+        />
         <SquareButton text={'🖼️'} theme={this.theme()} action={() => app.webUi.selectImageToUpload()} />
         <SquareButton text={'🖫'} theme={this.theme()} action={() => app.project.exportToLocal()} />
         <SquareButton text={'📂'} theme={this.theme()} action={() => app.project.importFromLocal()} />

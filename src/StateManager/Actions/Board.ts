@@ -1,7 +1,7 @@
-import FlowApp from '../Interfaces/FlowApp';
-import { IWorldCoords } from '../Interfaces/Viewport';
-import BoardElement from '../Interfaces/BoardElement';
-import { ShiftModeState } from '../Interfaces/Board';
+import FlowApp from '../../Interfaces/FlowApp';
+import { IWorldCoords } from '../../Interfaces/Viewport';
+import BoardElement from '../../Interfaces/BoardElement';
+import { ShiftModeState } from '../../Interfaces/Board';
 
 export default class BoardActions {
   constructor(public app: FlowApp) {}
@@ -82,14 +82,14 @@ export default class BoardActions {
   public decreaseSelectedElementScale() {
     const boardElement = this.app.board.getSelectedElement();
     if (boardElement) {
-      this.app.actions.board.scaleElementById(boardElement.id, boardElement.scale / 1.3);
+      this.app.stateManager.actions.board.scaleElementById(boardElement.id, boardElement.scale / 1.3);
     }
   }
 
   public increaseSelectedElementScale() {
     const boardElement = this.app.board.getSelectedElement();
     if (boardElement) {
-      this.app.actions.board.scaleElementById(boardElement.id, boardElement.scale * 1.3);
+      this.app.stateManager.actions.board.scaleElementById(boardElement.id, boardElement.scale * 1.3);
     }
   }
 }

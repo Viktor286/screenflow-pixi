@@ -6,8 +6,7 @@ import DevMonitor from './DevMonitor';
 import Board from './Board';
 import WebUI from './WebUI';
 import GUI from './GUI';
-import StateManager from './StateManager';
-import Actions from '../Actions';
+import StateManager from '../StateManager';
 import Project from './Project';
 
 declare global {
@@ -28,7 +27,6 @@ export default class FlowApp {
   public readonly board: Board;
   public readonly gui: GUI;
   public readonly webUi: WebUI;
-  public readonly actions: Actions;
   public readonly stageEvents: StageEvents;
   public readonly stateManager: StateManager;
   public readonly project: Project;
@@ -44,7 +42,6 @@ export default class FlowApp {
     this.stageEvents = new StageEvents(this);
     this.viewport = new Viewport(this);
     this.board = new Board(this);
-    this.actions = new Actions(this);
     this.stateManager = new StateManager(this);
     this.project = new Project(this);
     this.gui = new GUI(this);

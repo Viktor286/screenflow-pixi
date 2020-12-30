@@ -1,4 +1,4 @@
-import FlowApp from '../Interfaces/FlowApp';
+import FlowApp from '../../Interfaces/FlowApp';
 import ViewportActions from './Viewport';
 import BoardActions from './Board';
 

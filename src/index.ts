@@ -2,7 +2,7 @@ import './index.css';
 import FlowApp from './Interfaces/FlowApp';
 import { getImageUrlSet } from './fixtures/imagesDataSet';
 import FilesIO from './Interfaces/FilesIO';
-import { SpaceModifiers } from './modifiers/SpaceModifiers';
+import { SpaceModifiers } from './Modifiers/SpaceModifiers';
 import Memo from './Interfaces/Memo';
 import { basicGroupWithScaling } from './tests/automation/interaction-scripts/groupWithScaling';
 
@@ -13,7 +13,7 @@ async function main() {
 
     /** Load test images **/
     const loader = await FilesIO.loadUrlSet(getImageUrlSet(12));
-    console.log('#FilesIO', FilesIO);
+
     for (const resource of Object.values(loader.resources)) {
       app.board.addElementToBoard(new Memo(resource.texture, app));
     }

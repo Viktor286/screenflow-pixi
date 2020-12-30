@@ -2,7 +2,7 @@
 
 import FlowApp from '../Interfaces/FlowApp';
 
-// This is a temp way how modifiers work. Might be better to be encapsulated from app
+// This is a temp way how Modifiers work. Might be better to be encapsulated from app
 /** TODO: change modifier interface to matrix output (prev, next states for animation) **/
 export class SpaceModifiers {
   static setPositionGrid(
@@ -33,8 +33,8 @@ export class SpaceModifiers {
         //  we should return array of mutation orders
         //  instead of modifying origin here here
 
-        app.actions.board.moveElementById(eId, { wX: x, wY: y });
-        app.actions.board.scaleElementById(eId, scale);
+        app.stateManager.actions.board.moveElementById(eId, { wX: x, wY: y });
+        app.stateManager.actions.board.scaleElementById(eId, scale);
 
         // elements[el].x = x;
         // elements[el].y = y;
