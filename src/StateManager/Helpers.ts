@@ -2,7 +2,7 @@ import { IAppState, IStateSlice } from './index';
 
 export default class StateManagerHelpers {
   static isScopeWithSubDomain(inputStr: string): boolean {
-    return inputStr[0] === '/';
+    return inputStr.indexOf('.') > -1;
   }
 
   static parseSubdomainScope(inputStr: string) {

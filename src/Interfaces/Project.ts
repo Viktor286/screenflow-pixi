@@ -27,7 +27,7 @@ export default class Project {
   pack(): Promise<Blob> {
     return new Promise(async (resolve) => {
       const projectArchive = new JSZip();
-      projectArchive.file('application.json', this.app.stateManager.exportState());
+      projectArchive.file('application.json', this.app.stateManager.io.exportState());
 
       const memoSnapshotsPNG = await this.exportAllMemoSnapshotsPNG();
       // Save files into projectArchive
@@ -159,7 +159,7 @@ export default class Project {
         }
       }
 
-      this.app.stateManager.importState(appDepositState);
+      this.app.stateManager.io.importState(appDepositState);
       this.app.engine.unpauseEngine();
     }
     console.log('Project doesnt seem to be valid');
@@ -231,14 +231,11 @@ export default class Project {
         // All project objects should be part of appState.board except 'application' file
         for (let i = 0; i < unpackedProject.length; i++) {
           const projObj = unpackedProject[i];
-          if (
-            projObj.fileName !== 'application' &&
-            !appState.boardOperations[projObj.fileName.split('.')[0]]
-          ) {
+          if (projObj.fileName !== 'application' && !appState.board[projObj.fileName.split('.')[0]]) {
             console.log(
               'The file in project folder not found on project board.',
               projObj.fileName,
-              appState.boardOperations,
+              appState.board,
             );
             return false;
           }

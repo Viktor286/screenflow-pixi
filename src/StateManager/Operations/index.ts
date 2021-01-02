@@ -2,6 +2,7 @@ import FlowApp from '../../Interfaces/FlowApp';
 import { IPublicCameraState } from '../../Interfaces/Viewport';
 import BoardOperations from './Board';
 import ViewportOperations from './Viewport';
+import { IAppState, IStateScope } from '../index';
 
 export default class Operations {
   boardOperations: BoardOperations;
@@ -13,11 +14,11 @@ export default class Operations {
   }
 
   public exec(
-    address: string,
+    address: IStateScope,
     property: string,
-    value: number | IPublicCameraState,
+    value: IAppState[keyof IAppState],
   ): number | IPublicCameraState | Promise<IPublicCameraState> | boolean {
-    //
+    // todo: address system
     // Board (board) operations
     if (address.startsWith('/board')) {
       this.boardOperations.updateBoardElement(address, property, value);

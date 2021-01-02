@@ -11,7 +11,7 @@ import { IWorldCoords } from './Viewport';
 export type ShiftModeState = 'off' | 'hold' | 'lock';
 
 export interface IPublicBoardState {
-  [key: string]: IBoardElementPublicState;
+  [key: string]: IBoardElementPublicState; // TODO: remove [key: string] everywhere
 }
 
 export interface IPublicBoardDepositState {
