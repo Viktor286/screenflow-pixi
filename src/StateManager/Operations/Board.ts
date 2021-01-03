@@ -6,6 +6,7 @@ export default class BoardOperations {
   constructor(public app: FlowApp) {}
 
   updateBoardElement(address: string, property: string, value: number | IPublicCameraState) {
+    // todo: address system
     if (Helpers.isScopeWithSubDomain(address)) {
       const { target: id } = Helpers.parseSubdomainScope(address);
       const boardElement = this.app.board.state[id].element;
