@@ -29,16 +29,7 @@ export class SpaceModifiers {
         const y = row * cellHeight + cellHeight / 2;
 
         // Apply transforms
-        // TODO: how would we access state here?
-        //  we should return array of mutation orders
-        //  instead of modifying origin here here
-
-        app.stateManager.actions.board.moveElementById(eId, { wX: x, wY: y });
-        app.stateManager.actions.board.scaleElementById(eId, scale);
-
-        // elements[el].x = x;
-        // elements[el].y = y;
-        // elements[el].scale = scale;
+        app.stateManager.setState(`board/${eId}`, { x, y, scale });
 
         idx++;
       }

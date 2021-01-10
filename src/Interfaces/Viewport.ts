@@ -20,7 +20,7 @@ export interface IViewportInstance extends PixiViewport {
   [key: string]: any;
 }
 
-export interface IPublicCameraState {
+export interface IPublicViewportState {
   x: number;
   y: number;
   cwX: number;
@@ -35,7 +35,7 @@ export default class Viewport {
   public readonly slideControls: SlideControls;
   public readonly zoomScales: number[] = [0.03125, 0.0625, 0.125, 0.25, 0.5, 1, 2, 4, 8, 16, 32];
   public readonly fitAreaMarginPercent = 20;
-  public readonly publicCameraState: IPublicCameraState = {
+  public readonly publicViewportState: IPublicViewportState = {
     x: 0,
     y: 0,
     cwX: 0,
@@ -95,19 +95,19 @@ export default class Viewport {
   }
 
   set cwX(wcX: number) {
-    this.viewport.instance.center = { x: wcX, y: this.viewport.instance.center.y };
+    this.instance.center.set(wcX, this.instance.center.y);
   }
 
   get cwX() {
-    return this.app.viewport.instance.center.x;
+    return this.instance.center.x;
   }
 
   set cwY(wcY: number) {
-    this.viewport.instance.center = { x: this.viewport.instance.center.x, y: wcY };
+    this.instance.center.set(this.instance.center.x, wcY);
   }
 
   get cwY() {
-    return this.app.viewport.instance.center.y;
+    return this.instance.center.y;
   }
 
   set scale(val: number) {
@@ -279,7 +279,7 @@ export default class Viewport {
     return this.app.viewport.instance.findFit(width, height);
   }
 
-  public cameraPropsConversion(targetPoint?: IWorldCoords, targetScale?: number): IPublicCameraState {
+  public viewportPropsConversion(targetPoint?: IWorldCoords, targetScale?: number): IPublicViewportState {
     if (!targetPoint) {
       targetPoint = this.app.viewport.getScreenCenterInWord();
     }
@@ -300,8 +300,8 @@ export default class Viewport {
     };
   }
 
-  public animateCamera(cameraProps: IPublicCameraState): Promise<IPublicCameraState> {
-    const { x, y, scale, cwX, cwY } = cameraProps;
+  public animateViewport(viewportProps: IPublicViewportState): Promise<IPublicViewportState> {
+    const { x, y, scale, cwX, cwY } = viewportProps;
 
     const animateProps = {
       x,
@@ -322,14 +322,14 @@ export default class Viewport {
         },
         onComplete: () => {
           // this.app.viewport.interactive = true;
-          setTimeout(() => this.app.viewport.onCameraAnimationEnds()); // send exec to next frame
+          setTimeout(() => this.app.viewport.onViewportAnimationEnds()); // send exec to next frame
           resolve({ ...animateProps, cwX, cwY });
         },
       });
     });
   }
 
-  private onCameraAnimationEnds = (): void => {
+  private onViewportAnimationEnds = (): void => {
     this.app.webUi.updateZoomBtn();
   };
 }

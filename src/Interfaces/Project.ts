@@ -127,7 +127,7 @@ export default class Project {
           //   1. Project: save .zip project to localstorage
           //   2. Assets: (what advantage? 1. lazy sync with server, 2. quick ready state to reopen)
           //   save blobs(most likely)/Base64/PIXI.Texture localForage(IndexedDB)
-          //   3. camera separate in localstorage?
+          //   3. viewport separate in localstorage?
 
           n += 1;
 

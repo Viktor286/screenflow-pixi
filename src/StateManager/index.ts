@@ -1,28 +1,38 @@
 import FlowApp from '../Interfaces/FlowApp';
-import { IPublicCameraState } from '../Interfaces/Viewport';
-import { IPublicBoardState, IPublicBoardDepositState } from '../Interfaces/Board';
+import { IPublicViewportState } from '../Interfaces/Viewport';
+import { IPublicBoardDepositState, IPublicBoardState } from '../Interfaces/Board';
 import IO from './IO';
 import Operations from './Operations';
+import { AsyncId } from './Operations/Async';
 import Actions from './Actions';
-import Helpers from './Helpers';
+import { StateUpdateRequest } from './StateUpdateRequest';
 
 export interface IAppState {
-  [index: string]: IPublicCameraState | IPublicBoardState | object | null;
-  camera: IPublicCameraState;
+  [index: string]: IPublicViewportState | IPublicBoardState;
+  viewport: IPublicViewportState;
   board: IPublicBoardState;
-  asyncQueue: object | null;
 }
 
-export type IStateSlice = Partial<IAppState>;
-export type IStateScope = Extract<keyof IAppState, string>;
+export type StateScope = Extract<keyof IAppState, string>;
+export type StateSlice = Partial<IPublicViewportState> | Partial<IPublicBoardState>;
+export type StateValue = StateSlice[keyof StateSlice] | undefined;
 
-export interface IHistoryObject {
-  content: IStateSlice;
-  scope: IStateScope;
+export interface IOpSettings {
+  noOp?: boolean;
+  async?: AsyncOperationType;
+  asyncId?: AsyncId;
+}
+
+type AsyncOperationType = 'animation' | 'animated' | undefined; // ex: | 'network'
+
+interface StateUpdateMsg {
+  status: 'updated' | 'pending' | 'idle' | 'error';
+  msg?: string;
+  updateRequest?: StateUpdateRequest;
 }
 
 export interface IAppDepositState {
-  camera: IPublicCameraState;
+  viewport: IPublicViewportState;
   board: IPublicBoardDepositState;
 }
 
@@ -32,75 +42,117 @@ export default class StateManager {
   public readonly io = new IO(this.app);
 
   public publicState: IAppState = {
-    camera: this.app.viewport.publicCameraState, // reference to origin class
-    board: this.app.board.state, // reference to origin class
-    asyncQueue: null,
+    viewport: this.operations.viewport.originState,
+    board: this.operations.board.originState,
   };
 
-  public history: IHistoryObject[] = [];
+  public history: StateUpdateRequest[] = [];
   public historyLevel = 50;
 
   constructor(public app: FlowApp) {}
 
-  // TODO: THE BIG QUESTION HERE -- HOW FREQUENT DO WE WANT TO UPDATE COMMON ANIMATION STATE, GAME-LIKE OR DOCUMENT-LIKE
-  public setState = (scope: IStateScope, stateSlice: IStateSlice, isNoOp: boolean = false) => {
-    if (!Helpers.isValidStateSlice(stateSlice)) return false;
+  public setState = (
+    locator: StateScope,
+    slice: StateSlice,
+    opSettings: IOpSettings = {},
+  ): StateUpdateMsg => {
+    const stateUpdate = new StateUpdateRequest(locator, slice, opSettings);
 
-    let isStateChanged = false;
+    if (!StateManager.isValidStateSlice(stateUpdate.slice))
+      return { status: 'error', msg: 'StateSlice is not valid' };
 
-    // For Animation apply GROUPED operation right away (props handled simultaneously by GSAP)
-    // without any state data update and stop processing any other fields to avoid other changes
+    // Async change
+    if (opSettings.async) {
+      switch (opSettings.async) {
+        case 'animation':
+          // For "animation" all props would be GROUPED (handled simultaneously by GSAP)
+          // without any state data update and stop processing any other fields to avoid other changes
+          const asyncId = this.operations.execAnimation(stateUpdate);
 
-    // Main handler loop
-    for (const property in stateSlice) {
-      if (Object.prototype.hasOwnProperty.call(stateSlice, property)) {
-        const updateValue = stateSlice[property];
+          if (asyncId) {
+            return {
+              status: 'pending',
+              msg: asyncId,
+            };
+          }
 
-        // Apply singe property update
-        let prevScopedState = this.getState(scope);
-        const prevValue = prevScopedState[property];
-
-        // We need to remove this if we created it via applyOperation
-        // if (prevScopedState.animationInProgress) {
-        //   delete prevScopedState.animationInProgress;
-        // }
-
-        if (prevValue !== updateValue && updateValue !== undefined) {
-          // const operationResult =
-
-          let newScopeState = {
-            ...prevScopedState,
-            [property]: isNoOp ? updateValue : this.operations.exec(scope, property, updateValue),
+          return {
+            status: 'error',
+            msg: 'animation was not executed',
           };
 
-          // Mutate state as scope's branch
-          Object.assign(this.getState(scope), newScopeState);
-          isStateChanged = true;
+        case 'animated':
+          if (stateUpdate.opSettings.asyncId) this.operations.async.remove(stateUpdate.opSettings.asyncId);
+      }
+    }
+
+    // Sync change
+    const prevScopedState = this.getState(stateUpdate.locator);
+    const stateUpdates: StateSlice = {};
+    let stateUpdatesCnt: number = 0;
+
+    for (const property in stateUpdate.slice) {
+      if (Object.prototype.hasOwnProperty.call(stateUpdate.slice, property)) {
+        const updateValue: StateValue = stateUpdate.slice[property];
+        if (updateValue !== undefined && updateValue !== prevScopedState[property]) {
+          stateUpdates[property] = this.operations.execValue(property, updateValue, stateUpdate);
+          stateUpdatesCnt += 1;
         }
       }
     }
 
-    if (isStateChanged) this.saveToHistory(scope, this.getState(scope));
-    return true;
+    if (stateUpdatesCnt > 0) {
+      // Mutate state as scope's branch
+      Object.assign(this.getState(stateUpdate.locator), {
+        ...prevScopedState,
+        ...stateUpdates,
+      });
+
+      this.saveToHistory(stateUpdate);
+
+      return { status: 'updated', updateRequest: stateUpdate };
+    }
+
+    return { status: 'idle' };
   };
 
-  public getState(stateScope?: IStateScope): IStateSlice {
-    if (stateScope) {
-      if (Helpers.isScopeWithSubDomain(stateScope)) {
-        const { domain, target } = Helpers.parseSubdomainScope(stateScope);
-        return Object.assign({}, this.publicState[domain][target]); // todo: address system
+  public getState(locator?: StateScope): StateSlice {
+    if (locator) {
+      // todo: locator might have its own api and be instance of the class (upd StateUpdateRequest)
+      const _locator = locator.startsWith('/') ? locator.slice(1) : locator;
+      const targeting = _locator.split('/');
+
+      if (targeting[1]) {
+        const [domain, target] = targeting;
+        return Object.assign({}, this.publicState[domain][target]);
       }
-      return Object.assign({}, this.publicState[stateScope]);
+      return Object.assign({}, this.publicState[locator]);
     }
     return Object.assign({}, this.publicState);
   }
 
-  public saveToHistory(stateScope: IStateScope, stateSlice: IStateSlice) {
-    console.log(`history: ${stateScope}`, stateSlice);
-    this.enqueueHistory({ scope: stateScope, content: stateSlice });
+  public saveToHistory(stateUpdate: StateUpdateRequest) {
+    console.log(`history: `, stateUpdate);
+    this.enqueueHistory(stateUpdate);
   }
 
-  private enqueueHistory(historyObject: IHistoryObject) {
-    this.history = [historyObject, ...this.history.slice(0, this.historyLevel - 1)];
+  private enqueueHistory(stateUpdate: StateUpdateRequest) {
+    this.history = [stateUpdate, ...this.history.slice(0, this.historyLevel - 1)];
+  }
+
+  static isValidStateSlice(stateItem: StateSlice) {
+    return typeof stateItem === 'object' || Array.isArray(stateItem);
+  }
+
+  static isGlobalStateValid(state: object, stateOrigin: IAppState) {
+    if (typeof state === 'object' && !Array.isArray(state)) {
+      for (const scope in stateOrigin) {
+        if (Object.hasOwnProperty.call(stateOrigin, scope)) {
+          return !state.hasOwnProperty(scope);
+        }
+      }
+      return true;
+    }
+    return false;
   }
 }

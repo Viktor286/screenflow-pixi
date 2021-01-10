@@ -1,12 +1,12 @@
 import clonedeep from 'lodash.clonedeep';
-import Helpers from './Helpers';
-import { IAppDepositState, IAppState, IStateScope } from './index';
+import StateManager, { IAppDepositState, IAppState, StateScope } from './index';
 import FlowApp from '../Interfaces/FlowApp';
+import { StateUpdateRequest } from './StateUpdateRequest';
 
 export default class IO {
   constructor(public app: FlowApp) {}
 
-  public exportState(stateScope?: IStateScope): string {
+  public exportState(stateScope?: StateScope): string {
     const state = clonedeep(this.app.stateManager.getState(stateScope));
 
     // rm real element references
@@ -36,27 +36,26 @@ export default class IO {
     // todo: do we want a generator function for this?
     const appState: IAppState = {
       board: {},
-      camera: {
+      viewport: {
         x: 0,
         y: 0,
         cwX: 0,
         cwY: 0,
         scale: 1,
       },
-      asyncQueue: null,
     };
 
-    // copy camera primitives
-    for (const key in appDepositState.camera) {
-      if (Object.prototype.hasOwnProperty.call(appDepositState.camera, key)) {
-        appState.camera[key] = appDepositState.camera[key];
+    // copy viewport primitives
+    for (const key in appDepositState.viewport) {
+      if (Object.prototype.hasOwnProperty.call(appDepositState.viewport, key)) {
+        appState.viewport[key] = appDepositState.viewport[key];
       }
     }
 
     // apply viewport operation (transforms)
-    this.app.viewport.x = appDepositState.camera.x;
-    this.app.viewport.y = appDepositState.camera.y;
-    this.app.viewport.scale = appDepositState.camera.scale;
+    this.app.viewport.x = appDepositState.viewport.x;
+    this.app.viewport.y = appDepositState.viewport.y;
+    this.app.viewport.scale = appDepositState.viewport.scale;
 
     // copy specific fields of board element
     for (const key in appDepositState.board) {
@@ -80,10 +79,10 @@ export default class IO {
     }
 
     // Validate and assign new state
-    if (!Helpers.isGlobalStateValid(appState, this.app.stateManager.publicState)) {
+    if (!StateManager.isGlobalStateValid(appState, this.app.stateManager.publicState)) {
       this.app.stateManager.publicState = appState;
       // Update history
-      this.app.stateManager.saveToHistory('global', appState);
+      this.app.stateManager.saveToHistory(new StateUpdateRequest('global state import', appState));
     }
   }
 }

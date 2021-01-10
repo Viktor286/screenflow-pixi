@@ -80,7 +80,7 @@ export default class SlideControls {
     setTimeout(() => {
       this.isSliding = false;
     }, 200);
-    this.app.stateManager.actions.viewport.amendCameraState();
+    this.app.stateManager.actions.viewport.amendViewportState();
   };
 
   private onSliderZoomed = () => {

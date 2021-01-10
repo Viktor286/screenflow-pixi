@@ -67,20 +67,17 @@ export default class BoardActions {
   }
 
   public scaleElementById(id: string, targetScale?: number) {
-    this.app.stateManager.setState(`/board/${id}`, {
-      animation: { scale: targetScale },
-    });
+    this.app.stateManager.setState(`/board/${id}`, { scale: targetScale }, { async: 'animation' });
   }
 
   public moveElementById(id: string, target: IWorldCoords) {
     const { wX: x, wY: y } = target;
-    this.app.stateManager.setState(`/board/${id}`, {
-      animation: { x, y },
-    });
+    this.app.stateManager.setState(`/board/${id}`, { x, y }, { async: 'animation' });
   }
 
   public decreaseSelectedElementScale() {
     const boardElement = this.app.board.getSelectedElement();
+    // TODO: implement state management
     if (boardElement) {
       this.app.stateManager.actions.board.scaleElementById(boardElement.id, boardElement.scale / 1.3);
     }
@@ -88,6 +85,7 @@ export default class BoardActions {
 
   public increaseSelectedElementScale() {
     const boardElement = this.app.board.getSelectedElement();
+    // TODO: implement state management
     if (boardElement) {
       this.app.stateManager.actions.board.scaleElementById(boardElement.id, boardElement.scale * 1.3);
     }

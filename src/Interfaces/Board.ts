@@ -19,7 +19,7 @@ export interface IPublicBoardDepositState {
 }
 
 export default class Board {
-  public readonly state: IPublicBoardState = {};
+  public readonly state: IPublicBoardState = {}; // TODO: Map more optimized? https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map
   public isMemberDragging: boolean | string = false;
   public shiftModeState: ShiftModeState = 'off';
   public selection: BoardElement | null = null;
