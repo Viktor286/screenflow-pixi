@@ -31,7 +31,7 @@ export default class BoardElement {
   public isScaleFromCenter = false;
   public inGroup: Group | undefined = undefined;
   public container = new BoardElementContainer(this);
-  private selectionDrawing = new PIXI.Graphics();
+  public selectionDrawing = new PIXI.Graphics();
   private dragPoint: IPoint = { x: 0, y: 0 };
   public readonly id: string;
 
@@ -198,7 +198,8 @@ export default class BoardElement {
 
   public drawSelection(): void {
     const groupFactor = this.inGroup ? this.inGroup.scale : 1;
-    // Compensate selection draw scale which is child for this.container's scale
+
+    // Sharp corners border
     this.selectionDrawing
       .clear()
       .lineStyle(4 / this.app.viewport.scale / this.scale / groupFactor, 0x73b2ff)

@@ -10,7 +10,9 @@ export type MemoSnapshot = {
 };
 
 export default class Memo extends BoardElement {
+  public cornerRadius = 20;
   private snapshot: Snapshot;
+
   [key: string]: any;
 
   // TODO: maybe we want to remove app link from this instance?
@@ -18,17 +20,17 @@ export default class Memo extends BoardElement {
     super(app, id);
     this.snapshot = new Snapshot(texture, this);
 
-    this.container.addChild(this.snapshot.sprite);
+    this.container.addChild(this.snapshot.textureGraphics);
 
     this.container.interactive = true;
   }
 
   public setDragState() {
-    this.snapshot.sprite.tint = 0x91b6e3;
+    this.snapshot.textureGraphics.tint = 0x91b6e3;
   }
 
   public unsetDragState() {
-    this.snapshot.sprite.tint = 0xffffff;
+    this.snapshot.textureGraphics.tint = 0xffffff;
   }
 
   public startDrag(startPoint: IWorldCoords) {
@@ -41,16 +43,34 @@ export default class Memo extends BoardElement {
     super.stopDrag();
   }
 
+  public drawSelection(): void {
+    const groupFactor = this.inGroup ? this.inGroup.scale : 1;
+
+    // Rounded corners border
+    this.selectionDrawing
+      .clear()
+      .lineStyle(4 / this.app.viewport.scale / this.scale / groupFactor, 0x73b2ff)
+      .drawRoundedRect(0, 0, this.width / this.scale, this.height / this.scale, this.cornerRadius);
+  }
+
   public extractMemoSnapshot(): Promise<MemoSnapshot> {
     return new Promise((resolve) => {
       const renderer = this.app.engine.renderer;
 
       if (this.isSelected) this.eraseSelectionDrawing();
 
+      // Replace Graphics with sprite just for extraction
+      this.container.removeChild(this.snapshot.textureGraphics);
+      this.container.addChild(this.snapshot.sprite);
+
       const ctx = renderer.plugins.extract.canvas(this.container);
       ctx.toBlob((blob: Blob) => {
         resolve({ id: this.id, data: blob });
       }, 'image/png'); // alternatively we can get jpg with compression
+
+      // Replace sprite with Graphics back
+      this.container.removeChild(this.snapshot.sprite);
+      this.container.addChild(this.snapshot.textureGraphics);
 
       if (this.isSelected) this.drawSelection();
 

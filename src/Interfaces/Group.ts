@@ -25,10 +25,8 @@ export default class Group extends BoardElement {
     this.container.interactive = true;
     this.container.sortableChildren = true;
 
-    this.groupDrawing.zIndex = 2;
+    this.groupDrawing.zIndex = 0;
     this.container.addChild(this.groupDrawing);
-
-    // PIXI.DisplayObjectContainer
 
     // If an object has no interactive children use interactiveChildren = false
     // the interaction manager will then be able to avoid crawling through the object.
@@ -76,18 +74,35 @@ export default class Group extends BoardElement {
   }
 
   public drawSelection(): void {
+    // Let children draw it's own selection
     this.container.children.forEach((elm) => {
       if (elm instanceof BoardElementContainer) {
         elm.boardElement.drawSelection();
       }
     });
 
-    const lineWidth = 2 / this.app.viewport.scale / this.scale;
-
-    this.groupDrawing
-      .clear()
-      .lineStyle(lineWidth, 0xe3d891)
-      .drawRect(0, 0, this.width / this.scale - lineWidth, this.height / this.scale - lineWidth);
+    // TODO: bug -- group object shifts a bit on x,y via different global scale
+    // // Border line stroke with sharp angle
+    // const lineWidth = 2 / this.app.viewport.scale / this.scale;
+    //
+    // this.groupDrawing
+    //   .clear()
+    //   .lineStyle(lineWidth, 0xe3d891)
+    //   .drawRect(0, 0, this.width / this.scale - lineWidth, this.height / this.scale - lineWidth);
+    // Area Fill with padding and rounded angles
+    // const padding = 8;
+    //
+    // this.groupDrawing
+    //   .clear()
+    //   .beginFill(0xe3d891, 0.15)
+    //   .drawRoundedRect(
+    //     -padding,
+    //     -padding,
+    //     (this.width + padding * 2) / this.scale,
+    //     (this.height + padding * 2) / this.scale,
+    //     4 / this.app.viewport.scale / this.scale,
+    //   )
+    //   .endFill();
   }
 
   public eraseSelectionDrawing() {
