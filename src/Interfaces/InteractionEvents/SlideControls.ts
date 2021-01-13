@@ -80,6 +80,8 @@ export default class SlideControls {
     setTimeout(() => {
       this.isSliding = false;
     }, 200);
+
+    // TODO: Can we avoid this workaround for stateManager?
     this.app.stateManager.actions.viewport.amendViewportState();
   };
 

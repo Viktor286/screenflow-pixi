@@ -11,7 +11,7 @@ export interface IExplodedGroup {
 }
 
 export default class Group extends BoardElement {
-  [key: string]: any;
+  [index: string]: any;
   private groupDrawing = new PIXI.Graphics();
 
   leftMostChild: BoardElementContainer | undefined;

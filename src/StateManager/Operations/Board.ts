@@ -1,7 +1,7 @@
 import FlowApp from '../../Interfaces/FlowApp';
-import Viewport, { IPublicViewportState } from '../../Interfaces/Viewport';
 import { AsyncId } from './Async';
 import { StateUpdateRequest } from '../StateUpdateRequest';
+import { IPublicBoardState } from '../../Interfaces/Board';
 
 export default class BoardOperations {
   constructor(public app: FlowApp) {}
@@ -25,8 +25,8 @@ export default class BoardOperations {
   }
 
   update(
-    property: Extract<keyof Viewport, string>,
-    value: IPublicViewportState[keyof IPublicViewportState],
+    property: string,
+    value: IPublicBoardState[keyof IPublicBoardState],
     stateUpdate: StateUpdateRequest,
   ) {
     const id = stateUpdate.targeting[1];

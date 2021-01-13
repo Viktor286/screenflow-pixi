@@ -23,9 +23,9 @@ export default class ViewportOperations {
     value: IPublicViewportState[keyof IPublicViewportState],
     stateUpdate: StateUpdateRequest,
   ) {
-    // if (Object.prototype.hasOwnProperty.call(this.app.viewport, property)) {
-    this.app.viewport[property] = value;
-    // }
+    if (Object.prototype.hasOwnProperty.call(this.app.viewport, property)) {
+      this.app.viewport[property] = value;
+    }
     return value;
   }
 }

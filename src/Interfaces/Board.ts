@@ -11,7 +11,7 @@ import { IWorldCoords } from './Viewport';
 export type ShiftModeState = 'off' | 'hold' | 'lock';
 
 export interface IPublicBoardState {
-  [key: string]: IBoardElementPublicState; // TODO: remove [key: string] everywhere
+  [index: string]: IBoardElementPublicState; // TODO: remove [key: string] everywhere
 }
 
 export interface IPublicBoardDepositState {
@@ -195,7 +195,7 @@ export default class Board {
       (el) => el instanceof BoardElementContainer,
     ) as BoardElementContainer[];
 
-    return displayObjects.map((container) => container.boardElement) as Memo[];
+    return displayObjects.map((container) => container.boardElement) as BoardElement[];
   }
 
   public getAllMemos(): Memo[] {

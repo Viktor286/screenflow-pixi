@@ -14,7 +14,7 @@ export default class ViewportActions {
   }
 
   public fitToBoardElement(boardElement: BoardElement) {
-    // rout to group if group's member
+    // route to group if group's member
     if (boardElement.inGroup) {
       boardElement = boardElement.inGroup;
     }

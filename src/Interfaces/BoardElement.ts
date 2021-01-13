@@ -12,7 +12,6 @@ export interface IBoardElementPublicState {
   y?: number;
   scale?: number;
   element?: BoardElement;
-  isSelected?: boolean; // is there any consumer of it?
 }
 
 export interface IBoardElementPublicDepositState {

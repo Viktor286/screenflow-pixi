@@ -44,11 +44,7 @@ export default class Operations {
     return;
   }
 
-  public execValue(
-    property: string,
-    updateValue: StateValue, // IAppState[keyof IAppState],
-    stateUpdate: StateUpdateRequest,
-  ): StateValue {
+  public execValue(property: string, updateValue: StateValue, stateUpdate: StateUpdateRequest): StateValue {
     // No operation idle
     if (stateUpdate.opSettings.noOp) {
       return updateValue;

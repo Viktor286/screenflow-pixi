@@ -19,6 +19,7 @@ export type StateValue = StateSlice[keyof StateSlice] | undefined;
 
 export interface IOpSettings {
   noOp?: boolean;
+  noHistory?: boolean;
   async?: AsyncOperationType;
   asyncId?: AsyncId;
 }
@@ -103,12 +104,24 @@ export default class StateManager {
 
     if (stateUpdatesCnt > 0) {
       // Mutate state as scope's branch
-      Object.assign(this.getState(stateUpdate.locator), {
-        ...prevScopedState,
-        ...stateUpdates,
-      });
+      const newState = Object.assign(prevScopedState, stateUpdates);
 
-      this.saveToHistory(stateUpdate);
+      // todo LOCATOR-1: locator might have its own api and be instance of the class (upd StateUpdateRequest)
+      const _locator = locator.startsWith('/') ? locator.slice(1) : locator;
+      const targeting = _locator.split('/');
+
+      if (targeting[1]) {
+        const [domain, target] = targeting;
+        this.publicState[domain][target] = newState;
+      } else {
+        const [domain] = targeting;
+        // @ts-ignore
+        this.publicState[domain] = newState;
+      }
+
+      if (!opSettings.noHistory) {
+        this.saveToHistory(stateUpdate);
+      }
 
       return { status: 'updated', updateRequest: stateUpdate };
     }
@@ -118,7 +131,7 @@ export default class StateManager {
 
   public getState(locator?: StateScope): StateSlice {
     if (locator) {
-      // todo: locator might have its own api and be instance of the class (upd StateUpdateRequest)
+      // todo LOCATOR-1: locator might have its own api and be instance of the class (upd StateUpdateRequest)
       const _locator = locator.startsWith('/') ? locator.slice(1) : locator;
       const targeting = _locator.split('/');
 
@@ -132,8 +145,9 @@ export default class StateManager {
   }
 
   public saveToHistory(stateUpdate: StateUpdateRequest) {
-    console.log(`history: `, stateUpdate);
+    console.log(`[debug] history: `, stateUpdate);
     this.enqueueHistory(stateUpdate);
+    console.log(`[debug] state: `, this.getState());
   }
 
   private enqueueHistory(stateUpdate: StateUpdateRequest) {

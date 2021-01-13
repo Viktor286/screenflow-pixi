@@ -7,7 +7,7 @@ export default class BoardActions {
   constructor(public app: FlowApp) {}
 
   public createNewMemoOnBoard() {
-    // todo: ^
+    // todo: UP NEXT: pipe board actions through stateManager^
   }
 
   public selectElementById(id: string) {
@@ -15,27 +15,14 @@ export default class BoardActions {
     if (el instanceof BoardElement) {
       this.app.board.selectElement(el);
     }
-    // TODO: implement state management for element and group selection
-    // this.app.stateManager.setState(`/board/${id}`, {
-    //   isSelected: true,
-    // });
   }
 
   public selectElement(boardElement: BoardElement) {
     this.app.board.selectElement(boardElement);
-
-    // TODO: implement state management for element and group selection
-    // this.app.stateManager.setState(`/board/${id}`, {
-    //   isSelected: true,
-    // });
   }
 
   public deselectElements() {
     this.app.board.deselectElement();
-    // TODO: implement state management for element and group selection
-    // this.app.stateManager.setState(`/board/${id}`, {
-    //   isSelected: true,
-    // });
   }
 
   public setShiftModeState(state: ShiftModeState = 'off') {
@@ -43,7 +30,6 @@ export default class BoardActions {
   }
 
   public deleteSelectedElement() {
-    // TODO: implement state management for element deletion
     const boardElement = this.app.board.getSelectedElement();
     if (boardElement) {
       this.app.board.deleteBoardElement(boardElement);
@@ -52,18 +38,18 @@ export default class BoardActions {
 
   public startDragElement(boardElement: BoardElement, startPoint: IWorldCoords) {
     this.app.board.startDragElement(boardElement, startPoint);
-    // TODO: implement state management for element and group dragging
-    // this.app.stateManager.setState(`/board/${id}`, {
-    //   ???: true,
-    // });
   }
 
   public stopDragElement(boardElement: BoardElement) {
     this.app.board.stopDragElement(boardElement);
-    // TODO: implement state management for element and group dragging
-    // this.app.stateManager.setState(`/board/${id}`, {
-    //   ???: true,
-    // });
+    const { id, x, y } = boardElement;
+    this.app.stateManager.setState(
+      `/board/${id}`,
+      { x, y },
+      {
+        noOp: true,
+      },
+    );
   }
 
   public scaleElementById(id: string, targetScale?: number) {
@@ -77,17 +63,15 @@ export default class BoardActions {
 
   public decreaseSelectedElementScale() {
     const boardElement = this.app.board.getSelectedElement();
-    // TODO: implement state management
     if (boardElement) {
-      this.app.stateManager.actions.board.scaleElementById(boardElement.id, boardElement.scale / 1.3);
+      this.scaleElementById(boardElement.id, boardElement.scale / 1.3);
     }
   }
 
   public increaseSelectedElementScale() {
     const boardElement = this.app.board.getSelectedElement();
-    // TODO: implement state management
     if (boardElement) {
-      this.app.stateManager.actions.board.scaleElementById(boardElement.id, boardElement.scale * 1.3);
+      this.scaleElementById(boardElement.id, boardElement.scale * 1.3);
     }
   }
 }
