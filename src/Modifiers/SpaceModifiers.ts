@@ -16,7 +16,7 @@ export class SpaceModifiers {
     let row = 0;
     let idx = 0;
 
-    const elements = app.board.state;
+    const elements = app.board.getAllMemos();
 
     for (let eId in elements) {
       if (Object.prototype.hasOwnProperty.call(elements, eId)) {

@@ -1,18 +1,15 @@
 import FlowApp from '../../Interfaces/FlowApp';
-import Viewport, { IPublicViewportState } from '../../Interfaces/Viewport';
+import Viewport from '../../Interfaces/Viewport';
 import { AsyncId } from './Async';
 import { StateUpdateRequest } from '../StateUpdateRequest';
+import { PublicViewportState } from '../Representations/Viewport';
 
 export default class ViewportOperations {
   constructor(public app: FlowApp) {}
 
-  get originState() {
-    return this.app.viewport.publicViewportState;
-  }
-
   animate(stateUpdate: StateUpdateRequest, asyncId: AsyncId) {
     this.app.viewport
-      .animateViewport(stateUpdate.slice as IPublicViewportState)
+      .animateViewport(stateUpdate.slice as PublicViewportState)
       .then((viewportProps) =>
         this.app.stateManager.setState('viewport', viewportProps, { async: 'animated', asyncId }),
       );
@@ -20,7 +17,7 @@ export default class ViewportOperations {
 
   update(
     property: Extract<keyof Viewport, string>,
-    value: IPublicViewportState[keyof IPublicViewportState],
+    value: PublicViewportState[keyof PublicViewportState],
     stateUpdate: StateUpdateRequest,
   ) {
     if (Object.prototype.hasOwnProperty.call(this.app.viewport, property)) {

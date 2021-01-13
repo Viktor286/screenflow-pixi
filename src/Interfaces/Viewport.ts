@@ -20,28 +20,13 @@ export interface IViewportInstance extends PixiViewport {
   [key: string]: any;
 }
 
-export interface IPublicViewportState {
-  x: number;
-  y: number;
-  cwX: number;
-  cwY: number;
-  scale: number;
-  [key: string]: any;
-}
-
 export default class Viewport {
   public readonly instance: IViewportInstance;
   public readonly engine: GraphicsEngine;
   public readonly slideControls: SlideControls;
   public readonly zoomScales: number[] = [0.03125, 0.0625, 0.125, 0.25, 0.5, 1, 2, 4, 8, 16, 32];
   public readonly fitAreaMarginPercent = 20;
-  public readonly publicViewportState: IPublicViewportState = {
-    x: 0,
-    y: 0,
-    cwX: 0,
-    cwY: 0,
-    scale: 1,
-  };
+
   [key: string]: any;
 
   constructor(public app: FlowApp) {
@@ -92,22 +77,6 @@ export default class Viewport {
 
   get y() {
     return this.instance.y;
-  }
-
-  set cwX(wcX: number) {
-    this.instance.center.set(wcX, this.instance.center.y);
-  }
-
-  get cwX() {
-    return this.instance.center.x;
-  }
-
-  set cwY(wcY: number) {
-    this.instance.center.set(this.instance.center.x, wcY);
-  }
-
-  get cwY() {
-    return this.instance.center.y;
   }
 
   set scale(val: number) {
@@ -279,7 +248,7 @@ export default class Viewport {
     return this.app.viewport.instance.findFit(width, height);
   }
 
-  public viewportPropsConversion(targetPoint?: IWorldCoords, targetScale?: number): IPublicViewportState {
+  public viewportPropsConversion(targetPoint?: IWorldCoords, targetScale?: number) {
     if (!targetPoint) {
       targetPoint = this.app.viewport.getScreenCenterInWord();
     }
@@ -295,13 +264,11 @@ export default class Viewport {
       x: (this.app.viewport.screenWidth / targetScale / 2 - targetPoint.wX) * targetScale,
       y: (this.app.viewport.screenHeight / targetScale / 2 - targetPoint.wY) * targetScale,
       scale: targetScale,
-      cwX: targetPoint.wX,
-      cwY: targetPoint.wY,
     };
   }
 
-  public animateViewport(viewportProps: IPublicViewportState): Promise<IPublicViewportState> {
-    const { x, y, scale, cwX, cwY } = viewportProps;
+  public animateViewport(viewportProps: Partial<Viewport>): Promise<Partial<Viewport>> {
+    const { x, y, scale } = viewportProps;
 
     const animateProps = {
       x,
@@ -323,7 +290,7 @@ export default class Viewport {
         onComplete: () => {
           // this.app.viewport.interactive = true;
           setTimeout(() => this.app.viewport.onViewportAnimationEnds()); // send exec to next frame
-          resolve({ ...animateProps, cwX, cwY });
+          resolve({ ...animateProps });
         },
       });
     });

@@ -1,25 +1,12 @@
 import FlowApp from './FlowApp';
-import BoardElement, {
-  BoardElementContainer,
-  IBoardElementPublicState,
-  IBoardElementPublicDepositState,
-} from './BoardElement';
+import BoardElement, { BoardElementContainer } from './BoardElement';
 import Memo from './Memo';
 import Group from './Group';
 import { IWorldCoords } from './Viewport';
 
 export type ShiftModeState = 'off' | 'hold' | 'lock';
 
-export interface IPublicBoardState {
-  [index: string]: IBoardElementPublicState; // TODO: remove [key: string] everywhere
-}
-
-export interface IPublicBoardDepositState {
-  [key: string]: IBoardElementPublicDepositState;
-}
-
 export default class Board {
-  public readonly state: IPublicBoardState = {}; // TODO: Map more optimized? https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map
   public isMemberDragging: boolean | string = false;
   public shiftModeState: ShiftModeState = 'off';
   public selection: BoardElement | null = null;
@@ -41,7 +28,6 @@ export default class Board {
   }
 
   public addElementToBoard<T extends BoardElement>(boardElement: T): T {
-    this.state[boardElement.id] = boardElement.state; // TODO: IMPORTANT - can we keep it as boardElement without .state?
     boardElement.zIndex = 1;
     this.app.viewport.addToViewport(boardElement.container);
     return boardElement;
@@ -52,15 +38,9 @@ export default class Board {
   public deleteBoardElement<T extends BoardElement>(boardElement: T, hard: boolean = false): boolean {
     if (boardElement instanceof Group) {
       boardElement.isTempGroup = false; // keep from rm on deselect
-
-      boardElement.getGroupMembers().forEach((boardElement) => {
-        if (boardElement && this.state[boardElement.id]) delete this.state[boardElement.id];
-      });
     }
 
     if (this.selection === boardElement) this.deselectElement();
-
-    if (this.state[boardElement.id]) delete this.state[boardElement.id];
 
     boardElement.delete(hard);
     return true;
@@ -180,14 +160,11 @@ export default class Board {
   }
 
   public getElementById(elementId: string): BoardElement | undefined {
-    const boardStateElement = this.state[elementId];
-    if (
-      Object.prototype.hasOwnProperty.call(boardStateElement, 'element') &&
-      boardStateElement.element instanceof BoardElement
-    ) {
-      return boardStateElement.element;
-    }
-    return undefined;
+    const displayObjects = this.app.viewport.instance.children.filter(
+      (el) => el instanceof BoardElementContainer && el.boardElement.id === elementId,
+    ) as BoardElementContainer[];
+
+    return displayObjects.length > 0 ? displayObjects[0].boardElement : undefined;
   }
 
   public getAllBoardElements() {

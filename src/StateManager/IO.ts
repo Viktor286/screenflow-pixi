@@ -34,23 +34,24 @@ export default class IO {
 
     // Start with default clean state
     // todo: do we want a generator function for this?
+
     const appState: IAppState = {
+      // @ts-ignore
       board: {},
+      // @ts-ignore
       viewport: {
         x: 0,
         y: 0,
-        cwX: 0,
-        cwY: 0,
         scale: 1,
       },
     };
 
     // copy viewport primitives
-    for (const key in appDepositState.viewport) {
-      if (Object.prototype.hasOwnProperty.call(appDepositState.viewport, key)) {
-        appState.viewport[key] = appDepositState.viewport[key];
-      }
-    }
+    // for (const key in appDepositState.viewport) {
+    //   if (Object.prototype.hasOwnProperty.call(appDepositState.viewport, key)) {
+    //     appState.viewport[key] = appDepositState.viewport[key];
+    //   }
+    // }
 
     // apply viewport operation (transforms)
     this.app.viewport.x = appDepositState.viewport.x;
@@ -58,25 +59,25 @@ export default class IO {
     this.app.viewport.scale = appDepositState.viewport.scale;
 
     // copy specific fields of board element
-    for (const key in appDepositState.board) {
-      if (Object.prototype.hasOwnProperty.call(appDepositState.board, key)) {
-        const el = appDepositState.board[key];
-
-        if (el.element) {
-          appState.board[key] = {
-            x: el.x,
-            y: el.y,
-            scale: el.s,
-            element: el.element,
-          };
-
-          // apply operation (transforms)
-          el.element.x = el.x;
-          el.element.y = el.y;
-          el.element.scale = el.s;
-        }
-      }
-    }
+    // for (const key in appDepositState.board) {
+    //   if (Object.prototype.hasOwnProperty.call(appDepositState.board, key)) {
+    //     const el = appDepositState.board[key];
+    //
+    //     if (el.element) {
+    //       appState.board[key] = {
+    //         x: el.x,
+    //         y: el.y,
+    //         scale: el.s,
+    //         element: el.element,
+    //       };
+    //
+    //       // apply operation (transforms)
+    //       el.element.x = el.x;
+    //       el.element.y = el.y;
+    //       el.element.scale = el.s;
+    //     }
+    //   }
+    // }
 
     // Validate and assign new state
     if (!StateManager.isGlobalStateValid(appState, this.app.stateManager.publicState)) {

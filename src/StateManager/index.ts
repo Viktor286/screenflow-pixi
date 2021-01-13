@@ -1,20 +1,20 @@
 import FlowApp from '../Interfaces/FlowApp';
-import { IPublicViewportState } from '../Interfaces/Viewport';
-import { IPublicBoardDepositState, IPublicBoardState } from '../Interfaces/Board';
 import IO from './IO';
 import Operations from './Operations';
 import { AsyncId } from './Operations/Async';
 import Actions from './Actions';
 import { StateUpdateRequest } from './StateUpdateRequest';
+import { IViewportDepositState, PublicViewportState } from './Representations/Viewport';
+import { IPublicBoardDepositState, PublicBoardState } from './Representations/Board';
 
 export interface IAppState {
-  [index: string]: IPublicViewportState | IPublicBoardState;
-  viewport: IPublicViewportState;
-  board: IPublicBoardState;
+  [index: string]: PublicViewportState | PublicBoardState;
+  viewport: PublicViewportState;
+  board: PublicBoardState;
 }
 
 export type StateScope = Extract<keyof IAppState, string>;
-export type StateSlice = Partial<IPublicViewportState> | Partial<IPublicBoardState>;
+export type StateSlice = Partial<PublicViewportState> | Partial<PublicBoardState>;
 export type StateValue = StateSlice[keyof StateSlice] | undefined;
 
 export interface IOpSettings {
@@ -33,7 +33,7 @@ interface StateUpdateMsg {
 }
 
 export interface IAppDepositState {
-  viewport: IPublicViewportState;
+  viewport: IViewportDepositState;
   board: IPublicBoardDepositState;
 }
 
@@ -43,8 +43,8 @@ export default class StateManager {
   public readonly io = new IO(this.app);
 
   public publicState: IAppState = {
-    viewport: this.operations.viewport.originState,
-    board: this.operations.board.originState,
+    viewport: new PublicViewportState(),
+    board: new PublicBoardState(),
   };
 
   public history: StateUpdateRequest[] = [];
@@ -104,19 +104,18 @@ export default class StateManager {
 
     if (stateUpdatesCnt > 0) {
       // Mutate state as scope's branch
-      const newState = Object.assign(prevScopedState, stateUpdates);
 
       // todo LOCATOR-1: locator might have its own api and be instance of the class (upd StateUpdateRequest)
       const _locator = locator.startsWith('/') ? locator.slice(1) : locator;
       const targeting = _locator.split('/');
 
       if (targeting[1]) {
-        const [domain, target] = targeting;
-        this.publicState[domain][target] = newState;
+        // const [domain, target] = targeting;
+        // this.publicState[domain][target] = newState;
       } else {
         const [domain] = targeting;
         // @ts-ignore
-        this.publicState[domain] = newState;
+        this.publicState[domain].merge(stateUpdates);
       }
 
       if (!opSettings.noHistory) {

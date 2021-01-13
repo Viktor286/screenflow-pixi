@@ -2,26 +2,8 @@ import * as PIXI from 'pixi.js';
 import FlowApp from './FlowApp';
 import { gsap } from 'gsap';
 import Group from './Group';
-import { IPoint, IGsapProps } from '../types/global';
+import { IGsapProps, IPoint } from '../types/global';
 import { IWorldCoords } from './Viewport';
-
-// TODO: IMPORTANT -- can we remove PublicState approach with PublicProps for setters
-//  and return state like results of .toString() for getState consumers?
-export interface IBoardElementPublicState {
-  x?: number;
-  y?: number;
-  scale?: number;
-  element?: BoardElement;
-}
-
-export interface IBoardElementPublicDepositState {
-  x: number;
-  y: number;
-  s: number;
-  w: number;
-  h: number;
-  element?: BoardElement;
-}
 
 export default class BoardElement {
   public isSelected = false;
@@ -33,13 +15,6 @@ export default class BoardElement {
   public selectionDrawing = new PIXI.Graphics();
   private dragPoint: IPoint = { x: 0, y: 0 };
   public readonly id: string;
-
-  public readonly state: IBoardElementPublicState = {
-    x: 0,
-    y: 0,
-    scale: 1,
-    element: this,
-  };
 
   [key: string]: any;
 
@@ -248,9 +223,9 @@ export default class BoardElement {
   };
 
   public animateBoardElement(
-    boardElementProps: IBoardElementPublicState,
+    boardElementProps: Partial<BoardElement>,
     gsapProps?: IGsapProps,
-  ): Promise<IBoardElementPublicState> {
+  ): Promise<Partial<BoardElement>> {
     this.isScaleFromCenter = true;
     return new Promise((resolve) => {
       gsap.to(this, {

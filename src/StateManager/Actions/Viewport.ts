@@ -93,14 +93,12 @@ export default class ViewportActions {
   }
 
   public amendViewportState() {
-    const { x, y, cwX, cwY, scale } = this.app.viewport;
+    const { x, y, scale } = this.app.viewport;
     this.app.stateManager.setState(
       'viewport',
       {
         x,
         y,
-        cwX,
-        cwY,
         scale,
       },
       { noOp: true },

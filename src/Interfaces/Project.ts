@@ -121,7 +121,7 @@ export default class Project {
           this.app.board.addElementToBoard(memo);
 
           // attach element ref to state
-          appDepositState.board[memoId].element = memo;
+          // appDepositState.board[memoId].element = memo;
 
           // todo: we need to finalize this mount API with localstorage system
           //   1. Project: save .zip project to localstorage
