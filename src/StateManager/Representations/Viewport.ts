@@ -1,3 +1,5 @@
+import { StateUpdateRequest } from '../StateUpdateRequest';
+
 export interface IViewportDepositState {
   scale: number;
   x: number;
@@ -17,13 +19,13 @@ export class PublicViewportState {
     this.y = 0;
   }
 
-  merge(stateSlice: Partial<PublicViewportState>) {
-    for (const property in stateSlice) {
+  update(stateUpdate: StateUpdateRequest) {
+    for (const property in stateUpdate.updated) {
       if (
-        Object.prototype.hasOwnProperty.call(stateSlice, property) &&
+        Object.prototype.hasOwnProperty.call(stateUpdate.updated, property) &&
         Object.prototype.hasOwnProperty.call(this, property)
       ) {
-        this[property] = stateSlice[property];
+        this[property] = stateUpdate.updated[property];
       }
     }
   }

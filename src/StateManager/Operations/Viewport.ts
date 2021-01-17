@@ -1,8 +1,8 @@
 import FlowApp from '../../Interfaces/FlowApp';
 import Viewport from '../../Interfaces/Viewport';
-import { AsyncId } from './Async';
 import { StateUpdateRequest } from '../StateUpdateRequest';
 import { PublicViewportState } from '../Representations/Viewport';
+import { AsyncId } from '../index';
 
 export default class ViewportOperations {
   constructor(public app: FlowApp) {}

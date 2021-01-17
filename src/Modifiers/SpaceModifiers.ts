@@ -18,21 +18,18 @@ export class SpaceModifiers {
 
     const elements = app.board.getAllMemos();
 
-    for (let eId in elements) {
-      if (Object.prototype.hasOwnProperty.call(elements, eId)) {
-        const x = (idx % colLimit) * cellWidth + cellWidth / 2;
-        if (col >= colLimit) {
-          col = 0;
-          row++;
-        }
-        col++;
-        const y = row * cellHeight + cellHeight / 2;
-
-        // Apply transforms
-        app.stateManager.setState(`board/${eId}`, { x, y, scale });
-
-        idx++;
+    elements.forEach((memo) => {
+      const x = (idx % colLimit) * cellWidth + cellWidth / 2;
+      if (col >= colLimit) {
+        col = 0;
+        row++;
       }
-    }
+      col++;
+      const y = row * cellHeight + cellHeight / 2;
+      // Apply transforms
+      app.stateManager.setState(`board/${memo.id}`, { x, y, scale });
+
+      idx++;
+    });
   }
 }

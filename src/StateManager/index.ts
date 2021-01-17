@@ -1,21 +1,35 @@
 import FlowApp from '../Interfaces/FlowApp';
 import IO from './IO';
-import Operations from './Operations';
-import { AsyncId } from './Operations/Async';
-import Actions from './Actions';
-import { StateUpdateRequest } from './StateUpdateRequest';
+import { StateLocation, StateUpdateRequest } from './StateUpdateRequest';
 import { IViewportDepositState, PublicViewportState } from './Representations/Viewport';
 import { IPublicBoardDepositState, PublicBoardState } from './Representations/Board';
+import ViewportOperations from './Operations/Viewport';
+import BoardOperations from './Operations/Board';
+import ViewportActions from './Actions/Viewport';
+import BoardActions from './Actions/Board';
 
-export interface IAppState {
+export interface IPublicState {
   [index: string]: PublicViewportState | PublicBoardState;
   viewport: PublicViewportState;
   board: PublicBoardState;
 }
 
-export type StateScope = Extract<keyof IAppState, string>;
+export interface IOperations {
+  [index: string]: ViewportOperations | BoardOperations;
+  viewport: ViewportOperations;
+  board: BoardOperations;
+}
+
+export interface IActions {
+  [index: string]: ViewportActions | BoardActions;
+  viewport: ViewportActions;
+  board: BoardActions;
+}
+
+export type StateScope = Extract<keyof IPublicState, string>;
 export type StateSlice = Partial<PublicViewportState> | Partial<PublicBoardState>;
 export type StateValue = StateSlice[keyof StateSlice] | undefined;
+export type StateProperty = Extract<keyof StateSlice, string>;
 
 export interface IOpSettings {
   noOp?: boolean;
@@ -24,6 +38,7 @@ export interface IOpSettings {
   asyncId?: AsyncId;
 }
 
+export type AsyncId = string;
 type AsyncOperationType = 'animation' | 'animated' | undefined; // ex: | 'network'
 
 interface StateUpdateMsg {
@@ -38,15 +53,40 @@ export interface IAppDepositState {
 }
 
 export default class StateManager {
-  public readonly actions = new Actions(this.app);
-  public readonly operations = new Operations(this.app);
-  public readonly io = new IO(this.app);
-
-  public publicState: IAppState = {
+  /**
+   * Public State Representation
+   * The "scopes" classes of the states represent their own stores and controllers for store data
+   * The Operations will delegate executions to "scopes"
+   * */
+  public publicState: IPublicState = {
     viewport: new PublicViewportState(),
     board: new PublicBoardState(),
   };
 
+  /**
+   * State Update Operations and their Actions
+   * The "scopes" of the states represent their own store and controllers
+   * */
+  public operations: IOperations = {
+    viewport: new ViewportOperations(this.app),
+    board: new BoardOperations(this.app),
+  };
+
+  public actions: IActions = {
+    viewport: new ViewportActions(this.app),
+    board: new BoardActions(this.app),
+  };
+
+  public asyncStore: Map<AsyncId, StateUpdateRequest> = new Map();
+
+  /**
+   * Import/Export handlers of state
+   * */
+  public readonly io = new IO(this.app);
+
+  /**
+   * State History
+   * */
   public history: StateUpdateRequest[] = [];
   public historyLevel = 50;
 
@@ -68,7 +108,9 @@ export default class StateManager {
         case 'animation':
           // For "animation" all props would be GROUPED (handled simultaneously by GSAP)
           // without any state data update and stop processing any other fields to avoid other changes
-          const asyncId = this.operations.execAnimation(stateUpdate);
+          const asyncId: AsyncId = Math.random().toString(32).slice(2);
+          this.operations[stateUpdate.location.scope].animate(stateUpdate, asyncId);
+          this.addAsync(asyncId, stateUpdate);
 
           if (asyncId) {
             return {
@@ -83,40 +125,30 @@ export default class StateManager {
           };
 
         case 'animated':
-          if (stateUpdate.opSettings.asyncId) this.operations.async.remove(stateUpdate.opSettings.asyncId);
+          if (stateUpdate.opSettings.asyncId) this.removeAsync(stateUpdate.opSettings.asyncId);
       }
     }
 
-    // Sync change
+    // Execute operations
     const prevScopedState = this.getState(stateUpdate.locator);
-    const stateUpdates: StateSlice = {};
-    let stateUpdatesCnt: number = 0;
 
     for (const property in stateUpdate.slice) {
       if (Object.prototype.hasOwnProperty.call(stateUpdate.slice, property)) {
         const updateValue: StateValue = stateUpdate.slice[property];
         if (updateValue !== undefined && updateValue !== prevScopedState[property]) {
-          stateUpdates[property] = this.operations.execValue(property, updateValue, stateUpdate);
-          stateUpdatesCnt += 1;
+          const opResultValue = stateUpdate.opSettings.noOp
+            ? updateValue
+            : this.operations[stateUpdate.location.scope].update(property, updateValue, stateUpdate);
+
+          stateUpdate.addToUpdated(property, opResultValue);
         }
       }
     }
 
-    if (stateUpdatesCnt > 0) {
-      // Mutate state as scope's branch
-
-      // todo LOCATOR-1: locator might have its own api and be instance of the class (upd StateUpdateRequest)
-      const _locator = locator.startsWith('/') ? locator.slice(1) : locator;
-      const targeting = _locator.split('/');
-
-      if (targeting[1]) {
-        // const [domain, target] = targeting;
-        // this.publicState[domain][target] = newState;
-      } else {
-        const [domain] = targeting;
-        // @ts-ignore
-        this.publicState[domain].merge(stateUpdates);
-      }
+    // Update State Representation
+    if (stateUpdate.updatedCnt > 0) {
+      // Delegate update to /Representations/Module e.g. "/Representations/Board"
+      this.publicState[stateUpdate.location.scope].update(stateUpdate);
 
       if (!opSettings.noHistory) {
         this.saveToHistory(stateUpdate);
@@ -130,17 +162,21 @@ export default class StateManager {
 
   public getState(locator?: StateScope): StateSlice {
     if (locator) {
-      // todo LOCATOR-1: locator might have its own api and be instance of the class (upd StateUpdateRequest)
-      const _locator = locator.startsWith('/') ? locator.slice(1) : locator;
-      const targeting = _locator.split('/');
-
-      if (targeting[1]) {
-        const [domain, target] = targeting;
-        return Object.assign({}, this.publicState[domain][target]);
+      const stateLocation = new StateLocation(locator);
+      if (stateLocation.levels === 2) {
+        return Object.assign({}, this.publicState[stateLocation.scope][stateLocation.target]);
       }
-      return Object.assign({}, this.publicState[locator]);
+      return Object.assign({}, this.publicState[stateLocation.scope]);
     }
     return Object.assign({}, this.publicState);
+  }
+
+  public addAsync(asyncId: AsyncId, stateUpdate: StateUpdateRequest) {
+    this.asyncStore.set(asyncId, stateUpdate);
+  }
+
+  public removeAsync(asyncId: AsyncId) {
+    this.asyncStore.delete(asyncId);
   }
 
   public saveToHistory(stateUpdate: StateUpdateRequest) {
@@ -157,7 +193,7 @@ export default class StateManager {
     return typeof stateItem === 'object' || Array.isArray(stateItem);
   }
 
-  static isGlobalStateValid(state: object, stateOrigin: IAppState) {
+  static isGlobalStateValid(state: object, stateOrigin: IPublicState) {
     if (typeof state === 'object' && !Array.isArray(state)) {
       for (const scope in stateOrigin) {
         if (Object.hasOwnProperty.call(stateOrigin, scope)) {

@@ -1,5 +1,5 @@
 import clonedeep from 'lodash.clonedeep';
-import StateManager, { IAppDepositState, IAppState, StateScope } from './index';
+import StateManager, { IAppDepositState, IPublicState, StateScope } from './index';
 import FlowApp from '../Interfaces/FlowApp';
 import { StateUpdateRequest } from './StateUpdateRequest';
 
@@ -35,7 +35,7 @@ export default class IO {
     // Start with default clean state
     // todo: do we want a generator function for this?
 
-    const appState: IAppState = {
+    const appState: IPublicState = {
       // @ts-ignore
       board: {},
       // @ts-ignore
