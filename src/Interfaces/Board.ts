@@ -6,10 +6,19 @@ import { IWorldCoords } from './Viewport';
 
 export type ShiftModeState = 'off' | 'hold' | 'lock';
 
+interface ISelectionChangeLog {
+  newSelection: null | BoardElement;
+  prevSelection: null | BoardElement;
+  addedToGroup: BoardElement[];
+  removedFromGroup: BoardElement[];
+  groupCreated: undefined | Group;
+  groupRemoved: undefined | Group;
+}
+
 export default class Board {
   public isMemberDragging: boolean | string = false;
   public shiftModeState: ShiftModeState = 'off';
-  public selection: BoardElement | null = null;
+  public selectedBoardElement: BoardElement | null = null;
   public isMultiSelect: boolean = false;
 
   constructor(public app: FlowApp) {
@@ -40,7 +49,7 @@ export default class Board {
       boardElement.isTempGroup = false; // keep from rm on deselect
     }
 
-    if (this.selection === boardElement) this.deselectElement();
+    if (this.selectedBoardElement === boardElement) this.setDeselection();
 
     boardElement.delete(hard);
     return true;
@@ -89,74 +98,144 @@ export default class Board {
   }
 
   private setSelection(boardElement: BoardElement) {
-    this.deselectElement();
-    this.selection = boardElement;
-    this.selection.onSelect();
+    this.setDeselection();
+    this.selectedBoardElement = boardElement;
+    this.selectedBoardElement.onSelect();
     this.app.webUi.updateSelectedMode();
   }
 
-  public selectElement(boardElement: BoardElement) {
-    if (this.selection) {
-      if (boardElement.id === this.selection.id) {
-        return;
+  private setDeselection() {
+    if (this.selectedBoardElement) {
+      this.selectedBoardElement.onDeselect();
+      this.selectedBoardElement = null;
+      this.app.webUi.updateSelectedMode();
+    }
+  }
+
+  private static createSelectionChangeLog(): ISelectionChangeLog {
+    return {
+      newSelection: null,
+      prevSelection: null,
+      addedToGroup: [],
+      removedFromGroup: [],
+      groupCreated: undefined,
+      groupRemoved: undefined,
+    };
+  }
+
+  public selectElement(boardElement: BoardElement): ISelectionChangeLog {
+    const selectionChangeLog = Board.createSelectionChangeLog();
+
+    if (this.selectedBoardElement) {
+      if (boardElement.id === this.selectedBoardElement.id) {
+        // CASE: the already selected element selected
+        return selectionChangeLog;
       }
 
-      if (this.selection instanceof Group) {
+      if (this.selectedBoardElement instanceof Group) {
         if (this.isMultiSelect) {
-          if (!this.selection.isElementInGroup(boardElement)) {
-            this.selection.addToGroup(boardElement);
+          if (!this.selectedBoardElement.isElementInGroup(boardElement)) {
+            // CASE: while some group already selected the new selected element adds to that group
+            this.selectedBoardElement.addToGroup(boardElement);
+            selectionChangeLog.addedToGroup.push(boardElement);
           } else {
             if (!this.isMemberDragging) {
-              const group = this.selection.removeFromGroup(boardElement);
+              // CASE: while some group already selected the selected group member element removes from that group
+              const group = this.selectedBoardElement.removeFromGroup(boardElement);
+              selectionChangeLog.removedFromGroup.push(boardElement);
 
+              // CASE: Remove the selected group if there is no more than one member left
               if (group) {
                 const groupMembers = group.getGroupMembers();
                 if (groupMembers && groupMembers.length === 1) {
                   const explodedGroup = group.explodeGroup();
-                  this.deselectElement();
-                  this.selectElement(explodedGroup.boardElements[0]);
+                  this.setSelection(explodedGroup.boardElements[0]);
+
+                  selectionChangeLog.removedFromGroup.push(explodedGroup.boardElements[0]);
+                  selectionChangeLog.groupRemoved = group;
+
                   this.deleteBoardElement(group);
                 }
               }
             }
           }
         } else {
-          if (!this.selection.isElementInGroup(boardElement)) {
+          if (!this.selectedBoardElement.isElementInGroup(boardElement)) {
+            // CASE: while multiselect off and previous selection is a group, select new element and delete the group
+            const group = this.selectedBoardElement;
+
+            const explodedGroup = this.selectedBoardElement.explodeGroup();
+
+            selectionChangeLog.removedFromGroup.push(...explodedGroup.boardElements);
+            selectionChangeLog.groupRemoved = group;
+
+            selectionChangeLog.prevSelection = group;
             this.setSelection(boardElement);
+
+            this.deleteBoardElement(group);
           }
         }
       } else {
-        // Prev Selection was not a group^
+        // CASE: while prev selection was not a group, it should be single boardElement
         if (this.isMultiSelect) {
+          // CASE: if multiselect on, create new temp group for previous and new boardElement
+
           const group = this.addElementToBoard(new Group(this.app));
-          group.addToGroup(this.selection);
+          group.addToGroup(this.selectedBoardElement);
           group.addToGroup(boardElement);
+
+          selectionChangeLog.addedToGroup.push(this.selectedBoardElement);
+          selectionChangeLog.addedToGroup.push(boardElement);
+
+          selectionChangeLog.groupCreated = group;
+
+          selectionChangeLog.prevSelection = this.selectedBoardElement;
           this.setSelection(group);
         } else {
+          selectionChangeLog.prevSelection = this.selectedBoardElement;
           this.setSelection(boardElement);
         }
       }
     } else {
+      // CASE: if multiselect off, just select new boardElement
       this.setSelection(boardElement);
     }
+
+    return { ...selectionChangeLog, newSelection: this.selectedBoardElement };
   }
 
-  public deselectElement() {
-    if (this.selection) {
-      this.selection.onDeselect();
-      this.selection = null;
-      this.app.webUi.updateSelectedMode();
+  public deselectElement(): ISelectionChangeLog {
+    const selectionChangeLog = Board.createSelectionChangeLog();
+
+    if (this.selectedBoardElement) {
+      if (this.selectedBoardElement instanceof Group) {
+        const group = this.selectedBoardElement;
+        const explodedGroup = this.selectedBoardElement.explodeGroup();
+
+        selectionChangeLog.removedFromGroup.push(...explodedGroup.boardElements);
+        selectionChangeLog.groupRemoved = group;
+
+        this.deleteBoardElement(group);
+      }
+
+      if (this.selectedBoardElement) {
+        selectionChangeLog.prevSelection = this.selectedBoardElement;
+      }
+
+      this.setDeselection();
     }
+
+    return selectionChangeLog;
   }
 
   public updateSelectionGraphics() {
-    if (this.selection) {
-      this.selection.drawSelection();
+    if (this.selectedBoardElement) {
+      this.selectedBoardElement.drawSelection();
     }
   }
 
   public getSelectedElement(): BoardElement | null {
-    return this.selection;
+    return this.selectedBoardElement;
   }
 
   public getElementById(elementId: string): BoardElement | undefined {
@@ -168,6 +247,8 @@ export default class Board {
   }
 
   public getAllBoardElements() {
+    // API design: Should we get all elements in a flat way, including inner group members?
+
     const displayObjects = this.app.viewport.instance.children.filter(
       (el) => el instanceof BoardElementContainer,
     ) as BoardElementContainer[];

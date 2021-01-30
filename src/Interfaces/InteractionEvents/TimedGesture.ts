@@ -150,7 +150,7 @@ export default class TimedGesture {
     if (!this.app.board.isMemberDragging) {
       if (e.isBoardElementHit instanceof BoardElement) {
         this.app.stateManager.actions.board.selectElement(e.isBoardElementHit);
-        console.log(`pressUpImmediate Memo clicked "${e.isBoardElementHit.id}" `, e.isBoardElementHit);
+        // console.log(`pressUpImmediate Memo clicked "${e.isBoardElementHit.id}" `, e.isBoardElementHit);
       } else {
         if (!this.app.viewport.slideControls.isSliding) {
           this.app.stateManager.actions.board.deselectElements();

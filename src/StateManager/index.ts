@@ -182,7 +182,7 @@ export default class StateManager {
   public saveToHistory(stateUpdate: StateUpdateRequest) {
     console.log(`[debug] history: `, stateUpdate);
     this.enqueueHistory(stateUpdate);
-    console.log(`[debug] state: `, this.getState());
+    // console.log(`[debug] state: `, this.getState());
   }
 
   private enqueueHistory(stateUpdate: StateUpdateRequest) {

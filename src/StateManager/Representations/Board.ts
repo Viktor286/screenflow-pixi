@@ -32,6 +32,8 @@ export class PublicBoardState {
     (() => {})();
   }
 
+  // TODO: figure out group updates
+
   update(stateUpdate: StateUpdateRequest) {
     if (!this[stateUpdate.location.target]) {
       this[stateUpdate.location.target] = new PublicBoardElement({ x: 0, y: 0, scale: 1 });

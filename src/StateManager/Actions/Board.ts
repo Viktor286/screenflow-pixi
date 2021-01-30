@@ -13,16 +13,22 @@ export default class BoardActions {
   public selectElementById(id: string) {
     const el = this.app.board.getElementById(id);
     if (el instanceof BoardElement) {
-      this.app.board.selectElement(el);
+      const selected = this.app.board.selectElement(el);
+      console.log('selected', selected);
+      // TODO: Update state based on selected: ISelectionChangeLog
     }
   }
 
   public selectElement(boardElement: BoardElement) {
-    this.app.board.selectElement(boardElement);
+    const selected = this.app.board.selectElement(boardElement);
+    console.log('selected', selected);
+    // TODO: Update state based on selected: ISelectionChangeLog
   }
 
   public deselectElements() {
-    this.app.board.deselectElement();
+    const deselected = this.app.board.deselectElement();
+    console.log('deselected', deselected);
+    // TODO: Update state based on selected: ISelectionChangeLog
   }
 
   public setShiftModeState(state: ShiftModeState = 'off') {
@@ -38,6 +44,7 @@ export default class BoardActions {
 
   public startDragElement(boardElement: BoardElement, startPoint: IWorldCoords) {
     this.app.board.startDragElement(boardElement, startPoint);
+    // no need to update state on startDrag yet
   }
 
   public stopDragElement(boardElement: BoardElement) {
