@@ -14,21 +14,21 @@ export default class BoardActions {
     const el = this.app.board.getElementById(id);
     if (el instanceof BoardElement) {
       const selected = this.app.board.selectElement(el);
-      console.log('selected', selected);
-      // TODO: Update state based on selected: ISelectionChangeLog
+      console.log('selected', selected, selected.tempGroupCreated);
+      // TODO: Update state based on selected: SelectionChangeLog
     }
   }
 
   public selectElement(boardElement: BoardElement) {
     const selected = this.app.board.selectElement(boardElement);
     console.log('selected', selected);
-    // TODO: Update state based on selected: ISelectionChangeLog
+    // TODO: Update state based on selected: SelectionChangeLog
   }
 
   public deselectElements() {
     const deselected = this.app.board.deselectElement();
     console.log('deselected', deselected);
-    // TODO: Update state based on selected: ISelectionChangeLog
+    // TODO: Update state based on selected: SelectionChangeLog
   }
 
   public setShiftModeState(state: ShiftModeState = 'off') {

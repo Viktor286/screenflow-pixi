@@ -28,8 +28,8 @@ export interface IActions {
 
 export type StateScope = Extract<keyof IPublicState, string>;
 export type StateSlice = Partial<PublicViewportState> | Partial<PublicBoardState>;
-export type StateValue = StateSlice[keyof StateSlice] | undefined;
 export type StateProperty = Extract<keyof StateSlice, string>;
+export type StateValue = StateSlice[keyof StateSlice] | undefined;
 
 export interface IOpSettings {
   noOp?: boolean;
