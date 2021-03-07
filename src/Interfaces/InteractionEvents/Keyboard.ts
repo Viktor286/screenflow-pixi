@@ -24,25 +24,25 @@ export default class Keyboard {
   shiftDown = () => {
     if (this.holdTimer === null) {
       this.holdTimer = setTimeout(() => {
-        this.app.board.setShiftModeState('hold');
+        this.app.webUi.setShiftModeState('hold');
         this.firstTimeHold = true;
       }, 100);
     }
   };
 
   shiftUp = () => {
-    if (this.app.board.shiftModeState === 'lock') {
-      this.app.board.setShiftModeState('off');
+    if (this.app.webUi.shiftModeState === 'lock') {
+      this.app.webUi.setShiftModeState('off');
       if (this.holdTimer) this.resetHoldTimer();
       return;
     }
 
-    if (this.app.board.shiftModeState === 'off') {
-      this.app.board.setShiftModeState('lock');
+    if (this.app.webUi.shiftModeState === 'off') {
+      this.app.webUi.setShiftModeState('lock');
     }
 
-    if (this.app.board.shiftModeState === 'hold') {
-      this.app.board.setShiftModeState('off');
+    if (this.app.webUi.shiftModeState === 'hold') {
+      this.app.webUi.setShiftModeState('off');
     }
 
     if (this.holdTimer) this.resetHoldTimer();

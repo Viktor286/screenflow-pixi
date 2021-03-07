@@ -25,7 +25,7 @@ export async function basicGroupWithScaling() {
   app.stateManager.actions.viewport.fitToBoard();
   await wait(700 * stepDelayFactor);
 
-  const selected = app.board.getSelectedElement();
+  const selected = app.board.selection.getSelectedElement();
   if (selected) app.stateManager.actions.board.scaleElementById(selected.id, 0.8);
   await wait(700 * stepDelayFactor);
 

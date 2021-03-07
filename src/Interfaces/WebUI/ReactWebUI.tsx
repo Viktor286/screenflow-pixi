@@ -27,7 +27,7 @@ class ReactWebUI extends Component {
   }
 
   public toggleShiftMode() {
-    app.board.setShiftModeState(this.state.isShiftActive ? 'off' : 'lock');
+    app.webUi.setShiftModeState(this.state.isShiftActive ? 'off' : 'lock');
   }
 
   theme(): buttonsTheme {

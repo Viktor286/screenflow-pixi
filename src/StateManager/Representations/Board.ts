@@ -32,7 +32,7 @@ export class PublicBoardState {
     (() => {})();
   }
 
-  // TODO: figure out group updates
+  // TODO: figure out group updates. (More info needed)
 
   update(stateUpdate: StateUpdateRequest) {
     if (!this[stateUpdate.location.target]) {

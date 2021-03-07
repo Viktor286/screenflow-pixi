@@ -96,7 +96,7 @@ export default class TimedGesture {
     const gestureEvent = this.getGestureEvent(e);
 
     if (this.app.board.isMemberDragging) {
-      const boardElement = this.app.board.getSelectedElement();
+      const boardElement = this.app.board.selection.getSelectedElement();
       if (boardElement && this.wasBoardElementMovedFromStartDragPoint(boardElement, gestureEvent)) {
         this.app.stateManager.actions.board.stopDragElement(boardElement);
         this.awaiting = false;
@@ -150,7 +150,7 @@ export default class TimedGesture {
     if (!this.app.board.isMemberDragging) {
       if (e.isBoardElementHit instanceof BoardElement) {
         this.app.stateManager.actions.board.selectElement(e.isBoardElementHit);
-        // console.log(`pressUpImmediate Memo clicked "${e.isBoardElementHit.id}" `, e.isBoardElementHit);
+        console.log(`pressUpImmediate Memo clicked "${e.isBoardElementHit.id}" `, e.isBoardElementHit);
       } else {
         if (!this.app.viewport.slideControls.isSliding) {
           this.app.stateManager.actions.board.deselectElements();

@@ -10,11 +10,27 @@ export interface HTMLInputEvent extends Event {
 }
 
 export default class WebUI {
+  public shiftModeState: ShiftModeState = 'off';
+
   reactWebUI: Component = reactInitializer(this.app);
 
   constructor(public app: FlowApp) {
     this.setupGlobalDragImage();
     this.setupGlobalPasteImage();
+  }
+
+  public setShiftModeState(state: ShiftModeState = 'off') {
+    this.shiftModeState = state;
+
+    if (state === 'hold' || state === 'lock') {
+      this.app.board.selection.isMultiSelect = true;
+    }
+
+    if (state === 'off') {
+      this.app.board.selection.isMultiSelect = false;
+    }
+
+    this.app.webUi.updateShiftMode(this.shiftModeState);
   }
 
   public updateZoomBtn() {
@@ -25,7 +41,7 @@ export default class WebUI {
 
   public updateSelectedMode() {
     this.reactWebUI.setState({
-      isMemoSelected: !!this.app.board.selectedBoardElement,
+      isMemoSelected: !!this.app.board.selection.selectedElement,
     });
   }
 
