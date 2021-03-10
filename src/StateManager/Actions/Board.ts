@@ -8,32 +8,32 @@ export default class BoardActions {
   constructor(public app: FlowApp) {}
 
   public createNewMemoOnBoard() {
-    // todo: UP NEXT: pipe board actions through stateManager^
+    // todo: UP NEXT #2: pipe board actions through stateManager^
   }
 
   public selectElementById(id: string) {
     const el = this.app.board.getElementById(id);
     if (el instanceof BoardElement) {
       const selected = this.app.board.selection.selectElement(el);
-      console.log('selected', selected, selected.tempGroupCreated);
-      // TODO: Update state based on selected: SelectionChangeLog
+      console.log('selected', selected, selected.createdTempGroup);
+      // TODO: Update state based on selected: SelectionState
     }
   }
 
   public selectElement(boardElement: BoardElement) {
-    const selectionChangeLog = this.app.board.selection.selectElement(boardElement);
-    console.log('selected', selectionChangeLog);
-    // TODO: Update state based on selected: SelectionChangeLog
+    const selectionState = this.app.board.selection.selectElement(boardElement);
+    console.log('selected', selectionState);
+    // TODO: Update state based on selected: SelectionState
 
     // Single update
     // Note: No update for selection yet
-    // newSelection: Board['selectedBoardElement'] = null;
+    // selectedElement: Board['selectedBoardElement'] = null;
     // prevSelection: Board['selectedBoardElement'] = null;
     // this.app.stateManager.setState(`/board/${id}`, { selected: true }, {});
 
-    // tempGroupCreated: undefined | Group = undefined;
+    // createdTempGroup: undefined | Group = undefined;
     // this.app.stateManager.setState(`/board/create:${id}`, { x, y, scale, children }, { noOp: true; } );
-    // tempGroupRemoved: undefined | Group = undefined;
+    // deletedTempGroup: undefined | Group = undefined;
     // this.app.stateManager.setState(`/board/delete:${id}`, {}, { noOp: true; } );
 
     // Multiple update
@@ -43,16 +43,15 @@ export default class BoardActions {
     // this.app.stateManager.setState(`/board/${id}`, { x, y, scale, parent }, { noOp: true; } );
 
     const {
-      newSelection,
-      // prevSelection,
+      selectedElement,
       addedToTempGroup,
       removedFromTempGroup,
-      tempGroupCreated,
-      tempGroupRemoved,
-    } = selectionChangeLog;
+      createdTempGroup,
+      deletedTempGroup,
+    } = selectionState;
 
-    if (tempGroupCreated && addedToTempGroup && newSelection instanceof Group) {
-      const { id, x, y, scale } = newSelection;
+    if (createdTempGroup && addedToTempGroup && selectedElement instanceof Group) {
+      const { id, x, y, scale } = selectedElement;
       this.app.stateManager.setState(
         `/board/create:${id}`,
         { x, y, scale, children: addedToTempGroup.map((el) => el.id) },
@@ -60,24 +59,24 @@ export default class BoardActions {
       );
     }
 
-    if (tempGroupRemoved && addedToTempGroup && newSelection instanceof Group) {
-      const { id } = newSelection;
+    if (deletedTempGroup && addedToTempGroup && selectedElement instanceof Group) {
+      const { id } = selectedElement;
       this.app.stateManager.setState(`/board/delete:${id}`, {}, { noOp: true });
     }
 
-    // Add or remove group members for both cases: tempGroupCreated or just added to group
-    if (addedToTempGroup && newSelection instanceof Group) {
+    // Add or remove group members for both cases: createdTempGroup or just added to group
+    if (addedToTempGroup && selectedElement instanceof Group) {
       addedToTempGroup.forEach((el) => {
         const { id, x, y, scale } = el;
         this.app.stateManager.setState(
           `/board/${id}`,
-          { x, y, scale, parent: newSelection.id },
+          { x, y, scale, parent: selectedElement.id },
           { noOp: true, noHistory: true },
         );
       });
     }
 
-    if (removedFromTempGroup && newSelection instanceof Group) {
+    if (removedFromTempGroup && selectedElement instanceof Group) {
       addedToTempGroup.forEach((el) => {
         const { id, x, y, scale } = el;
         this.app.stateManager.setState(
@@ -92,7 +91,7 @@ export default class BoardActions {
   public deselectElements() {
     const deselected = this.app.board.selection.deselectElement();
     console.log('deselected', deselected);
-    // TODO: Update state based on selected: SelectionChangeLog
+    // TODO: Update state based on selected: SelectionState
   }
 
   public setShiftModeState(state: ShiftModeState = 'off') {

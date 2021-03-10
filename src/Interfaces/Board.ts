@@ -17,7 +17,7 @@ export default class Board {
     }
   }
 
-  // TODO: this is currently a shortcut method, we need to add elements properly through the actions
+  // TODO: this is currently a temp shortcut method, we need to add elements properly through the actions
   public addNewMemosToBoardFromTextures(textures?: PIXI.Texture[]) {
     if (textures && textures.length > 0) {
       textures.forEach((texture) => {
@@ -36,11 +36,10 @@ export default class Board {
   //   probably this need two variations: soft/hard deletion
   public deleteBoardElement<T extends BoardElement>(boardElement: T, hard: boolean = false): boolean {
     if (boardElement instanceof Group) {
-      boardElement.isTempGroup = false; // keep from rm on deselect
+      boardElement.isTempGroup = false; // keep from rm on deselect. TODO: can we do it some "proper" way?
     }
 
-    if (this.selection.selectedElement === boardElement) this.selection.setDeselection(); // todo: this points at incorrect binds with "selection"
-
+    this.selection.deselectElement();
     boardElement.delete(hard);
     return true;
   }

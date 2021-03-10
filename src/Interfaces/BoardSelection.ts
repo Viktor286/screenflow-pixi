@@ -3,156 +3,187 @@ import Group from './Group';
 import Board from './Board';
 import Memo from './Memo';
 
-export class ElementSelection {
-  public isMultiSelect: boolean = false;
-  public selectedElement: BoardElement | null = null;
+class MultiSelectionAsTempGroup {
+  constructor(public board: Board, public selection: ElementSelection) {}
 
-  newSelection: ElementSelection['selectedElement'] = null;
-  prevSelection: ElementSelection['selectedElement'] = null;
   addedToTempGroup: BoardElement[] = [];
   removedFromTempGroup: BoardElement[] = [];
-  tempGroupCreated: undefined | Group = undefined;
-  tempGroupRemoved: undefined | Group = undefined;
+  createdTempGroup: undefined | Group = undefined;
+  deletedTempGroup: undefined | Group = undefined;
 
-  constructor(public board: Board) {}
-
-  public resetLog(currentSelection: ElementSelection['selectedElement']): void {
-    this.newSelection = null;
-    this.prevSelection = currentSelection;
-    this.tempGroupCreated = undefined;
-    this.tempGroupRemoved = undefined;
+  public resetReport(): void {
+    this.createdTempGroup = undefined;
+    this.deletedTempGroup = undefined;
     this.addedToTempGroup = [];
     this.removedFromTempGroup = [];
   }
 
-  public export(currentSelection: ElementSelection['selectedElement']): ElementSelection {
-    this.newSelection = currentSelection;
-    return this;
+  public getReport() {
+    return {
+      addedToTempGroup: this.addedToTempGroup,
+      removedFromTempGroup: this.removedFromTempGroup,
+      createdTempGroup: this.createdTempGroup,
+      deletedTempGroup: this.deletedTempGroup,
+    };
   }
+
+  public delete() {
+    if (this.selection.selectedElement instanceof Group && this.selection.selectedElement.isTempGroup) {
+      const group = this.selection.selectedElement;
+      const explodedGroup = this.selection.selectedElement.explodeGroup();
+      this.removedFromTempGroup.push(...explodedGroup.boardElements);
+      this.deletedTempGroup = group;
+      this.board.deleteBoardElement(group);
+    }
+  }
+
+  public create(boardElements: BoardElement[]) {
+    const group = this.board.addElementToBoard(new Group(this.board.app));
+
+    boardElements.forEach((boardElement) => {
+      if (boardElement instanceof Memo) {
+        group.addToGroup(boardElement);
+        this.addedToTempGroup.push(boardElement);
+      }
+    });
+
+    this.createdTempGroup = group;
+    return group;
+  }
+
+  public add(boardElement: BoardElement) {
+    if (this.selection.selectedElement instanceof Group && this.selection.selectedElement.isTempGroup) {
+      this.selection.selectedElement.addToGroup(boardElement);
+      this.addedToTempGroup.push(boardElement);
+    }
+  }
+
+  public remove(boardElement: BoardElement) {
+    if (this.selection.selectedElement instanceof Group && this.selection.selectedElement.isTempGroup) {
+      this.selection.selectedElement.removeFromGroup(boardElement);
+      this.removedFromTempGroup.push(boardElement);
+    }
+  }
+}
+
+interface SelectionReport {
+  addedToTempGroup: MultiSelectionAsTempGroup['addedToTempGroup'];
+  removedFromTempGroup: MultiSelectionAsTempGroup['removedFromTempGroup'];
+  createdTempGroup: MultiSelectionAsTempGroup['createdTempGroup'];
+  deletedTempGroup: MultiSelectionAsTempGroup['deletedTempGroup'];
+  selectedElement: ElementSelection['selectedElement'];
+}
+
+export class ElementSelection {
+  public isMultiSelect: boolean = false;
+  public selectedElement: BoardElement | null = null;
+  public multiselection: MultiSelectionAsTempGroup = new MultiSelectionAsTempGroup(this.board, this);
+
+  constructor(public board: Board) {}
 
   public setSelection(boardElement: BoardElement) {
     if (this.selectedElement?.id === boardElement.id) {
       return;
     }
 
-    this.setDeselection();
+    this.setDeselection({ webUiUpdate: false });
     this.selectedElement = boardElement;
     this.selectedElement.onSelect();
     this.board.app.webUi.updateSelectedMode(); // not cool external binding but keep for simplification
   }
 
-  public setDeselection() {
+  public setDeselection({ webUiUpdate } = { webUiUpdate: true }) {
     if (this.selectedElement) {
       this.selectedElement.onDeselect();
       this.selectedElement = null;
-      this.board.app.webUi.updateSelectedMode(); // not cool external binding but keep for simplification
+      if (webUiUpdate) this.board.app.webUi.updateSelectedMode(); // not cool external binding but keep for simplification
     }
   }
 
-  public selectElement(boardElement: BoardElement): ElementSelection {
+  public selectElement(boardElement: BoardElement): SelectionReport {
     return this.isMultiSelect
       ? this.multiSelectElement(boardElement)
       : this.singleSelectElement(boardElement);
   }
 
-  public deselectElement(): ElementSelection {
-    this.resetLog(this.selectedElement);
+  public deselectElement(): SelectionReport {
+    this.resetSelectionReport();
 
     if (this.selectedElement) {
-      // Remove group if it was temp
       if (this.selectedElement instanceof Group && this.selectedElement.isTempGroup) {
-        const group = this.selectedElement;
-        const explodedGroup = this.selectedElement.explodeGroup();
-
-        this.removedFromTempGroup.push(...explodedGroup.boardElements);
-        this.tempGroupRemoved = group;
-
-        this.board.deleteBoardElement(group);
+        this.multiselection.delete();
       }
 
       this.setDeselection();
     }
 
-    return this.export(this.selectedElement);
+    return this.getSelectionReport();
   }
 
-  public singleSelectElement(boardElement: BoardElement): ElementSelection {
-    this.resetLog(this.selectedElement);
+  public singleSelectElement(boardElement: BoardElement): SelectionReport {
+    this.resetSelectionReport();
 
     if (this.selectedElement instanceof Group) {
       if (this.selectedElement.isElementInGroup(boardElement)) {
-        // CASE: Single select on group member -- do nothing, maybe move group or use group ui
-        return this.export(this.selectedElement);
+        // CASE: Single select on group member -- no changes to selection (maybe moving group or using group ui)
+        return this.getSelectionReport();
       }
 
       // CASE: was selected: group, new selection: non-group-element -- drop group, select non-group-element
-      const group = this.selectedElement;
-      const explodedGroup = this.selectedElement.explodeGroup();
-
-      this.removedFromTempGroup.push(...explodedGroup.boardElements);
-      this.tempGroupRemoved = group;
-
-      this.board.deleteBoardElement(group);
+      this.multiselection.delete();
     }
 
     this.setSelection(boardElement);
-    return this.export(this.selectedElement);
+    return this.getSelectionReport();
   }
 
-  public multiSelectElement(boardElement: BoardElement): ElementSelection {
-    this.resetLog(this.selectedElement);
+  public multiSelectElement(boardElement: BoardElement): SelectionReport {
+    this.resetSelectionReport();
 
-    if (this.selectedElement instanceof Group) {
+    if (this.selectedElement instanceof Group && this.selectedElement.isTempGroup) {
       if (!this.selectedElement.isElementInGroup(boardElement)) {
         // CASE: while some group already selected the new selected element adds to that group
-        this.selectedElement.addToGroup(boardElement);
-        this.addedToTempGroup.push(boardElement);
+        this.multiselection.add(boardElement);
       } else {
         if (!this.board.isMemberDragging) {
           // CASE: while some group already selected the selected group member element removed from that group
-          const group = this.selectedElement.removeFromGroup(boardElement);
-          this.removedFromTempGroup.push(boardElement);
+          this.multiselection.remove(boardElement);
 
           // CASE: Remove the selected group if there is no more than one member left
-          if (group) {
-            const groupMembers = group.getGroupMembers();
-            if (groupMembers && groupMembers.length === 1) {
-              const explodedGroup = group.explodeGroup();
-              this.setSelection(explodedGroup.boardElements[0]);
-
-              this.removedFromTempGroup.push(explodedGroup.boardElements[0]);
-              this.tempGroupRemoved = group;
-
-              this.board.deleteBoardElement(group);
+          if (this.selectedElement) {
+            const groupMembers = this.selectedElement.getGroupMembers();
+            if (groupMembers.length === 1 && groupMembers[0]) {
+              this.multiselection.delete();
+              this.setSelection(groupMembers[0]);
             }
           }
         }
       }
 
-      return this.export(this.selectedElement);
+      return this.getSelectionReport();
     }
 
     // Create temp selection group
     if (this.selectedElement instanceof Memo && this.selectedElement !== boardElement) {
-      const group = this.board.addElementToBoard(new Group(this.board.app));
-      group.addToGroup(this.selectedElement);
-      group.addToGroup(boardElement);
-
-      this.addedToTempGroup.push(this.selectedElement, boardElement);
-      this.tempGroupCreated = group;
-
-      this.setSelection(group);
-
-      return this.export(this.selectedElement);
+      this.setSelection(this.multiselection.create([this.selectedElement, boardElement]));
+      return this.getSelectionReport();
     }
 
     // Make basic selection
     if (this.selectedElement === null) {
       this.setSelection(boardElement);
-      return this.export(this.selectedElement);
+      return this.getSelectionReport();
     }
 
-    return this.export(this.selectedElement);
+    return this.getSelectionReport();
+  }
+
+  public getSelectionReport(): SelectionReport {
+    return { ...this.multiselection.getReport(), selectedElement: this.selectedElement };
+  }
+
+  public resetSelectionReport(): void {
+    this.multiselection.resetReport();
   }
 
   public updateSelectionGraphics() {

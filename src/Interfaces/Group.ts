@@ -11,7 +11,7 @@ export interface IExplodedGroup {
 }
 
 export default class Group extends BoardElement {
-  [index: string]: any;
+  [index: string]: any; // TODO: try to remove [index: string] usage everywhere
   private groupDrawing = new PIXI.Graphics();
 
   leftMostChild: BoardElementContainer | undefined;
@@ -150,14 +150,8 @@ export default class Group extends BoardElement {
   public getGroupMembers() {
     const boardElementContainers = this.container.children.filter(
       (elm) => elm instanceof BoardElementContainer,
-    );
-
-    return boardElementContainers.map((elmC) => {
-      if (elmC instanceof BoardElementContainer) {
-        return elmC.boardElement;
-      }
-      return undefined;
-    });
+    ) as BoardElementContainer[];
+    return boardElementContainers.map((elmC) => elmC.boardElement);
   }
 
   public addToGroup<T extends BoardElement>(boardElement: T) {
