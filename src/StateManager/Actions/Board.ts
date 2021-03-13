@@ -22,25 +22,6 @@ export default class BoardActions {
 
   public selectElement(boardElement: BoardElement) {
     const selectionState = this.app.board.selection.selectElement(boardElement);
-    console.log('selected', selectionState);
-    // TODO: Update state based on selected: SelectionState
-
-    // Single update
-    // Note: No update for selection yet
-    // selectedElement: Board['selectedBoardElement'] = null;
-    // prevSelection: Board['selectedBoardElement'] = null;
-    // this.app.stateManager.setState(`/board/${id}`, { selected: true }, {});
-
-    // createdTempGroup: undefined | Group = undefined;
-    // this.app.stateManager.setState(`/board/create:${id}`, { x, y, scale, children }, { noOp: true; } );
-    // deletedTempGroup: undefined | Group = undefined;
-    // this.app.stateManager.setState(`/board/delete:${id}`, {}, { noOp: true; } );
-
-    // Multiple update
-    // addedToTempGroup: BoardElement[] = [];
-    // this.app.stateManager.setState(`/board/${id}`, { x, y, scale, parent }, { noOp: true; } );
-    // removedFromTempGroup: BoardElement[] = [];
-    // this.app.stateManager.setState(`/board/${id}`, { x, y, scale, parent }, { noOp: true; } );
 
     const {
       selectedElement,
@@ -50,41 +31,43 @@ export default class BoardActions {
       deletedTempGroup,
     } = selectionState;
 
-    if (createdTempGroup && addedToTempGroup && selectedElement instanceof Group) {
-      const { id, x, y, scale } = selectedElement;
-      this.app.stateManager.setState(
-        `/board/create:${id}`,
-        { x, y, scale, children: addedToTempGroup.map((el) => el.id) },
-        { noOp: true },
-      );
-    }
-
-    if (deletedTempGroup && addedToTempGroup && selectedElement instanceof Group) {
-      const { id } = selectedElement;
-      this.app.stateManager.setState(`/board/delete:${id}`, {}, { noOp: true });
-    }
-
-    // Add or remove group members for both cases: createdTempGroup or just added to group
-    if (addedToTempGroup && selectedElement instanceof Group) {
-      addedToTempGroup.forEach((el) => {
-        const { id, x, y, scale } = el;
+    // No selector state change in this version
+    if (selectedElement instanceof Group) {
+      if (createdTempGroup && addedToTempGroup) {
+        const { id, x, y, scale } = selectedElement;
         this.app.stateManager.setState(
-          `/board/${id}`,
-          { x, y, scale, parent: selectedElement.id },
-          { noOp: true, noHistory: true },
+          `/board/create:${id}`,
+          { x, y, scale, children: addedToTempGroup.map((el) => el.id) },
+          { noOp: true },
         );
-      });
-    }
+      }
 
-    if (removedFromTempGroup && selectedElement instanceof Group) {
-      addedToTempGroup.forEach((el) => {
-        const { id, x, y, scale } = el;
-        this.app.stateManager.setState(
-          `/board/${id}`,
-          { x, y, scale, parent: undefined },
-          { noOp: true, noHistory: true },
-        );
-      });
+      if (deletedTempGroup) {
+        const { id } = selectedElement;
+        this.app.stateManager.setState(`/board/delete:${id}`, {}, { noOp: true });
+      }
+
+      if (addedToTempGroup) {
+        addedToTempGroup.forEach((el) => {
+          const { id, x, y, scale } = el;
+          this.app.stateManager.setState(
+            `/board/${id}`,
+            { x, y, scale, parent: selectedElement.id },
+            { noOp: true, noHistory: true },
+          );
+        });
+      }
+
+      if (removedFromTempGroup) {
+        addedToTempGroup.forEach((el) => {
+          const { id, x, y, scale } = el;
+          this.app.stateManager.setState(
+            `/board/${id}`,
+            { x, y, scale, parent: undefined },
+            { noOp: true, noHistory: true },
+          );
+        });
+      }
     }
   }
 
