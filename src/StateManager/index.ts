@@ -1,8 +1,8 @@
 import FlowApp from '../Interfaces/FlowApp';
 import IO from './IO';
 import { StateLocation, StateUpdateRequest } from './StateUpdateRequest';
-import { IViewportDepositState, PublicViewportState } from './Representations/Viewport';
-import { IPublicBoardDepositState, PublicBoardState } from './Representations/Board';
+import { IViewportDepositState, PublicViewportState } from './PublicState/Viewport';
+import { IPublicBoardDepositState, PublicBoardState } from './PublicState/Board';
 import ViewportOperations from './Operations/Viewport';
 import BoardOperations from './Operations/Board';
 import ViewportActions from './Actions/Viewport';
@@ -129,7 +129,7 @@ export default class StateManager {
       }
     }
 
-    // Execute operations
+    // Execute "operations"
     const prevScopedState = this.getState(stateUpdate.locator);
 
     for (const property in stateUpdate.slice) {
@@ -138,16 +138,15 @@ export default class StateManager {
         if (updateValue !== undefined && updateValue !== prevScopedState[property]) {
           const opResultValue = stateUpdate.opSettings.noOp
             ? updateValue
-            : this.operations[stateUpdate.location.scope].update(property, updateValue, stateUpdate);
-
-          stateUpdate.addToUpdated(property, opResultValue);
+            : this.operations[stateUpdate.location.scope].exec(property, updateValue, stateUpdate);
+          if (opResultValue !== undefined) stateUpdate.addToUpdated(property, opResultValue);
         }
       }
     }
 
     // Update State Representation
     if (stateUpdate.updatedCnt > 0) {
-      // Delegate update to /Representations/Module e.g. "/Representations/Board"
+      // Delegate update to /PublicState/Module e.g. "/PublicState/Board"
       this.publicState[stateUpdate.location.scope].update(stateUpdate);
 
       if (!opSettings.noHistory) {

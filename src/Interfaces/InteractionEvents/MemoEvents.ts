@@ -5,6 +5,7 @@ import Memo from '../Memo';
 /** This class might be useful when Memo UI work will begin **/
 
 // MemoEvent mimics PIXI.interaction.InteractionEvent with targets overwritten
+// TODO: Could Memo event be the part of "Memo" module set?
 interface MemoEvent {
   stopped: boolean;
   target: Memo;

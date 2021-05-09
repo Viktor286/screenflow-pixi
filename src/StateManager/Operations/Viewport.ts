@@ -1,7 +1,7 @@
 import FlowApp from '../../Interfaces/FlowApp';
 import Viewport from '../../Interfaces/Viewport';
 import { StateUpdateRequest } from '../StateUpdateRequest';
-import { PublicViewportState } from '../Representations/Viewport';
+import { PublicViewportState } from '../PublicState/Viewport';
 import { AsyncId } from '../index';
 
 export default class ViewportOperations {
@@ -15,7 +15,7 @@ export default class ViewportOperations {
       );
   }
 
-  update(
+  exec(
     property: Extract<keyof Viewport, string>,
     value: PublicViewportState[keyof PublicViewportState],
     stateUpdate: StateUpdateRequest,

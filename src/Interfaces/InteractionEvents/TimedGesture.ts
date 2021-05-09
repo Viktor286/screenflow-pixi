@@ -9,6 +9,8 @@ interface IGestureEvent extends StageEvent {
   isBoardElementHit?: BoardElement | undefined;
 }
 
+// TODO: rename InteractionEvents into something like "input controllers"?
+
 // Timed-gestures event manager
 export default class TimedGesture {
   private app: FlowApp;
@@ -96,11 +98,12 @@ export default class TimedGesture {
     const gestureEvent = this.getGestureEvent(e);
 
     if (this.app.board.isMemberDragging) {
-      const boardElement = this.app.board.selection.getSelectedElement();
-      if (boardElement && this.wasBoardElementMovedFromStartDragPoint(boardElement, gestureEvent)) {
-        this.app.stateManager.actions.board.stopDragElement(boardElement);
-        this.awaiting = false;
-      }
+      // TODO: use board action here instead of direct interface
+      // const boardElement = this.app.board.selection.getSelectedElement();
+      // if (boardElement && this.wasBoardElementMovedFromStartDragPoint(boardElement, gestureEvent)) {
+      //   this.app.stateManager.actions.board.stopDragElement(boardElement);
+      //   this.awaiting = false;
+      // }
     }
 
     // Distinguish single click and double click handlers
@@ -145,19 +148,7 @@ export default class TimedGesture {
   // Timed-gestures special events
   // Press Up events
   private pressUpImmediate(e: IGestureEvent) {
-    // this.markGlc('Up I');
-
-    if (!this.app.board.isMemberDragging) {
-      if (e.isBoardElementHit instanceof BoardElement) {
-        this.app.stateManager.actions.board.selectElement(e.isBoardElementHit);
-        console.log(`pressUpImmediate Memo clicked "${e.isBoardElementHit.id}" `, e.isBoardElementHit);
-      } else {
-        if (!this.app.viewport.slideControls.isSliding) {
-          this.app.stateManager.actions.board.deselectElements();
-        }
-      }
-    }
-
+    this.app.stateManager.actions.board.selectBoardElement(e.isBoardElementHit);
     this.sendToMonitor('Immediate Press Up', e);
   }
 
@@ -189,7 +180,7 @@ export default class TimedGesture {
     // fitToArea Or ZoomIn
     if (gestureEvent.isBoardElementHit instanceof BoardElement) {
       this.app.stateManager.actions.viewport.fitToBoardElement(gestureEvent.isBoardElementHit);
-      this.app.stateManager.actions.board.selectElement(gestureEvent.isBoardElementHit);
+      this.app.stateManager.actions.board.selectBoardElement(gestureEvent.isBoardElementHit);
     } else {
       // this.app.stateManager.actions.viewport.zoomIn(e.worldClick);
       this.app.stateManager.actions.viewport.fitToBoard();

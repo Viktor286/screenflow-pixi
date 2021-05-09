@@ -1,6 +1,7 @@
+// @ts-nocheck
 import FlowApp from '../../Interfaces/FlowApp';
 import { StateUpdateRequest } from '../StateUpdateRequest';
-import { PublicBoardState } from '../Representations/Board';
+import { PublicBoardState } from '../PublicState/Board';
 import { AsyncId } from '../index';
 
 export default class BoardOperations {
@@ -19,9 +20,14 @@ export default class BoardOperations {
     }
   }
 
-  update(property: string, value: PublicBoardState[keyof PublicBoardState], stateUpdate: StateUpdateRequest) {
+  exec(property: string, value: PublicBoardState[keyof PublicBoardState], stateUpdate: StateUpdateRequest) {
+    console.log('>> stateUpdate', stateUpdate, property, value);
+
     const boardElement = this.app.board.getElementById(stateUpdate.location.target);
-    if (boardElement) boardElement[property] = value;
+    if (!boardElement) return undefined;
+
+    // Apply assignment directly
+    boardElement[property] = value;
     return value;
   }
 }

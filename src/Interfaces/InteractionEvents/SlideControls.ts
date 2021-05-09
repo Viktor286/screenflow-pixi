@@ -83,7 +83,7 @@ export default class SlideControls {
 
     // TODO: Can we avoid this workaround for stateManager?
     //  option: observable isSliding
-    this.app.stateManager.actions.viewport.amendViewportState();
+    // this.app.stateManager.actions.viewport.amendViewportState();
   };
 
   private onSliderZoomed = () => {
@@ -91,7 +91,7 @@ export default class SlideControls {
       this.app.viewport.scale < this.viewport.zoomScales[this.viewport.zoomScales.length - 1] &&
       this.app.viewport.scale > this.viewport.zoomScales[0]
     ) {
-      this.app.board.selection.updateSelectionGraphics();
+      this.app.board.updateSelectionGraphics();
       this.app.webUi.updateZoomBtn();
     }
   };

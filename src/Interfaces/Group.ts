@@ -1,9 +1,13 @@
 import * as PIXI from 'pixi.js';
-import FlowApp from './FlowApp';
 import BoardElement, { BoardElementContainer } from './BoardElement';
 import { ITransforms } from '../types/global';
 import { IWorldCoords } from './Viewport';
 import Memo from './Memo';
+import Board, { BoardElementId } from './Board';
+
+export interface IGroupSettings {
+  isTempGroup: boolean;
+}
 
 export interface IExplodedGroup {
   boardElements: BoardElement[];
@@ -11,22 +15,24 @@ export interface IExplodedGroup {
 }
 
 export default class Group extends BoardElement {
-  [index: string]: any; // TODO: try to remove [index: string] usage everywhere
   private groupDrawing = new PIXI.Graphics();
-
   leftMostChild: BoardElementContainer | undefined;
   isTempGroup: boolean = true;
 
-  constructor(public app: FlowApp, public isTempGroup = true) {
-    super(app);
-
+  constructor(public board: Board, id: BoardElementId, settings: IGroupSettings = { isTempGroup: false }) {
+    super(board, id);
     this.container = new BoardElementContainer(this);
+    this.isTempGroup = settings.isTempGroup;
     this.container.zIndex = 1;
     this.container.interactive = true;
     this.container.sortableChildren = true;
-
     this.groupDrawing.zIndex = 0;
     this.container.addChild(this.groupDrawing);
+
+    this.publicState = {
+      ...super.publicState,
+      type: 'Group',
+    };
 
     // If an object has no interactive children use interactiveChildren = false
     // the interaction manager will then be able to avoid crawling through the object.
@@ -83,7 +89,7 @@ export default class Group extends BoardElement {
 
     // TODO: bug -- group object shifts a bit on x,y via different global scale
     // // Border line stroke with sharp angle
-    // const lineWidth = 2 / this.app.viewport.scale / this.scale;
+    // const lineWidth = 2 / this.board.viewport.scale / this.scale;
     //
     // this.groupDrawing
     //   .clear()
@@ -100,7 +106,7 @@ export default class Group extends BoardElement {
     //     -padding,
     //     (this.width + padding * 2) / this.scale,
     //     (this.height + padding * 2) / this.scale,
-    //     4 / this.app.viewport.scale / this.scale,
+    //     4 / this.board.viewport.scale / this.scale,
     //   )
     //   .endFill();
   }
@@ -121,7 +127,7 @@ export default class Group extends BoardElement {
         elm.boardElement.isDragging = true;
 
         if (elm.boardElement instanceof Memo) {
-          elm.boardElement.setDragState();
+          elm.boardElement.setDrag();
         }
       }
     });
@@ -134,7 +140,7 @@ export default class Group extends BoardElement {
         elm.boardElement.isDragging = false;
 
         if (elm.boardElement instanceof Memo) {
-          elm.boardElement.unsetDragState();
+          elm.boardElement.unsetDrag();
         }
       }
     });
@@ -197,7 +203,7 @@ export default class Group extends BoardElement {
         const { boardElement } = boardElementContainer;
         boardElement.inGroup = undefined;
         boardElement.eraseSelectionDrawing();
-        this.app.viewport.instance.addChild(boardElementContainer);
+        this.board.viewport.instance.addChild(boardElementContainer);
         boardElement.x = coords.x;
         boardElement.y = coords.y;
         boardElement.scale = coords.s;

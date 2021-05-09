@@ -1,30 +1,65 @@
 import FlowApp from './FlowApp';
 import BoardElement, { BoardElementContainer } from './BoardElement';
-import Memo from './Memo';
-import Group from './Group';
-import { IWorldCoords } from './Viewport';
-import { ElementSelection } from './BoardSelection';
+import Memo, { IMemoSettings } from './Memo';
+import Group, { IGroupSettings } from './Group';
+import Viewport, { IWorldCoords } from './Viewport';
+import GraphicsEngine from './GraphicsEngine';
+
+export type BoardElementId = string | undefined;
+export type BoardElementType = 'BoardElement' | 'Memo' | 'Group';
+export type IBoardImage = {
+  data: Blob;
+  id: string;
+};
 
 export type ShiftModeState = 'off' | 'hold' | 'lock';
 
+// TODO: INFO -- THE CRITICAL CONDITION FOR CURRENT "INTERFACE" METHODS IS
+//  THEY SHOULD EVENTUALLY CHANGE ONLY ONE PUBLIC STATE PROPERTY,
+//  OFFER GRANULAR CONTROL OVER ITS ENTITIES,
+//  SO ACTIONS (CONTROLLERS) WILL DRIVE COMPLEX LOGIC THROUGH STATE UPDATE
+//  VEIW (UI) -> CONTROLLER (ACTION) -> MODEL (STATE) -> CONTROLLER (INTERFACE) -> CONTROLLER (ENGINE) -> MODEL (STATE) -> VIEW (GUI)
+//  TODO: READ ABOUT ARCHITECTURE PATTERNS VARIATIONS: E.G.
+
 export default class Board {
+  public viewport: Viewport;
+  public engine: GraphicsEngine;
   public isMemberDragging: boolean | string = false;
-  public selection = new ElementSelection(this);
+  public isMultiSelect: boolean = false;
+  public selectedElement: BoardElement | null = null;
 
   constructor(public app: FlowApp) {
+    this.viewport = this.app.viewport;
+    this.engine = this.app.engine;
+
     if (this.app.devMonitor) {
       this.app.devMonitor.addDevMonitor('boardEvents');
     }
   }
 
-  // TODO: this is currently a temp shortcut method, we need to add elements properly through the actions
-  public addNewMemosToBoardFromTextures(textures?: PIXI.Texture[]) {
-    if (textures && textures.length > 0) {
-      textures.forEach((texture) => {
-        this.addElementToBoard(new Memo(texture, this.app));
-      });
+  public createBoardElement(
+    type: BoardElementType,
+    id: BoardElementId,
+    settings?: IMemoSettings | IGroupSettings,
+  ) {
+    switch (type) {
+      case 'BoardElement':
+        return new BoardElement(this, id);
+      case 'Memo':
+        return new Memo(this, id, settings as IMemoSettings);
+      case 'Group':
+        return new Group(this, id, settings as IGroupSettings);
     }
   }
+
+  // // TODO: this is currently a temp shortcut method, we need to add elements properly through the actions (state update)
+  // public addNewMemosToBoardFromTextures(textures?: PIXI.Texture[]) {
+  //   if (textures && textures.length > 0) {
+  //     textures.forEach((texture) => {
+  //       this.addElementToBoard(new Memo(texture, this.app));
+  //     });
+  //   }
+  // }
 
   public addElementToBoard<T extends BoardElement>(boardElement: T): T {
     boardElement.zIndex = 1;
@@ -39,7 +74,6 @@ export default class Board {
       boardElement.isTempGroup = false; // keep from rm on deselect. TODO: can we do it some "proper" way?
     }
 
-    this.selection.deselectElement();
     boardElement.delete(hard);
     return true;
   }
@@ -57,7 +91,7 @@ export default class Board {
   ) {
     if (!this.isMemberDragging) {
       this.isMemberDragging = boardElement.id;
-      this.selection.selectElement(boardElement);
+      // this.selection.selectElement(boardElement);
       this.app.viewport.instance.pause = true;
       boardElement.startDrag(startPoint);
     }
@@ -72,12 +106,12 @@ export default class Board {
     boardElement.stopDrag();
   }
 
-  public getElementById(elementId: string): BoardElement | undefined {
+  public getElementById(elementId: string): BoardElement | null {
     const displayObjects = this.app.viewport.instance.children.filter(
       (el) => el instanceof BoardElementContainer && el.boardElement.id === elementId,
     ) as BoardElementContainer[];
 
-    return displayObjects.length > 0 ? displayObjects[0].boardElement : undefined;
+    return displayObjects.length > 0 ? displayObjects[0].boardElement : null;
   }
 
   public getAllBoardElements() {
@@ -109,6 +143,12 @@ export default class Board {
   public sendEventToMonitor(boardElement: BoardElement, eventName: string, msg: string = '') {
     if (this.app.devMonitor) {
       this.app.devMonitor.dispatchMonitor('boardEvents', `[${boardElement.id}] ${eventName}`, msg);
+    }
+  }
+
+  public updateSelectionGraphics() {
+    if (this.selectedElement) {
+      this.selectedElement.drawSelection();
     }
   }
 }

@@ -285,7 +285,7 @@ export default class Viewport {
         },
         onUpdate: () => {
           this.app.gui.stageBackTile.updateGraphics();
-          this.app.board.selection.updateSelectionGraphics();
+          this.app.board.updateSelectionGraphics();
         },
         onComplete: () => {
           // this.app.viewport.interactive = true;

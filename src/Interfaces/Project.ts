@@ -1,10 +1,12 @@
+// @ts-nocheck
 import * as PIXI from 'pixi.js';
 import { fileOpen } from 'browser-nativefs';
 import JSZip from 'jszip';
 import FlowApp from './FlowApp';
 import FilesIO from './FilesIO';
-import Memo, { MemoSnapshot } from './Memo';
+import Memo from './Memo';
 import { IAppDepositState } from '../StateManager';
+import { IBoardImage } from './Board';
 
 export interface IProjectObject {
   fileName: string;
@@ -117,8 +119,6 @@ export default class Project {
 
           // set memo id
           const memoId = obj.fileName.split('.')[0];
-          const memo = new Memo(pixiTexture, this.app, memoId);
-          this.app.board.addElementToBoard(memo);
 
           // attach element ref to state
           // appDepositState.board[memoId].element = memo;
@@ -181,7 +181,7 @@ export default class Project {
   extractedSnapshotsTotal: number = 0;
 
   private async memoSnapshotsExtraction(memo: Memo) {
-    const memoSnapshot = await memo.extractMemoSnapshot();
+    const memoSnapshot = await memo.contentElement.extractBoardImageObj();
     const arraybuffer = await memoSnapshot.data.arrayBuffer();
     this.extractedSnapshots++;
     console.log(
@@ -197,7 +197,7 @@ export default class Project {
     // TODO: this is temp "progress" tracking
     console.log(`[Export] image extraction started...`);
 
-    const pngExtractionArr: Promise<MemoSnapshot>[] = [];
+    const pngExtractionArr: Promise<IBoardImage>[] = [];
 
     const boardMemos = this.app.board.getAllMemos();
     this.extractedSnapshotsTotal = boardMemos.length;
@@ -275,9 +275,9 @@ export default class Project {
 
     // TODO: fileSave from browser-nativefs causes error here because of long project build time?
     // await fileSave(projectFile, options, handle);
-    FilesIO.downloadFileToClient(projectFile, 'project.flow', 'application/zip');
+    FilesIO.downloadBlobToClient(projectFile, 'project.flow', 'application/zip');
 
     // await this.fileHandle.write
-    // FilesIO.downloadFileToClient(content, 'project.flow', 'application/zip');
+    // FilesIO.downloadBlobToClient(content, 'project.flow', 'application/zip');
   }
 }

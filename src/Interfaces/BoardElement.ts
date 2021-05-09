@@ -1,11 +1,20 @@
 import * as PIXI from 'pixi.js';
-import FlowApp from './FlowApp';
 import { gsap } from 'gsap';
 import Group from './Group';
 import { IGsapProps, IPoint } from '../types/global';
 import { IWorldCoords } from './Viewport';
+import Board, { BoardElementId, BoardElementType } from './Board';
+
+export interface IBoardElementPublicState {
+  id: BoardElementId;
+  type: BoardElementType;
+  x: number;
+  y: number;
+  scale: number;
+}
 
 export default class BoardElement {
+  public publicState: IBoardElementPublicState;
   public isSelected = false;
   public isDragging = false;
   public startDragPoint: IWorldCoords | undefined = undefined;
@@ -16,11 +25,20 @@ export default class BoardElement {
   private dragPoint: IPoint = { x: 0, y: 0 };
   public readonly id: string;
 
-  [key: string]: any;
-
-  constructor(public app: FlowApp, id?: string) {
+  constructor(public board: Board, id?: BoardElementId) {
     this.id = id ? id : Math.random().toString(32).slice(2);
     this.container.addChild(this.selectionDrawing);
+
+    // TODO: it looks like this state should have fields which have
+    //  getters to obtain plain text data for "DepositState"
+    //  setters to trigger updates properly
+    this.publicState = {
+      id: this.id,
+      type: 'BoardElement',
+      x: this.x,
+      y: this.y,
+      scale: this.scale,
+    };
   }
 
   get x() {
@@ -37,11 +55,6 @@ export default class BoardElement {
 
   set y(val: number) {
     this.container.y = val;
-  }
-
-  public setCoords(point: IPoint) {
-    this.x = point.x;
-    this.y = point.y;
   }
 
   get scale() {
@@ -124,6 +137,11 @@ export default class BoardElement {
     return this.container.y + this.container.height / 2;
   }
 
+  public setCoords(point: IPoint) {
+    this.x = point.x;
+    this.y = point.y;
+  }
+
   public delete(hard: boolean = false) {
     // TODO: need to delete from state?
     //  when we would be really ready to destroy?
@@ -176,7 +194,7 @@ export default class BoardElement {
     // Sharp corners border
     this.selectionDrawing
       .clear()
-      .lineStyle(4 / this.app.viewport.scale / this.scale / groupFactor, 0x73b2ff)
+      .lineStyle(4 / this.board.viewport.scale / this.scale / groupFactor, 0x73b2ff)
       .drawRect(0, 0, this.width / this.scale, this.height / this.scale);
   }
 
@@ -192,14 +210,14 @@ export default class BoardElement {
       this.startDragPoint = startPoint;
       this.container.alpha = 0.5;
       this.zIndex = 1;
-      const { wX: wMx, wY: wMy } = this.app.viewport.getWorldCoordsFromMouse();
+      const { wX: wMx, wY: wMy } = this.board.viewport.getWorldCoordsFromMouse();
 
       // Compensate mouse movement and start point
       this.x -= startPoint.wX - wMx;
       this.y -= startPoint.wY - wMy;
 
       this.dragPoint = { x: wMx - this.x, y: wMy - this.y };
-      this.app.engine.ticker.add(this.onDrag);
+      this.board.engine.ticker.add(this.onDrag);
     }
   }
 
@@ -212,12 +230,12 @@ export default class BoardElement {
       this.container.alpha = 1;
       this.zIndex = 0;
       this.dragPoint = { x: 0, y: 0 };
-      this.app.engine.ticker.remove(this.onDrag);
+      this.board.engine.ticker.remove(this.onDrag);
     }
   }
 
   private onDrag = (delta: any) => {
-    const mouseCoords = this.app.viewport.getWorldCoordsFromMouse();
+    const mouseCoords = this.board.viewport.getWorldCoordsFromMouse();
     this.x = mouseCoords.wX - this.dragPoint.x;
     this.y = mouseCoords.wY - this.dragPoint.y;
   };

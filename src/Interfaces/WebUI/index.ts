@@ -23,11 +23,11 @@ export default class WebUI {
     this.shiftModeState = state;
 
     if (state === 'hold' || state === 'lock') {
-      this.app.board.selection.isMultiSelect = true;
+      this.app.board.isMultiSelect = true;
     }
 
     if (state === 'off') {
-      this.app.board.selection.isMultiSelect = false;
+      this.app.board.isMultiSelect = false;
     }
 
     this.app.webUi.updateShiftMode(this.shiftModeState);
@@ -41,7 +41,7 @@ export default class WebUI {
 
   public updateSelectedMode() {
     this.reactWebUI.setState({
-      isMemoSelected: !!this.app.board.selection.selectedElement,
+      isMemoSelected: !!this.app.board.selectedElement,
     });
   }
 
@@ -59,10 +59,11 @@ export default class WebUI {
     window.addEventListener('dragover', handler, false);
     window.addEventListener('drop', async (event: DragEvent) => {
       event.preventDefault();
-      const imageBlobs = await AssetConversion.getBlobsFromDropEvent(event);
-      const imageElements = await AssetConversion.getHTMLImageElementsFromBlobs(imageBlobs);
-      const textures = await AssetConversion.getPixiTexturesFromImages(imageElements);
-      this.app.board.addNewMemosToBoardFromTextures(textures);
+      // TODO: we now delegate loading to IMediaResource implementations
+      // const imageBlobs = await AssetConversion.getBlobsFromDropEvent(event);
+      // const imageElements = await AssetConversion.getHTMLImageElementsFromBlobs(imageBlobs);
+      // const textures = await AssetConversion.getPixiTexturesFromImages(imageElements);
+      // this.app.board.addNewMemosToBoardFromTextures(textures);
     });
   }
 
@@ -70,10 +71,11 @@ export default class WebUI {
   public setupGlobalPasteImage() {
     // @ts-ignore
     window.addEventListener('paste', async (pasteEvent: ClipboardEvent) => {
-      const imageBlobs = await AssetConversion.getBlobsFromClipboardEvent(pasteEvent);
-      const imageElements = await AssetConversion.getHTMLImageElementsFromBlobs(imageBlobs);
-      const textures = await AssetConversion.getPixiTexturesFromImages(imageElements);
-      this.app.board.addNewMemosToBoardFromTextures(textures);
+      // TODO: we now delegate loading to IMediaResource implementations
+      // const imageBlobs = await AssetConversion.getBlobsFromClipboardEvent(pasteEvent);
+      // const imageElements = await AssetConversion.getHTMLImageElementsFromBlobs(imageBlobs);
+      // const textures = await AssetConversion.getPixiTexturesFromImages(imageElements);
+      // this.app.board.addNewMemosToBoardFromTextures(textures);
     });
   }
 
@@ -87,10 +89,11 @@ export default class WebUI {
     // @ts-ignore
     input.addEventListener('change', async (event: HTMLInputEvent) => {
       if (event.currentTarget.files && event.currentTarget.files.length > 0) {
-        const imageBlobs = await AssetConversion.getBlobsFromInputEvent(event);
-        const imageElements = await AssetConversion.getHTMLImageElementsFromBlobs(imageBlobs);
-        const textures = await AssetConversion.getPixiTexturesFromImages(imageElements);
-        this.app.board.addNewMemosToBoardFromTextures(textures);
+        // const imageBlobs = await AssetConversion.getBlobsFromInputEvent(event);
+        // const imageElements = await AssetConversion.getHTMLImageElementsFromBlobs(imageBlobs);
+        // const textures = await AssetConversion.getPixiTexturesFromImages(imageElements);
+        // TODO: we now delegate loading to IMediaResource implementations
+        // this.app.board.addNewMemosToBoardFromTextures(textures);
       }
       window.document.body.removeChild(input);
     });
