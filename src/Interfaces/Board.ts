@@ -1,9 +1,9 @@
 import FlowApp from './FlowApp';
-import BoardElement, { BoardElementContainer } from './BoardElement';
+import BoardElement from './BoardElement';
 import Memo, { IMemoSettings } from './Memo';
 import Group, { IGroupSettings } from './Group';
 import Viewport, { IWorldCoords } from './Viewport';
-import GraphicsEngine from './GraphicsEngine';
+import { CgEngine, CgContainer } from './GraphicsEngine';
 
 export type BoardElementId = string | undefined;
 export type BoardElementType = 'BoardElement' | 'Memo' | 'Group';
@@ -23,7 +23,7 @@ export type ShiftModeState = 'off' | 'hold' | 'lock';
 
 export default class Board {
   public viewport: Viewport;
-  public engine: GraphicsEngine;
+  public engine: CgEngine;
   public isMemberDragging: boolean | string = false;
   public isMultiSelect: boolean = false;
   public selectedElement: BoardElement | null = null;
@@ -63,7 +63,7 @@ export default class Board {
 
   public addElementToBoard<T extends BoardElement>(boardElement: T): T {
     boardElement.zIndex = 1;
-    this.app.viewport.addToViewport(boardElement.container);
+    this.app.viewport.addToViewport(boardElement.c);
     return boardElement;
   }
 
@@ -108,8 +108,8 @@ export default class Board {
 
   public getElementById(elementId: string): BoardElement | null {
     const displayObjects = this.app.viewport.instance.children.filter(
-      (el) => el instanceof BoardElementContainer && el.boardElement.id === elementId,
-    ) as BoardElementContainer[];
+      (el) => el instanceof CgContainer && el.boardElement.id === elementId,
+    ) as CgContainer[];
 
     return displayObjects.length > 0 ? displayObjects[0].boardElement : null;
   }
@@ -118,24 +118,24 @@ export default class Board {
     // API design: Should we get all elements in a flat way, including inner group members?
 
     const displayObjects = this.app.viewport.instance.children.filter(
-      (el) => el instanceof BoardElementContainer,
-    ) as BoardElementContainer[];
+      (el) => el instanceof CgContainer,
+    ) as CgContainer[];
 
     return displayObjects.map((container) => container.boardElement) as BoardElement[];
   }
 
   public getAllMemos(): Memo[] {
     const displayObjects = this.app.viewport.instance.children.filter(
-      (el) => el instanceof BoardElementContainer && el.boardElement instanceof Memo,
-    ) as BoardElementContainer[];
+      (el) => el instanceof CgContainer && el.boardElement instanceof Memo,
+    ) as CgContainer[];
 
     return displayObjects.map((container) => container.boardElement) as Memo[];
   }
 
   public getAllGroups() {
     const displayObjects = this.app.viewport.instance.children.filter(
-      (el) => el instanceof BoardElementContainer && el.boardElement instanceof Group,
-    ) as BoardElementContainer[];
+      (el) => el instanceof CgContainer && el.boardElement instanceof Group,
+    ) as CgContainer[];
 
     return displayObjects.map((container) => container.boardElement);
   }

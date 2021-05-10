@@ -2,7 +2,6 @@ import { ImageMedia, TMediaSource } from './MediaResource';
 import BoardElement, { IBoardElementPublicState } from './BoardElement';
 import { IWorldCoords } from './Viewport';
 import Board, { BoardElementId } from './Board';
-import { drawRoundedBorderOnGraphics } from './GraphicsEngine';
 
 export interface IMemoSettings {
   mediaSource: TMediaSource;
@@ -29,9 +28,8 @@ export default class Memo extends BoardElement {
       mediaSource: this.mediaSource,
     };
 
-    this.container.addChild(this.contentElement.container);
-    this.container.interactive = true;
-
+    this.addElement(this.contentElement.container);
+    this.enableInteractive();
     this.drawSelection();
   }
 
@@ -59,11 +57,11 @@ export default class Memo extends BoardElement {
   }
 
   public drawSelection(): void {
-    const groupFactor = this.inGroup ? this.inGroup.scale : 1;
-    drawRoundedBorderOnGraphics(this.selectionDrawing, {
-      width: this.width / this.scale,
-      height: this.height / this.scale,
-      lineWidth: 4 / this.board.viewport.scale / this.scale / groupFactor,
+    const groupFactor = this.inGroup ? this.inGroup.scaleX : 1;
+    this.selectionDrawing.drawRectWithRoundedCorners({
+      width: this.width / this.scaleX,
+      height: this.height / this.scaleX,
+      lineWidth: 4 / this.board.viewport.scale / this.scaleX / groupFactor,
       lineColor: 0x73b2ff,
       cornerRadius: this.cornerRadius,
     });

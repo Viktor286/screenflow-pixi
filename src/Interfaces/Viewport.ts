@@ -1,5 +1,5 @@
 import * as PIXI from 'pixi.js';
-import GraphicsEngine from './GraphicsEngine';
+import { CgEngine } from './GraphicsEngine';
 import { Viewport as PixiViewport } from 'pixi-viewport';
 import FlowApp from './FlowApp';
 import { StageEvent } from './InteractionEvents/StageEvents';
@@ -22,7 +22,7 @@ export interface IViewportInstance extends PixiViewport {
 
 export default class Viewport {
   public readonly instance: IViewportInstance;
-  public readonly engine: GraphicsEngine;
+  public readonly engine: CgEngine;
   public readonly slideControls: SlideControls;
   public readonly zoomScales: number[] = [0.03125, 0.0625, 0.125, 0.25, 0.5, 1, 2, 4, 8, 16, 32];
   public readonly fitAreaMarginPercent = 20;

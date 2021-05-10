@@ -1,6 +1,6 @@
 import StageEvents, { StageEvent } from './StageEvents';
 import FlowApp from '../FlowApp';
-import BoardElement, { BoardElementContainer } from '../BoardElement';
+import BoardElement from '../BoardElement';
 import { IScreenCoords, IWorldCoords } from '../Viewport';
 
 interface IGestureEvent extends StageEvent {
@@ -249,9 +249,9 @@ export default class TimedGesture {
       y: gestureEvent.screenClick.sY,
     });
 
-    if (hit instanceof BoardElementContainer) {
-      gestureEvent.isBoardElementHit = hit.boardElement;
-    }
+    // if (hit instanceof cgContainer) {
+    gestureEvent.isBoardElementHit = hit.boardElement;
+    // }
 
     return gestureEvent;
   }

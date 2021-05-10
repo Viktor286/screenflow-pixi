@@ -3,9 +3,9 @@ import Memo from './Memo';
 import { loadMediaSource } from './AssetLoader';
 import { IBoardImage } from './Board';
 import {
-  extractBlobImageFromContainer,
-  drawTextureWithRoundCornersOnGraphics,
   createTextureFromBlob,
+  drawTextureWithRoundCornersOnGraphics,
+  extractBlobImageFromContainer,
 } from './GraphicsEngine';
 
 export type TMediaSource = string;

@@ -1,9 +1,9 @@
-import * as PIXI from 'pixi.js';
-import BoardElement, { BoardElementContainer } from './BoardElement';
+import BoardElement from './BoardElement';
 import { ITransforms } from '../types/global';
 import { IWorldCoords } from './Viewport';
 import Memo from './Memo';
 import Board, { BoardElementId } from './Board';
+import { CgContainer, CgDrawContainer } from './GraphicsEngine';
 
 export interface IGroupSettings {
   isTempGroup: boolean;
@@ -15,19 +15,17 @@ export interface IExplodedGroup {
 }
 
 export default class Group extends BoardElement {
-  private groupDrawing = new PIXI.Graphics();
-  leftMostChild: BoardElementContainer | undefined;
+  private groupDrawing = new CgDrawContainer();
+  leftMostChild: CgContainer | undefined;
   isTempGroup: boolean = true;
 
   constructor(public board: Board, id: BoardElementId, settings: IGroupSettings = { isTempGroup: false }) {
     super(board, id);
-    this.container = new BoardElementContainer(this);
     this.isTempGroup = settings.isTempGroup;
-    this.container.zIndex = 1;
-    this.container.interactive = true;
-    this.container.sortableChildren = true;
+    this.zIndex = 1;
+    this.enableInteractive();
     this.groupDrawing.zIndex = 0;
-    this.container.addChild(this.groupDrawing);
+    this.addElement(this.groupDrawing);
 
     this.publicState = {
       ...super.publicState,
@@ -47,12 +45,7 @@ export default class Group extends BoardElement {
     if (!this.isSelected) {
       this.isSelected = true;
       this.drawSelection();
-
-      this.container.children.forEach((elm) => {
-        if (elm instanceof BoardElementContainer) {
-          this.isSelected = true;
-        }
-      });
+      this.getAllContents().forEach(() => (this.isSelected = true));
       return true;
     }
     return false;
@@ -62,12 +55,7 @@ export default class Group extends BoardElement {
     if (this.isSelected) {
       this.isSelected = false;
       this.eraseSelectionDrawing();
-
-      this.container.children.forEach((elm) => {
-        if (elm instanceof BoardElementContainer) {
-          elm.boardElement.isSelected = false;
-        }
-      });
+      this.getAllContents().forEach((elm) => (elm.isSelected = false));
 
       if (this.isTempGroup) {
         this.explodeGroup();
@@ -81,11 +69,7 @@ export default class Group extends BoardElement {
 
   public drawSelection(): void {
     // Let children draw it's own selection
-    this.container.children.forEach((elm) => {
-      if (elm instanceof BoardElementContainer) {
-        elm.boardElement.drawSelection();
-      }
-    });
+    this.getAllContents().forEach((elm) => elm.drawSelection());
 
     // TODO: bug -- group object shifts a bit on x,y via different global scale
     // // Border line stroke with sharp angle
@@ -114,16 +98,16 @@ export default class Group extends BoardElement {
   public eraseSelectionDrawing() {
     this.groupDrawing.clear();
 
-    this.container.children.forEach((elm) => {
-      if (elm instanceof BoardElementContainer) {
+    this.getAllContents().forEach((elm) => {
+      if (elm instanceof CgContainer) {
         elm.boardElement.eraseSelectionDrawing();
       }
     });
   }
 
   public startDrag(startPoint: IWorldCoords) {
-    this.container.children.forEach((elm) => {
-      if (elm instanceof BoardElementContainer) {
+    this.getAllContents().forEach((elm) => {
+      if (elm instanceof CgContainer) {
         elm.boardElement.isDragging = true;
 
         if (elm.boardElement instanceof Memo) {
@@ -135,8 +119,8 @@ export default class Group extends BoardElement {
   }
 
   public stopDrag() {
-    this.container.children.forEach((elm) => {
-      if (elm instanceof BoardElementContainer) {
+    this.getAllContents().forEach((elm) => {
+      if (elm instanceof CgContainer) {
         elm.boardElement.isDragging = false;
 
         if (elm.boardElement instanceof Memo) {
@@ -148,15 +132,15 @@ export default class Group extends BoardElement {
   }
 
   public isElementInGroup(boardElement: BoardElement) {
-    return this.container.children.find(
-      (elm) => elm instanceof BoardElementContainer && elm.boardElement === boardElement,
+    return this.getAllContents().find(
+      (elm) => elm instanceof CgContainer && elm.boardElement === boardElement,
     );
   }
 
   public getGroupMembers() {
-    const boardElementContainers = this.container.children.filter(
-      (elm) => elm instanceof BoardElementContainer,
-    ) as BoardElementContainer[];
+    const boardElementContainers = this.getAllContents().filter(
+      (elm) => elm instanceof CgContainer,
+    ) as CgContainer[];
     return boardElementContainers.map((elmC) => elmC.boardElement);
   }
 
@@ -184,12 +168,12 @@ export default class Group extends BoardElement {
     const initialScale = this.scale;
 
     if (this.container) {
-      const elementMap = new Map<BoardElementContainer, ITransforms>();
+      const elementMap = new Map<CgContainer, ITransforms>();
       const boardElements: BoardElement[] = [];
 
       // Prepare future position
-      this.container.children.forEach((elm) => {
-        if (elm instanceof BoardElementContainer) {
+      this.getAllContents().forEach((elm) => {
+        if (elm instanceof CgContainer) {
           elementMap.set(elm, {
             x: this.x + elm.x * this.scale,
             y: this.y + elm.y * this.scale,
@@ -231,7 +215,7 @@ export default class Group extends BoardElement {
       boardElement.y *= fScale;
       boardElement.scale *= fScale;
 
-      this.container.addChild(boardElement.container);
+      this.addElement(boardElement.container);
       boardElement.inGroup = this;
     });
 
@@ -239,8 +223,8 @@ export default class Group extends BoardElement {
     // Find leftMostX and leftMostY point, which will be group's new position
     let leftMostX = Infinity;
     let leftMostY = Infinity;
-    this.container.children.forEach((elm) => {
-      if (elm instanceof BoardElementContainer) {
+    this.getAllContents().forEach((elm) => {
+      if (elm instanceof CgContainer) {
         if (elm.x < leftMostX) leftMostX = elm.x;
         if (elm.y < leftMostY) leftMostY = elm.y;
       }
@@ -251,15 +235,15 @@ export default class Group extends BoardElement {
     this.y = leftMostY / fScale;
 
     // Shift children to their prev position
-    this.container.children.forEach((elm) => {
-      if (elm instanceof BoardElementContainer) {
+    this.getAllContents().forEach((elm) => {
+      if (elm instanceof CgContainer) {
         elm.x = elm.x - leftMostX;
         elm.y = elm.y - leftMostY;
       }
     });
 
     // Apply needed group scale
-    this.scale = initialScale;
+    this.scaleX = initialScale;
     // this.container.cacheAsBitmap = true;
 
     // Draw for debug

@@ -1,4 +1,4 @@
-import GraphicsEngine from './GraphicsEngine';
+import { CgEngine } from './GraphicsEngine';
 import Viewport from './Viewport';
 import StageEvents from './InteractionEvents/StageEvents';
 import Keyboard from './InteractionEvents/Keyboard';
@@ -20,7 +20,7 @@ declare global {
 }
 
 export default class FlowApp {
-  public readonly engine: GraphicsEngine;
+  public readonly engine: CgEngine;
   public readonly hostHTML: HTMLElement;
   public readonly viewport: Viewport;
   public readonly devMonitor: DevMonitor | null; // TODO: replace for "Debug" with included prod logic
@@ -36,7 +36,7 @@ export default class FlowApp {
   constructor(targetDiv: HTMLElement) {
     this.env = process.env.NODE_ENV;
     this.hostHTML = targetDiv;
-    this.engine = new GraphicsEngine(this);
+    this.engine = new CgEngine(this);
     // this.devMonitor = new DevMonitor();
     this.devMonitor = null;
     this.stageEvents = new StageEvents(this);
