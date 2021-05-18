@@ -1,157 +1,69 @@
 import * as PIXI from 'pixi.js';
-import { IPoint } from '../../types/global';
+import { CgObject } from './index';
 
-export class CgContainer {
-  c = new PIXI.Container();
-  isScaleFromCenter = false;
+export interface ICgContainerCompatible {
+  cgObj: CgObject['cgObj'];
+}
 
-  constructor() {
-    this.c = new PIXI.Container();
-    this.c.sortableChildren = true;
+export class CgContainer extends CgObject implements ICgContainerCompatible {
+  store = new Array<ICgContainerCompatible>();
+  indexHashes = new Map<string, number>();
+
+  constructor(public cgContainer = new PIXI.Container()) {
+    super(cgContainer);
   }
 
-  destroy() {
-    this.c.destroy({
-      children: true,
-      texture: true,
-      baseTexture: true,
+  prependElement(element: ICgContainerCompatible): string {
+    // Engine bindings
+    this.cgContainer.addChild(element.cgObj);
+    this.cgContainer.setChildIndex(element.cgObj, 0);
+
+    // CgContainer hashed array store
+    const hash = Math.random().toString(32).slice(2);
+
+    const newIndex = new Map<string, number>();
+    newIndex.set(hash, 0);
+    this.indexHashes.forEach((index, hash) => {
+      newIndex.set(hash, index + 1);
     });
+
+    this.indexHashes = newIndex;
+    this.store = [element, ...this.store];
+    return hash;
   }
 
-  get x() {
-    return this.c.x;
-  }
-
-  set x(val: number) {
-    this.c.x = val;
-  }
-
-  get y() {
-    return this.c.y;
-  }
-
-  set y(val: number) {
-    this.c.y = val;
-  }
-
-  get scaleX() {
-    return this.c.scale.x;
-  }
-
-  set scaleX(val: number) {
-    this.c.scale.x = val;
-  }
-
-  get scaleY() {
-    return this.c.scale.y;
-  }
-
-  set scaleY(val: number) {
-    this.c.scale.y = val;
-  }
-
-  get alpha() {
-    return this.c.alpha;
-  }
-
-  set alpha(val: number) {
-    this.c.alpha = val;
-  }
-
-  get zIndex() {
-    return this.c.zIndex;
-  }
-
-  set zIndex(val: number) {
-    this.c.zIndex = val;
-  }
-
-  get pivotX() {
-    return this.c.pivot.x;
-  }
-
-  set pivotX(val: number) {
-    this.c.pivot.x = val;
-  }
-
-  get pivotY() {
-    return this.c.pivot.y;
-  }
-
-  set pivotY(val: number) {
-    this.c.pivot.y = val;
-  }
-
-  /** width/height  Implemented in Container. Scaling. The width property calculates scale.x/scale.y by dividing
-   * the "requested" width/height by the local bounding box width/height. It is indirectly an abstraction over scale.x/scale.y,
-   * and there is no concept of user-defined width. https://pixijs.download/dev/docs/PIXI.DisplayObject.html */
-
-  /** First, remember that in pixi, width and height are just another way of expressing scale.
-   // Second, a containers width and height are expressed by the bounds of its children, but express no dimensions themselves.
-   // https://github.com/pixijs/pixi.js/issues/4990#issuecomment-401556950 */
-
-  // set width(val: number) {
-  //   this.container.width = val;
-  // }
-
-  // set height(val: number) {
-  //   this.container.height = val;
-  // }
-
-  get width() {
-    return this.c.width;
-  }
-
-  get height() {
-    return this.c.height;
-  }
-
-  getCenterX(): number {
-    return this.c.x + this.c.width / 2;
-  }
-
-  getCenterY(): number {
-    return this.c.y + this.c.height / 2;
-  }
-
-  setUniformScaleBase(type: 'topLeft' | 'center' = 'topLeft') {
-    this.isScaleFromCenter = type === 'center';
-  }
-
-  setUniformScale(val: number) {
-    if (this.isScaleFromCenter) {
-      // offset approach
-      const oWidth = this.c.width;
-      const oHeight = this.c.height;
-
-      this.c.scale.x = val;
-      this.c.scale.y = val;
-
-      const width = this.c.width;
-      const height = this.c.height;
-
-      this.c.position.x -= (width - oWidth) / 2;
-      this.c.position.y -= (height - oHeight) / 2;
-    } else {
-      this.scaleX = val;
-      this.scaleY = val;
+  getElement(hash: string): ICgContainerCompatible | undefined {
+    const index = this.indexHashes.get(hash);
+    if (index) {
+      return this.store[index];
     }
   }
 
-  getScale(): IPoint {
-    return { x: this.scaleX, y: this.scaleY };
+  getElementsIndex(hash: string): number | undefined {
+    return this.indexHashes.get(hash);
   }
 
-  // public addChild<TChildren extends PIXI.DisplayObject[]>(...children: TChildren): TChildren[0] {
-  //   const originReturn = super.addChild.call(this, ...arguments);
-  //   // if (this instanceof Memo) {
-  //   //   this.updateCenterPivot();
-  //   // }
-  //   return originReturn;
-  // }
-  //
-  // public updateCenterPivot() {
-  //   this.pivot.x = this.width / 2;
-  //   this.pivot.y = this.height / 2;
-  // }
+  deleteElement(hash: string): boolean {
+    const element = this.getElement(hash);
+    const elementIdx = this.getElementsIndex(hash);
+    if (element && elementIdx) {
+      this.cgContainer.removeChild(element.cgObj);
+      this.store = [...this.store.slice(0, elementIdx), ...this.store.slice(elementIdx + 1)];
+      this.indexHashes.delete(hash);
+
+      // Re-arrange engine indexes
+      this.indexHashes.forEach((index, hash) => {
+        const el = this.getElement(hash);
+        if (el) {
+          this.cgContainer.setChildIndex(el.cgObj, index);
+        }
+      });
+      return true;
+    }
+    return false;
+  }
+
+  getAllElements(): ICgContainerCompatible[] {
+    return this.store;
+  }
 }

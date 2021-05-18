@@ -1,9 +1,7 @@
-import { gsap } from 'gsap';
 import Group from './Group';
-import { IGsapProps } from '../types/global';
 import { IWorldCoords } from './Viewport';
 import Board, { BoardElementId, BoardElementType } from './Board';
-import { CgDrawContainer, CgInteractiveContainer } from './GraphicsEngine';
+import { CgDrawContainer, CgInteractiveObject, animateCgObject } from './GraphicsEngine';
 
 export interface IBoardElementPublicState {
   id: BoardElementId;
@@ -14,23 +12,16 @@ export interface IBoardElementPublicState {
   scaleY: number;
 }
 
-export default class BoardElement extends CgInteractiveContainer {
+export default class BoardElement extends CgInteractiveObject {
   public readonly id: string;
   public publicState: IBoardElementPublicState;
   public cgDrawContainer = new CgDrawContainer();
   public inGroup: Group | undefined = undefined;
 
-  public selectionDrawing = new CgDrawContainer();
-
   constructor(public board: Board, id?: BoardElementId) {
     super(board.engine, board.viewport);
-
     this.id = id ? id : Math.random().toString(32).slice(2);
     this.cgDrawContainer.addGraphics('selectionDrawing');
-
-    // TODO: it looks like this state should have fields which have
-    //  getters to obtain plain text data for "DepositState"
-    //  setters to trigger updates properly
     this.publicState = {
       id: this.id,
       type: 'BoardElement',
@@ -42,10 +33,7 @@ export default class BoardElement extends CgInteractiveContainer {
   }
 
   public delete(hard: boolean = false) {
-    // TODO: need to delete from state?
-    //  when we would be really ready to destroy?
-    //  probably this need two variations: soft/hard deletion (same as board.deleteBoardElement)
-    // temporary, just wipe it out without opt to "redo" the deletion
+    // TODO: probably this need two variations: soft/hard deletion (same as board.deleteBoardElement)
     this.destroy();
   }
 
@@ -82,7 +70,7 @@ export default class BoardElement extends CgInteractiveContainer {
   }
 
   public eraseSelectionDrawing() {
-    this.cgDrawContainer.clear('selectionDrawing');
+    this.cgDrawContainer.clearGraphics('selectionDrawing');
   }
 
   public startDrag(startPoint: IWorldCoords) {
@@ -97,30 +85,19 @@ export default class BoardElement extends CgInteractiveContainer {
     this.zIndex = 0;
   }
 
-  // TODO: extract this into "Graphics Engine"
-  public animateBoardElement(
-    boardElementProps: Partial<BoardElement>,
-    gsapProps?: IGsapProps,
-  ): Promise<Partial<BoardElement>> {
+  public async animateBoardElement(boardElementProps: Partial<BoardElement>): Promise<Partial<BoardElement>> {
     this.isScaleFromCenter = true;
-    return new Promise((resolve) => {
-      gsap.to(this, {
-        ...boardElementProps,
-        duration: 0.5,
-        ease: 'power3.out',
-        ...gsapProps,
-        onStart: () => {
-          this.zIndex = 1;
-        },
-        onUpdate: () => {
-          if (this.isSelected) this.drawSelection();
-        },
-        onComplete: () => {
-          this.zIndex = 0; // bring back zIndex after sorting operation
-          this.isScaleFromCenter = false;
-          resolve({ ...boardElementProps });
-        },
-      });
+    return animateCgObject(this, boardElementProps, {
+      onStart: () => {
+        this.zIndex = 1;
+      },
+      onUpdate: () => {
+        if (this.isSelected) this.drawSelection();
+      },
+      onComplete: () => {
+        this.zIndex = 0; // bring back zIndex after sorting operation
+        this.isScaleFromCenter = false;
+      },
     });
   }
 }

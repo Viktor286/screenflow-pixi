@@ -266,14 +266,14 @@ export default class TimedGesture {
     );
   };
 
-  public wasBoardElementMovedFromStartDragPoint(boardElement: BoardElement, gestureEvent: IGestureEvent) {
-    return (
-      boardElement &&
-      boardElement.startDragPoint &&
-      gestureEvent.worldClick.wX !== boardElement.startDragPoint.wX &&
-      gestureEvent.worldClick.wY !== boardElement.startDragPoint.wY
-    );
-  }
+  // public wasBoardElementMovedFromStartDragPoint(boardElement: BoardElement, gestureEvent: IGestureEvent) {
+  //   return (
+  //     boardElement &&
+  //     boardElement.startDragPoint &&
+  //     gestureEvent.worldClick.wX !== boardElement.startDragPoint.wX &&
+  //     gestureEvent.worldClick.wY !== boardElement.startDragPoint.wY
+  //   );
+  // }
 
   // private isPointerMoving(e: IGestureEvent) {
   //   const { sX, sY } = this.app.viewport.getScreenCoordsFromMouse();
@@ -299,7 +299,7 @@ export default class TimedGesture {
   //
   // public resetGlc() {
   //   this.addToGlcHistory();
-  //   this.gLifeCycle.clear();
+  //   this.gLifeCycle.clearGraphics();
   // }
   //
   // public getGlcTimestamp(prev?: number) {

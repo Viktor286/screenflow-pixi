@@ -3,7 +3,7 @@ import BoardElement from './BoardElement';
 import Memo, { IMemoSettings } from './Memo';
 import Group, { IGroupSettings } from './Group';
 import Viewport, { IWorldCoords } from './Viewport';
-import { CgEngine, CgContainer } from './GraphicsEngine';
+import { CgEngine, CgObject } from './GraphicsEngine';
 
 export type BoardElementId = string | undefined;
 export type BoardElementType = 'BoardElement' | 'Memo' | 'Group';
@@ -63,7 +63,7 @@ export default class Board {
 
   public addElementToBoard<T extends BoardElement>(boardElement: T): T {
     boardElement.zIndex = 1;
-    this.app.viewport.addToViewport(boardElement.c);
+    this.app.viewport.addToViewport(boardElement.cgObj);
     return boardElement;
   }
 
@@ -78,12 +78,12 @@ export default class Board {
     return true;
   }
 
-  public resetBoard() {
-    // Looks like in order to fully reset the board we just need to remove all board elements
-    const allBoardElements = this.getAllBoardElements();
-    allBoardElements.forEach((el) => this.deleteBoardElement(el, true));
-    return true;
-  }
+  // public resetBoard() {
+  //   // Looks like in order to fully reset the board we just need to remove all board elements
+  //   const allBoardElements = this.getAllBoardElements();
+  //   allBoardElements.forEach((el) => this.deleteBoardElement(el, true));
+  //   return true;
+  // }
 
   public startDragElement(
     boardElement: BoardElement,
@@ -106,39 +106,39 @@ export default class Board {
     boardElement.stopDrag();
   }
 
-  public getElementById(elementId: string): BoardElement | null {
-    const displayObjects = this.app.viewport.instance.children.filter(
-      (el) => el instanceof CgContainer && el.boardElement.id === elementId,
-    ) as CgContainer[];
-
-    return displayObjects.length > 0 ? displayObjects[0].boardElement : null;
-  }
-
-  public getAllBoardElements() {
-    // API design: Should we get all elements in a flat way, including inner group members?
-
-    const displayObjects = this.app.viewport.instance.children.filter(
-      (el) => el instanceof CgContainer,
-    ) as CgContainer[];
-
-    return displayObjects.map((container) => container.boardElement) as BoardElement[];
-  }
-
-  public getAllMemos(): Memo[] {
-    const displayObjects = this.app.viewport.instance.children.filter(
-      (el) => el instanceof CgContainer && el.boardElement instanceof Memo,
-    ) as CgContainer[];
-
-    return displayObjects.map((container) => container.boardElement) as Memo[];
-  }
-
-  public getAllGroups() {
-    const displayObjects = this.app.viewport.instance.children.filter(
-      (el) => el instanceof CgContainer && el.boardElement instanceof Group,
-    ) as CgContainer[];
-
-    return displayObjects.map((container) => container.boardElement);
-  }
+  // public getElementById(elementId: string): BoardElement | null {
+  //   const displayObjects = this.app.viewport.instance.children.filter(
+  //     (el) => el instanceof CgObject && el.boardElement.id === elementId,
+  //   ) as CgObject[];
+  //
+  //   return displayObjects.length > 0 ? displayObjects[0].boardElement : null;
+  // }
+  //
+  // public getAllBoardElements() {
+  //   // API design: Should we get all elements in a flat way, including inner group members?
+  //
+  //   const displayObjects = this.app.viewport.instance.children.filter(
+  //     (el) => el instanceof CgObject,
+  //   ) as CgObject[];
+  //
+  //   return displayObjects.map((container) => container.boardElement) as BoardElement[];
+  // }
+  //
+  // public getAllMemos(): Memo[] {
+  //   const displayObjects = this.app.viewport.instance.children.filter(
+  //     (el) => el instanceof CgObject && el.boardElement instanceof Memo,
+  //   ) as CgObject[];
+  //
+  //   return displayObjects.map((container) => container.boardElement) as Memo[];
+  // }
+  //
+  // public getAllGroups() {
+  //   const displayObjects = this.app.viewport.instance.children.filter(
+  //     (el) => el instanceof CgObject && el.boardElement instanceof Group,
+  //   ) as CgObject[];
+  //
+  //   return displayObjects.map((container) => container.boardElement);
+  // }
 
   public sendEventToMonitor(boardElement: BoardElement, eventName: string, msg: string = '') {
     if (this.app.devMonitor) {

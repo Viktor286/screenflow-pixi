@@ -58,7 +58,7 @@ export default class Memo extends BoardElement {
 
   public drawSelection(): void {
     const groupFactor = this.inGroup ? this.inGroup.scaleX : 1;
-    this.selectionDrawing.drawRectWithRoundedCorners({
+    this.cgDrawContainer.drawRectWithRoundedCorners('selectionDrawing', {
       width: this.width / this.scaleX,
       height: this.height / this.scaleX,
       lineWidth: 4 / this.board.viewport.scale / this.scaleX / groupFactor,

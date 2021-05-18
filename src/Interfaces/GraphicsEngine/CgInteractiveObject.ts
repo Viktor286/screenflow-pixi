@@ -1,9 +1,9 @@
-import { CgContainer } from './CgContainer';
+import { CgObject } from './CgObject';
 import { CgEngine } from './CgEngine';
 import Viewport, { IWorldCoords } from '../Viewport';
 import { IPoint } from '../../types/global';
 
-export class CgInteractiveContainer extends CgContainer {
+export class CgInteractiveObject extends CgObject {
   public engine: CgEngine;
   public viewport: Viewport;
   public isSelected = false;
@@ -18,11 +18,11 @@ export class CgInteractiveContainer extends CgContainer {
   }
 
   public enableInteractive() {
-    this.c.interactive = true;
+    this.cgObj.interactive = true;
   }
 
   public disableInteractive() {
-    this.c.interactive = false;
+    this.cgObj.interactive = false;
   }
 
   public onDrag = (delta: any) => {
