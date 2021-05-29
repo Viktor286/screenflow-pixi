@@ -3,7 +3,7 @@ import BoardElement from './BoardElement';
 import Memo, { IMemoSettings } from './Memo';
 import Group, { IGroupSettings } from './Group';
 import Viewport, { IWorldCoords } from './Viewport';
-import { CgEngine, CgObject } from './GraphicsEngine';
+import { CgEngine } from './GraphicsEngine';
 
 export type BoardElementId = string | undefined;
 export type BoardElementType = 'BoardElement' | 'Memo' | 'Group';
@@ -38,18 +38,26 @@ export default class Board {
   }
 
   public createBoardElement(
-    type: BoardElementType,
-    id: BoardElementId,
+    type: BoardElementType = 'BoardElement',
+    id?: BoardElementId,
     settings?: IMemoSettings | IGroupSettings,
   ) {
+    let boardElement;
+
     switch (type) {
       case 'BoardElement':
-        return new BoardElement(this, id);
+        boardElement = new BoardElement(this, id);
+        break;
       case 'Memo':
-        return new Memo(this, id, settings as IMemoSettings);
+        boardElement = new Memo(this, id, settings as IMemoSettings);
+        break;
       case 'Group':
-        return new Group(this, id, settings as IGroupSettings);
+        boardElement = new Group(this, id, settings as IGroupSettings);
+        break;
     }
+
+    this.viewport.addBoardElementToViewport(boardElement);
+    return boardElement;
   }
 
   // // TODO: this is currently a temp shortcut method, we need to add elements properly through the actions (state update)
@@ -108,8 +116,8 @@ export default class Board {
 
   // public getElementById(elementId: string): BoardElement | null {
   //   const displayObjects = this.app.viewport.instance.children.filter(
-  //     (el) => el instanceof CgObject && el.boardElement.id === elementId,
-  //   ) as CgObject[];
+  //     (el) => el instanceof CgBaseObject && el.boardElement.id === elementId,
+  //   ) as CgBaseObject[];
   //
   //   return displayObjects.length > 0 ? displayObjects[0].boardElement : null;
   // }
@@ -118,24 +126,24 @@ export default class Board {
   //   // API design: Should we get all elements in a flat way, including inner group members?
   //
   //   const displayObjects = this.app.viewport.instance.children.filter(
-  //     (el) => el instanceof CgObject,
-  //   ) as CgObject[];
+  //     (el) => el instanceof CgBaseObject,
+  //   ) as CgBaseObject[];
   //
   //   return displayObjects.map((container) => container.boardElement) as BoardElement[];
   // }
   //
   // public getAllMemos(): Memo[] {
   //   const displayObjects = this.app.viewport.instance.children.filter(
-  //     (el) => el instanceof CgObject && el.boardElement instanceof Memo,
-  //   ) as CgObject[];
+  //     (el) => el instanceof CgBaseObject && el.boardElement instanceof Memo,
+  //   ) as CgBaseObject[];
   //
   //   return displayObjects.map((container) => container.boardElement) as Memo[];
   // }
   //
   // public getAllGroups() {
   //   const displayObjects = this.app.viewport.instance.children.filter(
-  //     (el) => el instanceof CgObject && el.boardElement instanceof Group,
-  //   ) as CgObject[];
+  //     (el) => el instanceof CgBaseObject && el.boardElement instanceof Group,
+  //   ) as CgBaseObject[];
   //
   //   return displayObjects.map((container) => container.boardElement);
   // }

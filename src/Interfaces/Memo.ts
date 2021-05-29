@@ -28,7 +28,7 @@ export default class Memo extends BoardElement {
       mediaSource: this.mediaSource,
     };
 
-    this.addElement(this.contentElement.container);
+    // this.addElement(this.contentElement.container);
     this.enableInteractive();
     this.drawSelection();
   }

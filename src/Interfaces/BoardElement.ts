@@ -1,7 +1,7 @@
 import Group from './Group';
 import { IWorldCoords } from './Viewport';
 import Board, { BoardElementId, BoardElementType } from './Board';
-import { CgDrawContainer, CgInteractiveObject, animateCgObject } from './GraphicsEngine';
+import { CgDrawContainer, CgInteractiveContainer, animateCgObject } from './GraphicsEngine';
 
 export interface IBoardElementPublicState {
   id: BoardElementId;
@@ -12,7 +12,7 @@ export interface IBoardElementPublicState {
   scaleY: number;
 }
 
-export default class BoardElement extends CgInteractiveObject {
+export default class BoardElement extends CgInteractiveContainer {
   public readonly id: string;
   public publicState: IBoardElementPublicState;
   public cgDrawContainer = new CgDrawContainer();
@@ -21,10 +21,14 @@ export default class BoardElement extends CgInteractiveObject {
   constructor(public board: Board, id?: BoardElementId) {
     super(board.engine, board.viewport);
     this.id = id ? id : Math.random().toString(32).slice(2);
-    this.cgDrawContainer.addGraphics('selectionDrawing');
+
+    this.cgDrawContainer.createGraphics('selectionDrawing');
+    this.prependElement(this.cgDrawContainer);
+
+    // inner to public state mapping
     this.publicState = {
-      id: this.id,
       type: 'BoardElement',
+      id: this.id,
       x: this.x,
       y: this.y,
       scaleX: this.scaleX,

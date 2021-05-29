@@ -1,6 +1,6 @@
 import { gsap } from 'gsap';
 // import { IGsapProps } from '../../types/global'; // for aditional props
-import { CgObject } from './index';
+import { CgBaseObject } from './index';
 
 interface IAnimationCallbacks {
   onStart(): void;
@@ -11,10 +11,10 @@ interface IAnimationCallbacks {
 const fn = function () {};
 
 export function animateCgObject(
-  cgObject: CgObject,
-  CgObjectProps: Partial<CgObject>,
+  cgObject: CgBaseObject,
+  CgObjectProps: Partial<CgBaseObject>,
   { onStart = fn, onUpdate = fn, onComplete = fn }: Partial<IAnimationCallbacks>,
-): Promise<Partial<CgObject>> {
+): Promise<Partial<CgBaseObject>> {
   cgObject.isScaleFromCenter = true;
   return new Promise((resolve) => {
     gsap.to(cgObject, {

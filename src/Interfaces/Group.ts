@@ -3,7 +3,7 @@ import BoardElement from './BoardElement';
 import { IWorldCoords } from './Viewport';
 // import Memo from './Memo';
 import Board, { BoardElementId } from './Board';
-import { CgObject } from './GraphicsEngine';
+import { CgBaseObject } from './GraphicsEngine';
 
 export interface IGroupSettings {
   isTempGroup: boolean;
@@ -15,7 +15,7 @@ export interface IExplodedGroup {
 }
 
 export default class Group extends BoardElement {
-  public leftMostChild: CgObject | undefined;
+  public leftMostChild: CgBaseObject | undefined;
   public isTempGroup: boolean = true;
 
   constructor(public board: Board, id: BoardElementId, settings: IGroupSettings = { isTempGroup: false }) {
@@ -23,7 +23,7 @@ export default class Group extends BoardElement {
     this.isTempGroup = settings.isTempGroup;
     this.zIndex = 1;
     this.enableInteractive();
-    this.cgDrawContainer.addGraphics('groupBorder');
+    this.cgDrawContainer.createGraphics('groupBorder');
     // this.cgObj.sortableChildren = true;
 
     this.publicState = {
@@ -84,7 +84,7 @@ export default class Group extends BoardElement {
 
   public startDrag(startPoint: IWorldCoords) {
     // this.getAllContents().forEach((elm) => {
-    //   if (elm instanceof CgObject) {
+    //   if (elm instanceof CgBaseObject) {
     //     elm.boardElement.isDragging = true;
     //
     //     if (elm.boardElement instanceof Memo) {
@@ -97,7 +97,7 @@ export default class Group extends BoardElement {
 
   public stopDrag() {
     // this.getAllContents().forEach((elm) => {
-    //   if (elm instanceof CgObject) {
+    //   if (elm instanceof CgBaseObject) {
     //     elm.boardElement.isDragging = false;
     //
     //     if (elm.boardElement instanceof Memo) {
@@ -109,13 +109,13 @@ export default class Group extends BoardElement {
   }
 
   public isElementInGroup(boardElement: BoardElement) {
-    // return this.getAllContents().find((elm) => elm instanceof CgObject && elm.boardElement === boardElement);
+    // return this.getAllContents().find((elm) => elm instanceof CgBaseObject && elm.boardElement === boardElement);
   }
 
   public getGroupMembers() {
     // const boardElementContainers = this.getAllContents().filter(
-    //   (elm) => elm instanceof CgObject,
-    // ) as CgObject[];
+    //   (elm) => elm instanceof CgBaseObject,
+    // ) as CgBaseObject[];
     // return boardElementContainers.map((elmC) => elmC.boardElement);
   }
 
@@ -143,12 +143,12 @@ export default class Group extends BoardElement {
   //   const initialScale = this.scale;
   //
   //   if (this.container) {
-  //     const elementMap = new Map<CgObject, ITransforms>();
+  //     const elementMap = new Map<CgBaseObject, ITransforms>();
   //     const boardElements: BoardElement[] = [];
   //
   //     // Prepare future position
   //     this.getAllContents().forEach((elm) => {
-  //       if (elm instanceof CgObject) {
+  //       if (elm instanceof CgBaseObject) {
   //         elementMap.set(elm, {
   //           x: this.x + elm.x * this.scale,
   //           y: this.y + elm.y * this.scale,
@@ -199,7 +199,7 @@ export default class Group extends BoardElement {
   //   let leftMostX = Infinity;
   //   let leftMostY = Infinity;
   //   this.getAllContents().forEach((elm) => {
-  //     if (elm instanceof CgObject) {
+  //     if (elm instanceof CgBaseObject) {
   //       if (elm.x < leftMostX) leftMostX = elm.x;
   //       if (elm.y < leftMostY) leftMostY = elm.y;
   //     }
@@ -211,7 +211,7 @@ export default class Group extends BoardElement {
   //
   //   // Shift children to their prev position
   //   this.getAllContents().forEach((elm) => {
-  //     if (elm instanceof CgObject) {
+  //     if (elm instanceof CgBaseObject) {
   //       elm.x = elm.x - leftMostX;
   //       elm.y = elm.y - leftMostY;
   //     }

@@ -1,9 +1,9 @@
-import { CgObject } from './CgObject';
+import { CgContainer } from './CgContainer';
 import { CgEngine } from './CgEngine';
 import Viewport, { IWorldCoords } from '../Viewport';
 import { IPoint } from '../../types/global';
 
-export class CgInteractiveObject extends CgObject {
+export class CgInteractiveContainer extends CgContainer {
   public engine: CgEngine;
   public viewport: Viewport;
   public isSelected = false;

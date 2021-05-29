@@ -1,11 +1,13 @@
 import * as PIXI from 'pixi.js';
 import { IPoint } from '../../types/global';
-import { ICgContainerCompatible } from './CgContainer';
 
-export class CgObject implements ICgContainerCompatible {
+export class CgBaseObject {
   isScaleFromCenter = false;
+  dummy = new PIXI.Graphics();
 
-  constructor(public cgObj: PIXI.DisplayObject | PIXI.Container = new PIXI.DisplayObject()) {}
+  constructor(public cgObj: PIXI.Container = new PIXI.Container()) {
+    this.initDummyGraphics();
+  }
 
   destroy() {
     this.cgObj.destroy();
@@ -115,19 +117,18 @@ export class CgObject implements ICgContainerCompatible {
     return this.cgObj.scale.y * this.cgObj.getLocalBounds().height;
   }
 
-  getCenterX(): number {
-    return this.cgObj.x + this.width / 2;
+  public getCenter(): IPoint {
+    return {
+      x: this.cgObj.x + this.width / 2,
+      y: this.cgObj.y + this.height / 2,
+    };
   }
 
-  getCenterY(): number {
-    return this.cgObj.y + this.height / 2;
-  }
-
-  setUniformScaleBase(type: 'topLeft' | 'center' = 'topLeft') {
+  public setUniformScaleBase(type: 'topLeft' | 'center' = 'topLeft') {
     this.isScaleFromCenter = type === 'center';
   }
 
-  setUniformScale(val: number) {
+  public setUniformScale(val: number) {
     if (this.isScaleFromCenter) {
       // offset approach
       const oWidth = this.width;
@@ -145,6 +146,18 @@ export class CgObject implements ICgContainerCompatible {
       this.scaleX = val;
       this.scaleY = val;
     }
+  }
+
+  private initDummyGraphics() {
+    this.drawDummyGraphics({ opacity: 0.5 });
+    this.cgObj.addChild(this.dummy);
+  }
+
+  public drawDummyGraphics({ color = 0x00ff00, width = 100, height = 100, opacity = 1 }) {
+    this.dummy.beginFill(color, 0.1);
+    this.dummy.lineStyle(1, color).drawRect(0, 0, width, height);
+    this.dummy.endFill();
+    this.dummy.alpha = opacity;
   }
 
   // public addChild<TChildren extends PIXI.DisplayObject[]>(...children: TChildren): TChildren[0] {

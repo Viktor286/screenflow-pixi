@@ -1,17 +1,17 @@
 import * as PIXI from 'pixi.js';
-import { CgObject } from './CgObject';
-import { ICgContainerCompatible } from './CgContainer';
+import { CgContainer } from './CgContainer';
 
-export class CgDrawContainer extends CgObject implements ICgContainerCompatible {
+export class CgDrawContainer extends CgContainer {
   graphicContent = new Map<string, PIXI.Graphics>();
 
-  constructor(public cgContainer = new PIXI.Container()) {
-    super(cgContainer);
+  // eslint-disable-next-line @typescript-eslint/no-useless-constructor
+  constructor() {
+    super();
   }
 
-  addGraphics(gKey: string) {
+  createGraphics(gKey: string) {
     const g = new PIXI.Graphics();
-    this.cgContainer.addChild(g);
+    this.cgObj.addChild(g);
     this.graphicContent.set(gKey, g);
   }
 

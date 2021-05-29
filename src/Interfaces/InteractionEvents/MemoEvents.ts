@@ -25,30 +25,27 @@ export class MemoEvents {
     // Singe Press
     // Double Press
     // Triple Press
-
     // Singe Press + hold timer
     // Double Press + hold timer
-
     // Slide -- very unnatural for focus
     // maybe could be removed to slide-jump or edge-slide
-
     // Activate only required events for optimization purposes
-
     // Events for PIXI.Container: https://pixijs.download/dev/docs/PIXI.Container.html
     // Button example: https://pixijs.io/examples/#/interaction/interactivity.js
     // Mouse & touch events are normalized into
     // the pointer* events for handling different button events.
-    this.memo.container.interactive = true;
+    // this.memo.container.interactive = true;
     // Normalized "pointer" events
     // this.memo.on('pointermove', (e: MemoEvent) => this.memoPointerMove(e));
     // this.memo.on('pointercancel', (e: MemoEvent) => this.memoPointerCancel(e));
-    this.memo.container.on('pointerdown', (e: MemoEvent) => this.memoPointerDown(e));
+    // // USED IN PROD
+    // this.memo.container.on('pointerdown', (e: MemoEvent) => this.memoPointerDown(e));
     // this.memo.on('pointerout', (e: MemoEvent) => this.memoPointerOut(e));
     // this.memo.on('pointerover', (e: MemoEvent) => this.memoPointerOver(e));
     // this.memo.on('pointertap', (e: MemoEvent) => this.memoPointerTap(e));
-    this.memo.container.on('pointerup', (e: MemoEvent) => this.memoPointerUp(e));
+    // // USED IN PROD
+    // this.memo.container.on('pointerup', (e: MemoEvent) => this.memoPointerUp(e));
     // this.memo.on('pointerupoutside', (e: MemoEvent) => this.memoPointerUpOutside(e));
-
     // Touch-device specific events
     // this.memo.on('tap', (e: MemoEvent) => this.memoTap(e));
     // this.memo.on('touchstart', (e: MemoEvent) => this.memoTouchStart(e));
