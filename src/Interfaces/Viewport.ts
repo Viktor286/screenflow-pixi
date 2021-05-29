@@ -5,6 +5,7 @@ import FlowApp from './FlowApp';
 import { StageEvent } from './InteractionEvents/StageEvents';
 import SlideControls from './InteractionEvents/SlideControls';
 import { gsap } from 'gsap';
+import BoardElement from './BoardElement';
 
 export interface IWorldCoords {
   wX: number;
@@ -16,12 +17,8 @@ export interface IScreenCoords {
   sY: number;
 }
 
-export interface IViewportInstance extends PixiViewport {
-  [key: string]: any;
-}
-
 export default class Viewport {
-  public readonly instance: IViewportInstance;
+  public readonly instance: PixiViewport;
   public readonly engine: CgEngine;
   public readonly slideControls: SlideControls;
   public readonly zoomScales: number[] = [0.03125, 0.0625, 0.125, 0.25, 0.5, 1, 2, 4, 8, 16, 32];
@@ -31,6 +28,7 @@ export default class Viewport {
 
   constructor(public app: FlowApp) {
     this.engine = app.engine;
+
     this.instance = new PixiViewport({
       screenWidth: this.app.hostHTMLWidth,
       screenHeight: this.app.hostHTMLHeight,
@@ -130,7 +128,7 @@ export default class Viewport {
 
   public getWorldScreenCoordsFromEvent(e: StageEvent): IWorldCoords {
     const screenClick: IScreenCoords = this.getScreenCoordsFromEvent(e);
-    return this.app.viewport.screenToWorld(screenClick);
+    return this.screenToWorld(screenClick);
   }
 
   public getNextScaleStepDown(runAhead: number): number {
@@ -198,6 +196,10 @@ export default class Viewport {
     return this.instance.addChildAt(displayObject, index);
   }
 
+  public addBoardElementToViewport(boardElement: BoardElement): void {
+    this.instance.addChildAt(boardElement.cgObj, 0);
+  }
+
   public removeFromViewport(displayObject: PIXI.DisplayObject): PIXI.DisplayObject {
     return this.instance.removeChild(displayObject);
   }
@@ -245,24 +247,24 @@ export default class Viewport {
   }
 
   public findScaleFit(width: number, height: number) {
-    return this.app.viewport.instance.findFit(width, height);
+    return this.instance.findFit(width, height);
   }
 
   public viewportPropsConversion(targetPoint?: IWorldCoords, targetScale?: number) {
     if (!targetPoint) {
-      targetPoint = this.app.viewport.getScreenCenterInWord();
+      targetPoint = this.getScreenCenterInWord();
     }
 
     if (targetScale === undefined) {
-      targetScale = this.app.viewport.scale;
+      targetScale = this.scale;
     }
 
     if (targetScale >= 32) targetScale = 32;
     if (targetScale <= 0.01) targetScale = 0.01;
 
     return {
-      x: (this.app.viewport.screenWidth / targetScale / 2 - targetPoint.wX) * targetScale,
-      y: (this.app.viewport.screenHeight / targetScale / 2 - targetPoint.wY) * targetScale,
+      x: (this.screenWidth / targetScale / 2 - targetPoint.wX) * targetScale,
+      y: (this.screenHeight / targetScale / 2 - targetPoint.wY) * targetScale,
       scale: targetScale,
     };
   }
@@ -276,20 +278,20 @@ export default class Viewport {
       scale,
     };
     return new Promise((resolve) => {
-      gsap.to(this.app.viewport, {
+      gsap.to(this, {
         ...animateProps,
         duration: 0.5,
         ease: 'power3.out',
         onStart: () => {
-          // this.app.viewport.interactive = false;
+          // this.interactive = false;
         },
         onUpdate: () => {
           this.app.gui.stageBackTile.updateGraphics();
           this.app.board.updateSelectionGraphics();
         },
         onComplete: () => {
-          // this.app.viewport.interactive = true;
-          setTimeout(() => this.app.viewport.onViewportAnimationEnds()); // send exec to next frame
+          // this.interactive = true;
+          setTimeout(() => this.onViewportAnimationEnds()); // send exec to next frame
           resolve({ ...animateProps });
         },
       });
