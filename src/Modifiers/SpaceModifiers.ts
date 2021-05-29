@@ -12,36 +12,24 @@ export class SpaceModifiers {
     cellHeight: number = 100,
     scale: number = 1,
   ) {
-    let col = 0;
-    let row = 0;
-    let idx = 0;
-
-    const elements = app.board.state;
-
-    for (let eId in elements) {
-      if (Object.prototype.hasOwnProperty.call(elements, eId)) {
-        const x = (idx % colLimit) * cellWidth + cellWidth / 2;
-        if (col >= colLimit) {
-          col = 0;
-          row++;
-        }
-        col++;
-        const y = row * cellHeight + cellHeight / 2;
-
-        // Apply transforms
-        // TODO: how would we access state here?
-        //  we should return array of mutation orders
-        //  instead of modifying origin here here
-
-        app.stateManager.actions.board.moveElementById(eId, { wX: x, wY: y });
-        app.stateManager.actions.board.scaleElementById(eId, scale);
-
-        // elements[el].x = x;
-        // elements[el].y = y;
-        // elements[el].scale = scale;
-
-        idx++;
-      }
-    }
+    // let col = 0;
+    // let row = 0;
+    // let idx = 0;
+    //
+    // const elements = app.board.getAllMemos();
+    //
+    // elements.forEach((memo) => {
+    //   const x = (idx % colLimit) * cellWidth + cellWidth / 2;
+    //   if (col >= colLimit) {
+    //     col = 0;
+    //     row++;
+    //   }
+    //   col++;
+    //   const y = row * cellHeight + cellHeight / 2;
+    //   // Apply transforms
+    //   app.stateManager.setState(`board/${memo.id}`, { x, y, scale });
+    //
+    //   idx++;
+    // });
   }
 }

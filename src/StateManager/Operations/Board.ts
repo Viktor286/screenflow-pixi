@@ -1,35 +1,33 @@
+// @ts-nocheck
 import FlowApp from '../../Interfaces/FlowApp';
-import Helpers from '../Helpers';
-import { IPublicCameraState } from '../../Interfaces/Viewport';
+import { StateUpdateRequest } from '../StateUpdateRequest';
+import { PublicBoardState } from '../PublicState/Board';
+import { AsyncId } from '../index';
 
 export default class BoardOperations {
   constructor(public app: FlowApp) {}
 
-  updateBoardElement(address: string, property: string, value: number | IPublicCameraState) {
-    if (Helpers.isScopeWithSubDomain(address)) {
-      const { target: id } = Helpers.parseSubdomainScope(address);
-      const boardElement = this.app.board.state[id].element;
+  animate(stateUpdate: StateUpdateRequest, asyncId: AsyncId) {
+    const boardElement = this.app.board.getElementById(stateUpdate.location.target);
 
-      if (boardElement) {
-        // const stateElement = this.getStateElement(stateAddress);
-
-        if (property === 'animation' && typeof value === 'object') {
-          boardElement
-            .animateBoardElement(value)
-            .then((boardElementProps) =>
-              this.app.stateManager.setState(`/board/${boardElement.id}`, { ...boardElementProps }),
-            );
-          // stateElement.animationInProgress = updateValue;
-          return true;
-        }
-
-        // if (stateElement.animationInProgress) {
-        //   delete stateElement.animationInProgress;
-        // }
-
-        boardElement[property] = value;
-        return value;
-      }
+    if (boardElement) {
+      boardElement.animateBoardElement(stateUpdate.slice).then((boardElementProps) =>
+        this.app.stateManager.setState(`/board/${boardElement.id}`, boardElementProps, {
+          async: 'animated',
+          asyncId,
+        }),
+      );
     }
+  }
+
+  exec(property: string, value: PublicBoardState[keyof PublicBoardState], stateUpdate: StateUpdateRequest) {
+    console.log('>> stateUpdate', stateUpdate, property, value);
+
+    const boardElement = this.app.board.getElementById(stateUpdate.location.target);
+    if (!boardElement) return undefined;
+
+    // Apply assignment directly
+    boardElement[property] = value;
+    return value;
   }
 }

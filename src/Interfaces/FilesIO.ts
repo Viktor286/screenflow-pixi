@@ -1,6 +1,35 @@
 import * as PIXI from 'pixi.js';
 import { fileSave } from 'browser-nativefs';
 
+export function image2Canvas(image: HTMLImageElement): HTMLCanvasElement {
+  const document = window.document;
+  const canvas = document.createElement('canvas');
+  canvas.width = image.width;
+  canvas.height = image.height;
+  const ctx = canvas.getContext('2d');
+
+  if (ctx) {
+    ctx.drawImage(image, 0, 0);
+    return canvas;
+  } else {
+    throw new Error('Canvas creation failed');
+  }
+}
+
+export function canvas2PNGImage(canvas: HTMLCanvasElement): HTMLImageElement {
+  const document = window.document;
+  const image = document.createElement('img') as HTMLImageElement;
+  image.src = canvas.toDataURL();
+  return image;
+}
+
+export function canvas2JPEGImage(canvas: HTMLCanvasElement): HTMLImageElement {
+  const document = window.document;
+  const image = document.createElement('img') as HTMLImageElement;
+  image.src = canvas.toDataURL('image/jpeg');
+  return image;
+}
+
 // browser-nativefs docs
 // https://github.com/GoogleChromeLabs/browser-nativefs#api-documentation
 
@@ -12,7 +41,7 @@ export default class FilesIO {
     });
   }
 
-  static downloadFileToClient(data: Blob, filename: string, type: string) {
+  static downloadBlobToClient(data: Blob, filename: string, type: string) {
     const file = new Blob([data], { type: type });
     const a = document.createElement('a');
     const url = URL.createObjectURL(file);
@@ -34,6 +63,7 @@ export default class FilesIO {
       const imageElement = new Image();
       imageElement.setAttribute('src', imageObjectURL);
       imageElement.onload = () => {
+        // the Blob can be Garbage Collected
         URL.revokeObjectURL(imageObjectURL);
         resolve(imageElement);
       };

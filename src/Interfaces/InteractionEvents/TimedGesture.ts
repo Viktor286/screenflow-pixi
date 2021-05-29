@@ -1,6 +1,6 @@
 import StageEvents, { StageEvent } from './StageEvents';
 import FlowApp from '../FlowApp';
-import BoardElement, { BoardElementContainer } from '../BoardElement';
+import BoardElement from '../BoardElement';
 import { IScreenCoords, IWorldCoords } from '../Viewport';
 
 interface IGestureEvent extends StageEvent {
@@ -8,6 +8,8 @@ interface IGestureEvent extends StageEvent {
   worldClick: IWorldCoords;
   isBoardElementHit?: BoardElement | undefined;
 }
+
+// TODO: rename InteractionEvents into something like "input controllers"?
 
 // Timed-gestures event manager
 export default class TimedGesture {
@@ -96,11 +98,12 @@ export default class TimedGesture {
     const gestureEvent = this.getGestureEvent(e);
 
     if (this.app.board.isMemberDragging) {
-      const boardElement = this.app.board.getSelectedElement();
-      if (boardElement && this.wasBoardElementMovedFromStartDragPoint(boardElement, gestureEvent)) {
-        this.app.stateManager.actions.board.stopDragElement(boardElement);
-        this.awaiting = false;
-      }
+      // TODO: use board action here instead of direct interface
+      // const boardElement = this.app.board.selection.getSelectedElement();
+      // if (boardElement && this.wasBoardElementMovedFromStartDragPoint(boardElement, gestureEvent)) {
+      //   this.app.stateManager.actions.board.stopDragElement(boardElement);
+      //   this.awaiting = false;
+      // }
     }
 
     // Distinguish single click and double click handlers
@@ -145,19 +148,7 @@ export default class TimedGesture {
   // Timed-gestures special events
   // Press Up events
   private pressUpImmediate(e: IGestureEvent) {
-    // this.markGlc('Up I');
-
-    if (!this.app.board.isMemberDragging) {
-      if (e.isBoardElementHit instanceof BoardElement) {
-        this.app.stateManager.actions.board.selectElement(e.isBoardElementHit);
-        console.log(`pressUpImmediate Memo clicked "${e.isBoardElementHit.id}" `, e.isBoardElementHit);
-      } else {
-        if (!this.app.viewport.slideControls.isSliding) {
-          this.app.stateManager.actions.board.deselectElements();
-        }
-      }
-    }
-
+    this.app.stateManager.actions.board.selectBoardElement(e.isBoardElementHit);
     this.sendToMonitor('Immediate Press Up', e);
   }
 
@@ -189,7 +180,7 @@ export default class TimedGesture {
     // fitToArea Or ZoomIn
     if (gestureEvent.isBoardElementHit instanceof BoardElement) {
       this.app.stateManager.actions.viewport.fitToBoardElement(gestureEvent.isBoardElementHit);
-      this.app.stateManager.actions.board.selectElement(gestureEvent.isBoardElementHit);
+      this.app.stateManager.actions.board.selectBoardElement(gestureEvent.isBoardElementHit);
     } else {
       // this.app.stateManager.actions.viewport.zoomIn(e.worldClick);
       this.app.stateManager.actions.viewport.fitToBoard();
@@ -258,9 +249,9 @@ export default class TimedGesture {
       y: gestureEvent.screenClick.sY,
     });
 
-    if (hit instanceof BoardElementContainer) {
-      gestureEvent.isBoardElementHit = hit.boardElement;
-    }
+    // if (hit instanceof cgContainer) {
+    gestureEvent.isBoardElementHit = hit.boardElement;
+    // }
 
     return gestureEvent;
   }
@@ -275,14 +266,14 @@ export default class TimedGesture {
     );
   };
 
-  public wasBoardElementMovedFromStartDragPoint(boardElement: BoardElement, gestureEvent: IGestureEvent) {
-    return (
-      boardElement &&
-      boardElement.startDragPoint &&
-      gestureEvent.worldClick.wX !== boardElement.startDragPoint.wX &&
-      gestureEvent.worldClick.wY !== boardElement.startDragPoint.wY
-    );
-  }
+  // public wasBoardElementMovedFromStartDragPoint(boardElement: BoardElement, gestureEvent: IGestureEvent) {
+  //   return (
+  //     boardElement &&
+  //     boardElement.startDragPoint &&
+  //     gestureEvent.worldClick.wX !== boardElement.startDragPoint.wX &&
+  //     gestureEvent.worldClick.wY !== boardElement.startDragPoint.wY
+  //   );
+  // }
 
   // private isPointerMoving(e: IGestureEvent) {
   //   const { sX, sY } = this.app.viewport.getScreenCoordsFromMouse();
@@ -308,7 +299,7 @@ export default class TimedGesture {
   //
   // public resetGlc() {
   //   this.addToGlcHistory();
-  //   this.gLifeCycle.clear();
+  //   this.gLifeCycle.clearGraphics();
   // }
   //
   // public getGlcTimestamp(prev?: number) {

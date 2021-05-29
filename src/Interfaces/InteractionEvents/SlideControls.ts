@@ -80,7 +80,10 @@ export default class SlideControls {
     setTimeout(() => {
       this.isSliding = false;
     }, 200);
-    this.app.stateManager.actions.viewport.amendCameraState();
+
+    // TODO: Can we avoid this workaround for stateManager?
+    //  option: observable isSliding
+    // this.app.stateManager.actions.viewport.amendViewportState();
   };
 
   private onSliderZoomed = () => {

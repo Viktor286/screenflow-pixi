@@ -14,40 +14,49 @@ export default class ViewportActions {
   }
 
   public fitToBoardElement(boardElement: BoardElement) {
-    // rout to group if group's member
+    // route to group if group's member
     if (boardElement.inGroup) {
       boardElement = boardElement.inGroup;
     }
-    let { centerX, centerY, width, height } = boardElement;
-    this.fitToArea({ wX: centerX, wY: centerY }, width, height);
+    let { width, height } = boardElement;
+    let { x, y } = boardElement.getCenter();
+    this.fitToArea({ wX: x, wY: y }, width, height);
   }
 
   public fitToArea(targetPoint: IWorldCoords, width: number, height: number) {
     const targetScale = this.app.viewport.findScaleFit(width, height);
 
-    this.app.stateManager.setState('camera', {
-      animation: this.app.viewport.cameraPropsConversion(
+    this.app.stateManager.setState(
+      'viewport',
+      this.app.viewport.viewportPropsConversion(
         targetPoint,
         targetScale - (targetScale / 100) * this.app.viewport.fitAreaMarginPercent,
       ),
-    });
+      { async: 'animation' },
+    );
   }
 
   public moveTo(target: IWorldCoords, targetScale?: number) {
-    this.app.stateManager.setState('camera', {
-      animation: this.app.viewport.cameraPropsConversion(target, targetScale),
-    });
+    this.app.stateManager.setState(
+      'viewport',
+      this.app.viewport.viewportPropsConversion(target, targetScale),
+      {
+        async: 'animation',
+      },
+    );
   }
 
   public zoomIn(zoomPoint?: IWorldCoords) {
     if (this.runAheadZoomIn > 1) this.runAheadZoomIn = 1;
 
-    this.app.stateManager.setState('camera', {
-      animation: this.app.viewport.cameraPropsConversion(
+    this.app.stateManager.setState(
+      'viewport',
+      this.app.viewport.viewportPropsConversion(
         zoomPoint,
         this.app.viewport.getNextScaleStepUp(this.runAheadZoomIn),
       ),
-    });
+      { async: 'animation' },
+    );
 
     this.runAheadZoomIn += 1;
 
@@ -59,21 +68,22 @@ export default class ViewportActions {
 
   public zoom100(zoomPoint?: IWorldCoords) {
     const scale = 1;
-
-    this.app.stateManager.setState('camera', {
-      animation: this.app.viewport.cameraPropsConversion(zoomPoint, scale),
+    this.app.stateManager.setState('viewport', this.app.viewport.viewportPropsConversion(zoomPoint, scale), {
+      async: 'animation',
     });
   }
 
   public zoomOut(zoomPoint?: IWorldCoords) {
     if (this.runAheadZoomOut > 1) this.runAheadZoomOut = 1;
 
-    this.app.stateManager.setState('camera', {
-      animation: this.app.viewport.cameraPropsConversion(
+    this.app.stateManager.setState(
+      'viewport',
+      this.app.viewport.viewportPropsConversion(
         zoomPoint,
         this.app.viewport.getNextScaleStepDown(this.runAheadZoomOut),
       ),
-    });
+      { async: 'animation' },
+    );
 
     this.runAheadZoomOut += 1;
 
@@ -83,18 +93,16 @@ export default class ViewportActions {
     }, 700);
   }
 
-  public amendCameraState() {
-    const { x, y, cwX, cwY, scale } = this.app.viewport;
+  public amendViewportState() {
+    const { x, y, scale } = this.app.viewport;
     this.app.stateManager.setState(
-      'camera',
+      'viewport',
       {
         x,
         y,
-        cwX,
-        cwY,
         scale,
       },
-      true, // isNoOp
+      { noOp: true },
     );
   }
 }

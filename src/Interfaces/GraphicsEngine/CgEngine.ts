@@ -1,7 +1,7 @@
 import * as PIXI from 'pixi.js';
-import FlowApp from './FlowApp';
+import FlowApp from '../FlowApp';
 
-export default class GraphicsEngine {
+export class CgEngine {
   public readonly instance: PIXI.Application;
   public readonly stage: PIXI.Container;
   public readonly renderer: PIXI.Renderer;
@@ -72,12 +72,12 @@ export default class GraphicsEngine {
   }
 }
 
+// ** OTHER NOTES
+
 // import { gsap } from 'gsap';
 // import { PixiPlugin } from 'gsap/PixiPlugin';
 
 // PIXI documentation: https://pixijs.download/dev/docs/PIXI.html
-//
-// Module: node_modules/pixi.js/lib/pixi.es.js
 //
 // Code Examples:
 // sprite = new PIXI.Sprite(PIXI.loader.resources["images/anyImage.png"].texture);

@@ -1,10 +1,12 @@
+// @ts-nocheck
 import * as PIXI from 'pixi.js';
 import { fileOpen } from 'browser-nativefs';
 import JSZip from 'jszip';
 import FlowApp from './FlowApp';
 import FilesIO from './FilesIO';
-import Memo, { MemoSnapshot } from './Memo';
+import Memo from './Memo';
 import { IAppDepositState } from '../StateManager';
+import { IBoardImage } from './Board';
 
 export interface IProjectObject {
   fileName: string;
@@ -27,7 +29,7 @@ export default class Project {
   pack(): Promise<Blob> {
     return new Promise(async (resolve) => {
       const projectArchive = new JSZip();
-      projectArchive.file('application.json', this.app.stateManager.exportState());
+      projectArchive.file('application.json', this.app.stateManager.io.exportState());
 
       const memoSnapshotsPNG = await this.exportAllMemoSnapshotsPNG();
       // Save files into projectArchive
@@ -117,17 +119,15 @@ export default class Project {
 
           // set memo id
           const memoId = obj.fileName.split('.')[0];
-          const memo = new Memo(pixiTexture, this.app, memoId);
-          this.app.board.addElementToBoard(memo);
 
           // attach element ref to state
-          appDepositState.board[memoId].element = memo;
+          // appDepositState.board[memoId].element = memo;
 
           // todo: we need to finalize this mount API with localstorage system
           //   1. Project: save .zip project to localstorage
           //   2. Assets: (what advantage? 1. lazy sync with server, 2. quick ready state to reopen)
           //   save blobs(most likely)/Base64/PIXI.Texture localForage(IndexedDB)
-          //   3. camera separate in localstorage?
+          //   3. viewport separate in localstorage?
 
           n += 1;
 
@@ -159,7 +159,7 @@ export default class Project {
         }
       }
 
-      this.app.stateManager.importState(appDepositState);
+      this.app.stateManager.io.importState(appDepositState);
       this.app.engine.unpauseEngine();
     }
     console.log('Project doesnt seem to be valid');
@@ -181,7 +181,7 @@ export default class Project {
   extractedSnapshotsTotal: number = 0;
 
   private async memoSnapshotsExtraction(memo: Memo) {
-    const memoSnapshot = await memo.extractMemoSnapshot();
+    const memoSnapshot = await memo.contentElement.extractBoardImageObj();
     const arraybuffer = await memoSnapshot.data.arrayBuffer();
     this.extractedSnapshots++;
     console.log(
@@ -197,7 +197,7 @@ export default class Project {
     // TODO: this is temp "progress" tracking
     console.log(`[Export] image extraction started...`);
 
-    const pngExtractionArr: Promise<MemoSnapshot>[] = [];
+    const pngExtractionArr: Promise<IBoardImage>[] = [];
 
     const boardMemos = this.app.board.getAllMemos();
     this.extractedSnapshotsTotal = boardMemos.length;
@@ -231,14 +231,11 @@ export default class Project {
         // All project objects should be part of appState.board except 'application' file
         for (let i = 0; i < unpackedProject.length; i++) {
           const projObj = unpackedProject[i];
-          if (
-            projObj.fileName !== 'application' &&
-            !appState.boardOperations[projObj.fileName.split('.')[0]]
-          ) {
+          if (projObj.fileName !== 'application' && !appState.board[projObj.fileName.split('.')[0]]) {
             console.log(
               'The file in project folder not found on project board.',
               projObj.fileName,
-              appState.boardOperations,
+              appState.board,
             );
             return false;
           }
@@ -278,9 +275,9 @@ export default class Project {
 
     // TODO: fileSave from browser-nativefs causes error here because of long project build time?
     // await fileSave(projectFile, options, handle);
-    FilesIO.downloadFileToClient(projectFile, 'project.flow', 'application/zip');
+    FilesIO.downloadBlobToClient(projectFile, 'project.flow', 'application/zip');
 
     // await this.fileHandle.write
-    // FilesIO.downloadFileToClient(content, 'project.flow', 'application/zip');
+    // FilesIO.downloadBlobToClient(content, 'project.flow', 'application/zip');
   }
 }
