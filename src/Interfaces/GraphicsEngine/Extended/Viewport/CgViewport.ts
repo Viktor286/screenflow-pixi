@@ -69,18 +69,13 @@ export class CgViewport extends CgInteractiveContainer {
       this.app.engine.renderScreenHeight !== this.app.hostHTMLHeight
     ) {
       this.app.engine.resizeRenderScreen(this.app.hostHTMLWidth, this.app.hostHTMLHeight);
-      // this.app.cgSceneRoot.cgObj.width = this.app.hostHTMLWidth;
-      // this.app.cgSceneRoot.cgObj.height = this.app.hostHTMLHeight;
       this.resizeViewport(this.app.hostHTMLWidth, this.app.hostHTMLHeight);
-      console.log('resizeViewportHandler', this.app.engine.renderScreenWidth, this.app.hostHTMLHeight);
-      console.log('cgSceneRoot', this.app.cgSceneRoot.width, this.app.cgSceneRoot.height);
-      console.log('viewport', this.app.viewport.cgObj.width, this.app.viewport.cgObj.height);
     }
   };
 
   public resizeViewport(width: number, height: number) {
     this.pixiViewport.resize(width, height);
-    // this.app.gui.stageBackTile.updateDimensions(width, height);
+    this.app.gui.stageBackTile.updateDimensions(width, height);
   }
 
   // public getScreenCoordsFromEvent(e: StageEvent): IScreenCoords {
@@ -180,7 +175,7 @@ export class CgViewport extends CgInteractiveContainer {
           // this.interactive = false;
         },
         onUpdate: () => {
-          // this.app.gui.stageBackTile.updateGraphics();
+          this.app.gui.stageBackTile.updateGraphics();
           // this.app.board.updateSelectionGraphics();
         },
         onComplete: () => {

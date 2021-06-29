@@ -15,6 +15,7 @@ export class CgContainer extends CgBaseObject {
     this.cgObj.addChild(element.cgObj);
     this.cgObj.setChildIndex(element.cgObj, 0);
 
+    // TODO: make abstraction for this addition and other operations
     // CgContainer hashed array store
     const hash = Math.random().toString(32).slice(2);
 

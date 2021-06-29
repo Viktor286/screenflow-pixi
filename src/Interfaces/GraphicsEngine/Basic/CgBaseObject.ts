@@ -6,7 +6,7 @@ export class CgBaseObject {
   dummy = new PIXI.Graphics();
 
   constructor(public cgObj: PIXI.Container = new PIXI.Container()) {
-    // this.initDummyGraphics();
+    this.initDummyGraphics();
   }
 
   destroy() {

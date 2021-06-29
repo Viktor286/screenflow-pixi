@@ -67,7 +67,7 @@ export default class ViewportSlideControls {
       clearTimeout(this.moveEndTimer);
     }
 
-    // this.app.gui.stageBackTile.updateGraphics();
+    this.app.gui.stageBackTile.updateGraphics();
 
     this.moveEndTimer = setTimeout(this.onSliderEnd, 300); // lower than 300 values start throw doubles
   };

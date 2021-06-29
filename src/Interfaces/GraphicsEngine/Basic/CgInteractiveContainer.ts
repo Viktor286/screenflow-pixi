@@ -10,6 +10,7 @@ export class CgInteractiveContainer extends CgContainer {
 
   constructor(public cgObj: PIXI.Container = new PIXI.Container()) {
     super(cgObj);
+    // this.enableInteractive();
   }
 
   public enableInteractive() {

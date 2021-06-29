@@ -8,6 +8,7 @@ import GUI from './GUI';
 // import StateManager from '../StateManager';
 // import Project from './Project';
 import { CgViewport } from './GraphicsEngine/Extended/Viewport/CgViewport';
+import * as PIXI from 'pixi.js'; // temp object
 
 declare global {
   interface Window {
@@ -36,12 +37,21 @@ export default class FlowApp {
 
   constructor(targetDiv: HTMLElement) {
     this.env = process.env.NODE_ENV;
+
     this.hostHTML = targetDiv;
     this.engine = new CgEngine();
+    this.hostHTML.appendChild(this.engine.view);
     this.cgSceneRoot = new CgInteractiveContainer(this.engine.stage);
+
     this.viewport = new CgViewport(this);
     this.cgSceneRoot.prependElement(this.viewport);
-    // this.hostHTML.appendChild(this.engine.view);
+
+    // temp object
+    const sprite = this.viewport.cgObj.addChild(new PIXI.Sprite(PIXI.Texture.WHITE));
+    sprite.tint = 0xff0000;
+    sprite.width = sprite.height = 100;
+    sprite.position.set(100, 100);
+
     // this.devMonitor = new DevMonitor();
     this.devMonitor = null;
     // this.stageEvents = new StageEvents(this);
