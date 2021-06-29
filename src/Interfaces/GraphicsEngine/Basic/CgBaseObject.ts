@@ -1,5 +1,5 @@
 import * as PIXI from 'pixi.js';
-import { IPoint } from '../../types/global';
+import { IPoint } from '../../../types/global';
 
 export class CgBaseObject {
   isScaleFromCenter = false;

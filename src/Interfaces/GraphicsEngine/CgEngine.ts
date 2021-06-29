@@ -62,7 +62,10 @@ export class CgEngine {
     return this.instance.screen.height;
   }
 
+  public addToStage() {}
+
   public addDisplayObject(...children: PIXI.DisplayObject[]): PIXI.DisplayObject {
+    // this.instance.stage.interactive
     return this.instance.stage.addChild(...children);
   }
 
@@ -85,8 +88,3 @@ export class CgEngine {
     return { sX, sY };
   }
 }
-
-// ** OTHER NOTES
-
-// import { gsap } from 'gsap';
-// import { PixiPlugin } from 'gsap/PixiPlugin';

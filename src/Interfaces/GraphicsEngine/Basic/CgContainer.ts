@@ -1,5 +1,5 @@
 import * as PIXI from 'pixi.js';
-import { CgBaseObject } from './index';
+import { CgBaseObject } from '../index';
 
 export class CgContainer extends CgBaseObject {
   store = new Array<CgContainer>();
@@ -7,6 +7,7 @@ export class CgContainer extends CgBaseObject {
 
   constructor(public cgObj: PIXI.Container = new PIXI.Container()) {
     super(cgObj);
+    this.cgObj.sortableChildren = true;
   }
 
   prependElement(element: CgContainer): string {

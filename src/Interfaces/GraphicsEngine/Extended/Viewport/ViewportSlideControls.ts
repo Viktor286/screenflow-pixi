@@ -1,6 +1,7 @@
-import FlowApp from './FlowApp';
-import Viewport from './Viewport';
+import FlowApp from '../../../FlowApp';
+import { Viewport } from './CgViewport';
 
+// TODO: how to
 export default class ViewportSlideControls {
   public activated = false;
   public isSliding = false;
@@ -9,7 +10,7 @@ export default class ViewportSlideControls {
   constructor(public app: FlowApp, public viewport: Viewport) {}
 
   public installSlideControls() {
-    this.viewport.instance
+    this.viewport.pixiViewport
       .drag()
       .pinch({
         noDrag: true,
@@ -27,33 +28,33 @@ export default class ViewportSlideControls {
 
     // Both "moved-end" and 'zoomed-end' events have not stable debounce, firing often than should be.
     // It was decided to use only 'moved' callback for everything
-    this.viewport.instance.on('moved', this.onSliderMoved);
-    this.viewport.instance.on('zoomed', this.onSliderZoomed);
+    this.viewport.pixiViewport.on('moved', this.onSliderMoved);
+    this.viewport.pixiViewport.on('zoomed', this.onSliderZoomed);
     this.activated = true;
   }
 
   public uninstallSlideControls() {
-    this.viewport.instance.plugins.remove('drag');
-    this.viewport.instance.plugins.remove('pinch');
-    this.viewport.instance.plugins.remove('wheel');
+    this.viewport.pixiViewport.plugins.remove('drag');
+    this.viewport.pixiViewport.plugins.remove('pinch');
+    this.viewport.pixiViewport.plugins.remove('wheel');
 
-    this.viewport.instance.off('moved', this.onSliderMoved);
-    this.viewport.instance.off('zoomed', this.onSliderZoomed);
+    this.viewport.pixiViewport.off('moved', this.onSliderMoved);
+    this.viewport.pixiViewport.off('zoomed', this.onSliderZoomed);
 
     this.activated = false;
   }
 
   public pauseSlideControls() {
-    this.viewport.instance.plugins.pause('drag');
-    this.viewport.instance.plugins.pause('pinch');
-    this.viewport.instance.plugins.pause('wheel');
+    this.viewport.pixiViewport.plugins.pause('drag');
+    this.viewport.pixiViewport.plugins.pause('pinch');
+    this.viewport.pixiViewport.plugins.pause('wheel');
     this.activated = false;
   }
 
   public unpauseSlideControls() {
-    this.viewport.instance.plugins.resume('drag');
-    this.viewport.instance.plugins.resume('pinch');
-    this.viewport.instance.plugins.resume('wheel');
+    this.viewport.pixiViewport.plugins.resume('drag');
+    this.viewport.pixiViewport.plugins.resume('pinch');
+    this.viewport.pixiViewport.plugins.resume('wheel');
     this.activated = true;
   }
 

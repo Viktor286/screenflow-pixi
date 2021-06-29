@@ -7,7 +7,7 @@ import WebUI from './WebUI';
 import GUI from './GUI';
 import StateManager from '../StateManager';
 import Project from './Project';
-import Viewport from './Viewport';
+import CgViewport from './GraphicsEngine/Extended/Viewport/CgViewport';
 
 declare global {
   interface Window {
