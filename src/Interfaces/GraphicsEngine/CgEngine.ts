@@ -64,11 +64,6 @@ export class CgEngine {
 
   public addToStage() {}
 
-  public addDisplayObject(...children: PIXI.DisplayObject[]): PIXI.DisplayObject {
-    // this.instance.stage.interactive
-    return this.instance.stage.addChild(...children);
-  }
-
   public pauseEngine(): void {
     this.instance.stage.interactive = false;
     this.instance.ticker.stop();

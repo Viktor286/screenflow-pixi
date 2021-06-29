@@ -20,10 +20,11 @@ async function main() {
     // SpaceModifiers.setPositionGrid(app, 3, 400, 230, 0.2);
 
     // const boardElement = new BoardElement(app.board);
-    const boardElement = app.board.createBoardElement();
+    // const boardElement = app.board.createBoardElement();
     // boardElement.drawSelection();
     // app.board.addElementToBoard(boardElement);
-    console.log('boardElement', boardElement);
+    // console.log('boardElement', boardElement);
+    console.log('app', app);
   }
 }
 

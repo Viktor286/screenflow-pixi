@@ -1,5 +1,5 @@
 import FlowApp from '../../../FlowApp';
-import { Viewport } from './CgViewport';
+import { CgViewport } from './CgViewport';
 
 // TODO: how to
 export default class ViewportSlideControls {
@@ -7,7 +7,7 @@ export default class ViewportSlideControls {
   public isSliding = false;
   private moveEndTimer: ReturnType<typeof setTimeout> | null = null;
 
-  constructor(public app: FlowApp, public viewport: Viewport) {}
+  constructor(public app: FlowApp, public viewport: CgViewport) {}
 
   public installSlideControls() {
     this.viewport.pixiViewport
@@ -67,7 +67,7 @@ export default class ViewportSlideControls {
       clearTimeout(this.moveEndTimer);
     }
 
-    this.app.gui.stageBackTile.updateGraphics();
+    // this.app.gui.stageBackTile.updateGraphics();
 
     this.moveEndTimer = setTimeout(this.onSliderEnd, 300); // lower than 300 values start throw doubles
   };
@@ -79,12 +79,12 @@ export default class ViewportSlideControls {
   };
 
   private onSliderZoomed = () => {
-    if (
-      this.app.viewport.scale < this.viewport.zoomScales.steps[this.viewport.zoomScales.steps.length - 1] &&
-      this.app.viewport.scale > this.viewport.zoomScales.steps[0]
-    ) {
-      this.app.board.updateSelectionGraphics();
-      this.app.webUi.updateZoomBtn();
-    }
+    // if (
+    //   this.app.viewport.scale < this.viewport.zoomScales.steps[this.viewport.zoomScales.steps.length - 1] &&
+    //   this.app.viewport.scale > this.viewport.zoomScales.steps[0]
+    // ) {
+    //   this.app.board.updateSelectionGraphics();
+    //   this.app.webUi.updateZoomBtn();
+    // }
   };
 }

@@ -3,24 +3,25 @@ import { CgInteractiveContainer, IScreenCoords, IWorldCoords } from '../../index
 import { Viewport as PixiViewport } from 'pixi-viewport';
 import ViewportSlideControls from './ViewportSlideControls';
 import ViewportZoomScales from './ViewportZoomScales';
-import { StageEvent } from '../../../InteractionEvents/StageEvents';
+// import { StageEvent } from '../../../InteractionEvents/StageEvents';
 import { gsap } from 'gsap';
 
-export class Viewport extends CgInteractiveContainer {
+export class CgViewport extends CgInteractiveContainer {
   public readonly pixiViewport: PixiViewport;
   public readonly slideControls: ViewportSlideControls;
   public readonly zoomScales = new ViewportZoomScales();
 
   constructor(
+    public app: FlowApp,
     public cgObj = new PixiViewport({
       screenWidth: 100,
       screenHeight: 100,
       worldWidth: 100,
       worldHeight: 100,
     }),
-    public app: FlowApp,
   ) {
     super(cgObj);
+
     this.pixiViewport = this.cgObj; // alias for plugin usage visibility
 
     this.slideControls = new ViewportSlideControls(this.app, this);
@@ -68,23 +69,28 @@ export class Viewport extends CgInteractiveContainer {
       this.app.engine.renderScreenHeight !== this.app.hostHTMLHeight
     ) {
       this.app.engine.resizeRenderScreen(this.app.hostHTMLWidth, this.app.hostHTMLHeight);
+      // this.app.cgSceneRoot.cgObj.width = this.app.hostHTMLWidth;
+      // this.app.cgSceneRoot.cgObj.height = this.app.hostHTMLHeight;
       this.resizeViewport(this.app.hostHTMLWidth, this.app.hostHTMLHeight);
+      console.log('resizeViewportHandler', this.app.engine.renderScreenWidth, this.app.hostHTMLHeight);
+      console.log('cgSceneRoot', this.app.cgSceneRoot.width, this.app.cgSceneRoot.height);
+      console.log('viewport', this.app.viewport.cgObj.width, this.app.viewport.cgObj.height);
     }
   };
 
   public resizeViewport(width: number, height: number) {
-    this.cgObj.resize(width, height);
-    this.app.gui.stageBackTile.updateDimensions(width, height);
+    this.pixiViewport.resize(width, height);
+    // this.app.gui.stageBackTile.updateDimensions(width, height);
   }
 
-  public getScreenCoordsFromEvent(e: StageEvent): IScreenCoords {
-    return { sX: e.data.global.x, sY: e.data.global.y };
-  }
-
-  public getWorldScreenCoordsFromEvent(e: StageEvent): IWorldCoords {
-    const screenClick: IScreenCoords = this.getScreenCoordsFromEvent(e);
-    return this.screenToWorld(screenClick);
-  }
+  // public getScreenCoordsFromEvent(e: StageEvent): IScreenCoords {
+  //   return { sX: e.data.global.x, sY: e.data.global.y };
+  // }
+  //
+  // public getWorldScreenCoordsFromEvent(e: StageEvent): IWorldCoords {
+  //   const screenClick: IScreenCoords = this.getScreenCoordsFromEvent(e);
+  //   return this.screenToWorld(screenClick);
+  // }
 
   // public addToViewport(displayObject: PIXI.DisplayObject, index: number = 0): PIXI.DisplayObject {
   //   return this.instance.addChildAt(displayObject, index);
@@ -157,7 +163,7 @@ export class Viewport extends CgInteractiveContainer {
     };
   }
 
-  public animateViewport(viewportProps: Partial<Viewport>): Promise<Partial<Viewport>> {
+  public animateViewport(viewportProps: Partial<CgViewport>): Promise<Partial<CgViewport>> {
     const { x, y, scaleX } = viewportProps; // TODO: scale or scaleX, have to decided eventually?
 
     const animateProps = {
@@ -174,8 +180,8 @@ export class Viewport extends CgInteractiveContainer {
           // this.interactive = false;
         },
         onUpdate: () => {
-          this.app.gui.stageBackTile.updateGraphics();
-          this.app.board.updateSelectionGraphics();
+          // this.app.gui.stageBackTile.updateGraphics();
+          // this.app.board.updateSelectionGraphics();
         },
         onComplete: () => {
           // this.interactive = true;
@@ -187,6 +193,6 @@ export class Viewport extends CgInteractiveContainer {
   }
 
   private onViewportAnimationEnds = (): void => {
-    this.app.webUi.updateZoomBtn();
+    // this.app.webUi.updateZoomBtn();
   };
 }
