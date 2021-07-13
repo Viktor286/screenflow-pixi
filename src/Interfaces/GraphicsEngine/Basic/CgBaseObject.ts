@@ -1,12 +1,13 @@
 import * as PIXI from 'pixi.js';
 import { IPoint } from '../../../types/global';
+import { DummyGraphics } from './dummyGraphics';
 
 export class CgBaseObject {
   isScaleFromCenter = false;
-  dummy = new PIXI.Graphics();
+  dummy = new DummyGraphics(this);
 
   constructor(public cgObj: PIXI.Container = new PIXI.Container()) {
-    this.initDummyGraphics();
+    //
   }
 
   destroy() {
@@ -146,18 +147,6 @@ export class CgBaseObject {
       this.scaleX = val;
       this.scaleY = val;
     }
-  }
-
-  private initDummyGraphics() {
-    this.drawDummyGraphics({ opacity: 0.5 });
-    this.cgObj.addChild(this.dummy);
-  }
-
-  public drawDummyGraphics({ color = 0x00ff00, width = 100, height = 100, opacity = 1 }) {
-    this.dummy.beginFill(color, 0.1);
-    this.dummy.lineStyle(1, color).drawRect(0, 0, width, height);
-    this.dummy.endFill();
-    this.dummy.alpha = opacity;
   }
 
   // public addChild<TChildren extends PIXI.DisplayObject[]>(...children: TChildren): TChildren[0] {

@@ -1,4 +1,4 @@
-import { CgEngine, CgInteractiveContainer } from './GraphicsEngine';
+import { CgEngine } from './GraphicsEngine';
 // // import StageEvents from './InteractionEvents/StageEvents';
 // import Keyboard from './InteractionEvents/Keyboard';
 import DevMonitor from './DevMonitor';
@@ -8,7 +8,7 @@ import GUI from './GUI';
 // import StateManager from '../StateManager';
 // import Project from './Project';
 import { CgViewport } from './GraphicsEngine/Extended/Viewport/CgViewport';
-import * as PIXI from 'pixi.js'; // temp object
+import { CgSceneRoot } from './GraphicsEngine/Basic/CgSceneRoot';
 
 declare global {
   interface Window {
@@ -23,7 +23,7 @@ declare global {
 export default class FlowApp {
   public readonly engine: CgEngine;
   public readonly hostHTML: HTMLElement;
-  public readonly cgSceneRoot: CgInteractiveContainer;
+  public readonly cgSceneRoot: CgSceneRoot;
   public readonly viewport: CgViewport;
   public readonly devMonitor: DevMonitor | null; // TODO: replace for "Debug" with included prod logic
   // public readonly board: Board;
@@ -39,18 +39,31 @@ export default class FlowApp {
     this.env = process.env.NODE_ENV;
 
     this.hostHTML = targetDiv;
-    this.engine = new CgEngine();
+    this.engine = new CgEngine(this);
     this.hostHTML.appendChild(this.engine.view);
-    this.cgSceneRoot = new CgInteractiveContainer(this.engine.stage);
 
+    this.cgSceneRoot = new CgSceneRoot(this.engine);
     this.viewport = new CgViewport(this);
     this.cgSceneRoot.prependElement(this.viewport);
 
-    // temp object
-    const sprite = this.viewport.cgObj.addChild(new PIXI.Sprite(PIXI.Texture.WHITE));
-    sprite.tint = 0xff0000;
-    sprite.width = sprite.height = 100;
-    sprite.position.set(100, 100);
+    this.engine.addEventListener('resizeRenderScreen', () => {
+      this.viewport.pixiViewport.resize(this.engine.renderScreenWidth, this.engine.renderScreenHeight);
+      this.gui.stageBackTile.updateDimensions(this.engine.renderScreenWidth, this.engine.renderScreenHeight);
+
+      this.viewport.dummy.resizeDummy(this.viewport.screenWidth, this.viewport.screenHeight);
+      this.viewport.dummy.render();
+
+      this.cgSceneRoot.renderInfoUI();
+    });
+
+    // // temp object
+    // const sprite = this.cgSceneRoot.cgObj.addChild(new PIXI.Sprite(PIXI.Texture.WHITE));
+    // sprite.tint = 0x5b1005;
+    // sprite.width = sprite.height = 200;
+    // sprite.position.set(100, 100);
+    //
+    // // update debug UI
+    // this.cgSceneRoot.dummy.render();
 
     // this.devMonitor = new DevMonitor();
     this.devMonitor = null;
@@ -67,6 +80,20 @@ export default class FlowApp {
     if (this.env !== 'production') {
       window.app = this;
     }
+
+    // Global page event handlers
+    window.addEventListener('contextmenu', (e) => {
+      e.preventDefault();
+    });
+
+    // For preventing page zoom
+    window.addEventListener(
+      'wheel',
+      (e) => {
+        e.preventDefault();
+      },
+      { passive: false },
+    );
   }
 
   get hostHTMLWidth() {

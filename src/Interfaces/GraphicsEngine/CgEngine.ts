@@ -1,4 +1,5 @@
 import * as PIXI from 'pixi.js';
+import FlowApp from '../FlowApp';
 
 export interface IWorldCoords {
   wX: number;
@@ -9,14 +10,26 @@ export interface IScreenCoords {
   sY: number;
 }
 
+export type CgEngineEvents = 'resizeRenderScreen';
+
+interface IEventList {
+  resizeRenderScreen: Function[];
+}
+
+export interface IResizeRenderScreenEvent {
+  renderScreenWidth: number;
+  renderScreenHeight: number;
+}
+
 export class CgEngine {
   public readonly instance: PIXI.Application;
   public readonly stage: PIXI.Container;
   public readonly renderer: PIXI.Renderer;
   public readonly ticker: PIXI.Ticker;
   public readonly view: HTMLCanvasElement;
+  private eventList: IEventList = { resizeRenderScreen: [] };
 
-  constructor() {
+  constructor(public app: FlowApp) {
     this.instance = new PIXI.Application({
       width: 100,
       height: 100,
@@ -42,6 +55,11 @@ export class CgEngine {
     this.renderer = this.instance.renderer;
     this.ticker = this.instance.ticker;
     this.view = this.instance.view;
+
+    // Handler for "pixi engine and Viewport" dimensions dependency on window size
+    window.addEventListener('resize', this.resizePageHandler);
+    setTimeout(() => this.resizePageHandler());
+    // window.addEventListener('orientationchange', this.orientationchangeViewportHandler, false);
 
     // // We stop Pixi ticker using stop() function because autoStart = false does NOT stop the shared ticker:
     // // doc: http://pixijs.download/release/docs/PIXI.Application.html
@@ -74,12 +92,48 @@ export class CgEngine {
     this.instance.ticker.start();
   }
 
+  public resizePageHandler(): void {
+    // solution ref: https://github.com/davidfig/pixi-viewport/issues/212#issuecomment-608231281
+    if (
+      this.app.engine.renderScreenWidth !== this.app.hostHTMLWidth ||
+      this.app.engine.renderScreenHeight !== this.app.hostHTMLHeight
+    ) {
+      this.app.engine.resizeRenderScreen(this.app.hostHTMLWidth, this.app.hostHTMLHeight);
+    }
+  }
+
   public resizeRenderScreen(width: number, height: number): void {
     this.instance.renderer.resize(width, height);
+    this.triggerEvent('resizeRenderScreen');
   }
 
   public getScreenCoordsFromMouse(): IScreenCoords {
     const { x: sX, y: sY } = this.renderer.plugins.interaction.eventData.data.global;
     return { sX, sY };
+  }
+
+  public addEventListener(eventType: CgEngineEvents, cb: Function) {
+    if (eventType === 'resizeRenderScreen') {
+      this.eventList.resizeRenderScreen.push(cb);
+    }
+  }
+
+  // todo: implement
+  // public removeEventListener(eventType: CgEngineEvents, cb: Function) {
+  //   //
+  // }
+
+  private triggerEvent(eventType: CgEngineEvents) {
+    if (this.eventList.hasOwnProperty(eventType)) {
+      if (eventType === 'resizeRenderScreen') {
+        this.eventList[eventType].forEach((cb) => {
+          const e: IResizeRenderScreenEvent = {
+            renderScreenWidth: this.app.engine.renderScreenWidth,
+            renderScreenHeight: this.app.engine.renderScreenHeight,
+          };
+          cb(e);
+        });
+      }
+    }
   }
 }

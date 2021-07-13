@@ -1,5 +1,5 @@
 import FlowApp from '../../../FlowApp';
-import { CgInteractiveContainer, IScreenCoords, IWorldCoords } from '../../index';
+import { CgInteractiveContainer, IResizeRenderScreenEvent, IScreenCoords, IWorldCoords } from '../../index';
 import { Viewport as PixiViewport } from 'pixi-viewport';
 import ViewportSlideControls from './ViewportSlideControls';
 import ViewportZoomScales from './ViewportZoomScales';
@@ -14,10 +14,10 @@ export class CgViewport extends CgInteractiveContainer {
   constructor(
     public app: FlowApp,
     public cgObj = new PixiViewport({
-      screenWidth: 100,
-      screenHeight: 100,
-      worldWidth: 100,
-      worldHeight: 100,
+      screenWidth: 300,
+      screenHeight: 300,
+      worldWidth: 300,
+      worldHeight: 300,
     }),
   ) {
     super(cgObj);
@@ -27,23 +27,7 @@ export class CgViewport extends CgInteractiveContainer {
     this.slideControls = new ViewportSlideControls(this.app, this);
     this.slideControls.installSlideControls();
 
-    window.addEventListener('contextmenu', (e) => {
-      e.preventDefault();
-    });
-
-    // Handler for "pixi engine and Viewport" dimensions dependency on window size
-    window.addEventListener('resize', this.resizeViewportHandler);
-    setTimeout(() => this.resizeViewportHandler());
-    // window.addEventListener('orientationchange', this.orientationchangeViewportHandler, false);
-
-    // For preventing page zoom you should prevent wheel event:
-    window.addEventListener(
-      'wheel',
-      (e) => {
-        e.preventDefault();
-      },
-      { passive: false },
-    );
+    this.dummy.resizeDummy(this.screenWidth, this.screenHeight);
   }
 
   set screenWidth(val: number) {
@@ -60,22 +44,6 @@ export class CgViewport extends CgInteractiveContainer {
 
   get screenHeight() {
     return this.pixiViewport.screenHeight;
-  }
-
-  public resizeViewportHandler = (): void => {
-    // solution ref: https://github.com/davidfig/pixi-viewport/issues/212#issuecomment-608231281
-    if (
-      this.app.engine.renderScreenWidth !== this.app.hostHTMLWidth ||
-      this.app.engine.renderScreenHeight !== this.app.hostHTMLHeight
-    ) {
-      this.app.engine.resizeRenderScreen(this.app.hostHTMLWidth, this.app.hostHTMLHeight);
-      this.resizeViewport(this.app.hostHTMLWidth, this.app.hostHTMLHeight);
-    }
-  };
-
-  public resizeViewport(width: number, height: number) {
-    this.pixiViewport.resize(width, height);
-    this.app.gui.stageBackTile.updateDimensions(width, height);
   }
 
   // public getScreenCoordsFromEvent(e: StageEvent): IScreenCoords {

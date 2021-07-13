@@ -8,6 +8,7 @@ export class CgContainer extends CgBaseObject {
   constructor(public cgObj: PIXI.Container = new PIXI.Container()) {
     super(cgObj);
     this.cgObj.sortableChildren = true;
+    // this.cgObj.interactive = false; // deactivate by default
   }
 
   prependElement(element: CgContainer): string {
