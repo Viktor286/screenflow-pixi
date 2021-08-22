@@ -49,10 +49,10 @@ export default class FlowApp {
     this.engine.addEventListener('resizeRenderScreen', () => {
       this.viewport.pixiViewport.resize(this.engine.renderScreenWidth, this.engine.renderScreenHeight);
       this.gui.stageBackTile.updateDimensions(this.engine.renderScreenWidth, this.engine.renderScreenHeight);
+      this.cgSceneRoot.renderInfoUI();
+    });
 
-      this.viewport.dummy.resizeDummy(this.viewport.screenWidth, this.viewport.screenHeight);
-      this.viewport.dummy.render();
-
+    this.viewport.addEventListener('viewportUpdate', () => {
       this.cgSceneRoot.renderInfoUI();
     });
 

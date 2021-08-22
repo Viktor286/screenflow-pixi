@@ -8,11 +8,11 @@ export class CgSceneRoot extends CgInteractiveContainer {
   }
 
   renderInfoUI() {
-    // TODO: render info
+    // TODO: conditional render info
     // traverse the whole tree and call dummy.render() from bottom to top
-    this.dummy.resizeDummy(this.engine.renderScreenWidth, this.engine.renderScreenHeight);
     this.dummy.render();
-    // const appTree = this.getAllElements();
-    // console.log('CgSceneRoot AllElements', appTree);
+    // temp traverse
+    const appTree = this.getAllElements();
+    appTree.forEach((e) => e.dummy.render());
   }
 }

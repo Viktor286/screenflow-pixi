@@ -13,7 +13,7 @@ export interface IScreenCoords {
 export type CgEngineEvents = 'resizeRenderScreen';
 
 interface IEventList {
-  resizeRenderScreen: Function[];
+  [CgEngineEvents: string]: Function[];
 }
 
 export interface IResizeRenderScreenEvent {

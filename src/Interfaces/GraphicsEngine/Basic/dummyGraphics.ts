@@ -1,11 +1,12 @@
 import * as PIXI from 'pixi.js';
 import { CgBaseObject } from './CgBaseObject';
 
+/**
+ * Dummy graphics inherits x,y, scale from its parent,
+ * **/
 export class DummyGraphics {
   private c: CgBaseObject;
   private dummy = new PIXI.Graphics();
-  public width = 100;
-  public height = 100;
   public color = 0x00ff00;
   public opacity = 0.5;
   public info: string;
@@ -24,43 +25,40 @@ export class DummyGraphics {
     setTimeout(() => this.render());
   }
 
+  get width() {
+    return this.dummy.width;
+  }
+
+  get height() {
+    return this.dummy.height;
+  }
+
   public render() {
-    this.drawRect({});
+    this.renderDummy({});
     this.updateText();
   }
 
   private updateText() {
     this.textObj.text = `
     ${this.c.constructor.name}
-    width: ${this.width.toFixed(2)}
-    height: ${this.height.toFixed(2)}
-    cgBaseObject width: ${this.c.width.toFixed(2)}
-    cgBaseObject height: ${this.c.height.toFixed(2)}
-    sX: ${this.c.scaleX.toFixed(2)}
-    sY: ${this.c.scaleY.toFixed(2)}
+    dummy size: (${this.width.toFixed(2)} : ${this.height.toFixed(2)})
+    obj coords: [${this.c.x.toFixed(2)} , ${this.c.y.toFixed(2)}]
+    obj size: (${this.c.width.toFixed(2)} : ${this.c.height.toFixed(2)})
+    obj scale: [${this.c.scaleX.toFixed(2)}, ${this.c.scaleY.toFixed(2)}]
     `;
     this.textObj.alpha = 0.5;
-
-    this.textObj.position.x = this.width - this.textObj.width - 5;
     this.c.cgObj.setChildIndex(this.textObj, this.c.cgObj.children.length - 1);
   }
 
-  public resizeDummy(width: number, height: number) {
-    this.width = width;
-    this.height = height;
-  }
-
   // todo: do we want support of just stroke-only highlighted of objects?
-  private drawRect({ color, width, height, opacity }: Partial<DummyGraphics>) {
+  public renderDummy({ color, opacity }: Partial<DummyGraphics>) {
     if (color) this.color = color;
     if (opacity) this.opacity = opacity;
-    if (width) this.width = width;
-    if (height) this.height = height;
 
     this.dummy.clear();
     this.dummy.beginFill(this.color, 0.1);
     // this.dummy.lineStyle(1, this.color);
-    this.dummy.drawRect(0, 0, this.width, this.height);
+    this.dummy.drawRect(0, 0, this.c.width, this.c.height);
     this.dummy.endFill();
     this.dummy.alpha = this.opacity;
     this.c.cgObj.setChildIndex(this.dummy, this.c.cgObj.children.length - 1);

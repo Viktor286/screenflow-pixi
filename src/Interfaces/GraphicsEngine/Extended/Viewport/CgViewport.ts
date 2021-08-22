@@ -1,15 +1,27 @@
 import FlowApp from '../../../FlowApp';
-import { CgInteractiveContainer, IResizeRenderScreenEvent, IScreenCoords, IWorldCoords } from '../../index';
+import { CgInteractiveContainer, IScreenCoords, IWorldCoords } from '../../index';
 import { Viewport as PixiViewport } from 'pixi-viewport';
 import ViewportSlideControls from './ViewportSlideControls';
 import ViewportZoomScales from './ViewportZoomScales';
 // import { StageEvent } from '../../../InteractionEvents/StageEvents';
 import { gsap } from 'gsap';
 
+export type CgViewportEvents = 'viewportUpdate';
+
+interface IEventList {
+  [CgViewportEvents: string]: Function[];
+}
+
+interface IViewportUpdateEvent {
+  scaleX: number;
+  scaleY: number;
+}
+
 export class CgViewport extends CgInteractiveContainer {
   public readonly pixiViewport: PixiViewport;
   public readonly slideControls: ViewportSlideControls;
   public readonly zoomScales = new ViewportZoomScales();
+  private eventList: IEventList = { viewportUpdate: [] };
 
   constructor(
     public app: FlowApp,
@@ -27,7 +39,29 @@ export class CgViewport extends CgInteractiveContainer {
     this.slideControls = new ViewportSlideControls(this.app, this);
     this.slideControls.installSlideControls();
 
-    this.dummy.resizeDummy(this.screenWidth, this.screenHeight);
+    this.pixiViewport.on('moved', () => {
+      this.triggerEvent('viewportUpdate');
+    });
+  }
+
+  public addEventListener(eventType: CgViewportEvents, cb: Function) {
+    if (eventType === 'viewportUpdate') {
+      this.eventList.viewportUpdate.push(cb);
+    }
+  }
+
+  private triggerEvent(eventType: CgViewportEvents) {
+    if (this.eventList.hasOwnProperty(eventType)) {
+      if (eventType === 'viewportUpdate') {
+        this.eventList[eventType].forEach((cb) => {
+          const e: IViewportUpdateEvent = {
+            scaleX: this.scaleX,
+            scaleY: this.scaleY,
+          };
+          cb(e);
+        });
+      }
+    }
   }
 
   set screenWidth(val: number) {
