@@ -15,4 +15,8 @@ export class CgSceneRoot extends CgInteractiveContainer {
     const appTree = this.getAllElements();
     appTree.forEach((e) => e.dummy.render());
   }
+
+  getDocumentTree() {}
+
+  getPublicStateTree() {}
 }

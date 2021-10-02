@@ -2,6 +2,7 @@
   "name": "pixi-graphic-editor",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "dependencies": {
     "@babel/core": "7.9.0",
     "@svgr/webpack": "4.3.3",

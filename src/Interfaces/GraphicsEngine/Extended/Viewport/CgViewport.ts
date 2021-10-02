@@ -17,6 +17,12 @@ interface IViewportUpdateEvent {
   scaleY: number;
 }
 
+interface IViewportPublicState {
+  x: number;
+  y: number;
+  s: number;
+}
+
 export class CgViewport extends CgInteractiveContainer {
   public readonly pixiViewport: PixiViewport;
   public readonly slideControls: ViewportSlideControls;
@@ -78,6 +84,14 @@ export class CgViewport extends CgInteractiveContainer {
 
   get screenHeight() {
     return this.pixiViewport.screenHeight;
+  }
+
+  getPublicState(): IViewportPublicState {
+    return {
+      x: this.x,
+      y: this.y,
+      s: this.scaleX,
+    };
   }
 
   // public getScreenCoordsFromEvent(e: StageEvent): IScreenCoords {
