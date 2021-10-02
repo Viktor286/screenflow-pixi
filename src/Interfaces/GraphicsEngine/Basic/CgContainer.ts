@@ -1,12 +1,14 @@
-import PIXI from 'pixi.js';
-import { CgBaseObject } from './index';
+import * as PIXI from 'pixi.js';
+import { CgBaseObject } from '../index';
 
 export class CgContainer extends CgBaseObject {
-  store = new Array<CgContainer>();
+  children = new Array<CgContainer>();
   indexHashes = new Map<string, number>();
 
   constructor(public cgObj: PIXI.Container = new PIXI.Container()) {
     super(cgObj);
+    this.cgObj.sortableChildren = true;
+    // this.cgObj.interactive = false; // deactivate by default
   }
 
   prependElement(element: CgContainer): string {
@@ -14,6 +16,7 @@ export class CgContainer extends CgBaseObject {
     this.cgObj.addChild(element.cgObj);
     this.cgObj.setChildIndex(element.cgObj, 0);
 
+    // TODO: make abstraction for this addition and other operations
     // CgContainer hashed array store
     const hash = Math.random().toString(32).slice(2);
 
@@ -24,14 +27,14 @@ export class CgContainer extends CgBaseObject {
     });
 
     this.indexHashes = newIndex;
-    this.store = [element, ...this.store];
+    this.children = [element, ...this.children];
     return hash;
   }
 
   getElement(hash: string): CgContainer | undefined {
     const index = this.indexHashes.get(hash);
     if (index) {
-      return this.store[index];
+      return this.children[index];
     }
   }
 
@@ -44,7 +47,7 @@ export class CgContainer extends CgBaseObject {
     const elementIdx = this.getElementsIndex(hash);
     if (element && elementIdx) {
       this.cgObj.removeChild(element.cgObj);
-      this.store = [...this.store.slice(0, elementIdx), ...this.store.slice(elementIdx + 1)];
+      this.children = [...this.children.slice(0, elementIdx), ...this.children.slice(elementIdx + 1)];
       this.indexHashes.delete(hash);
 
       // Re-arrange engine indexes
@@ -60,6 +63,6 @@ export class CgContainer extends CgBaseObject {
   }
 
   getAllElements(): CgContainer[] {
-    return this.store;
+    return this.children;
   }
 }

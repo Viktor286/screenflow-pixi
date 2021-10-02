@@ -1,5 +1,5 @@
 import * as PIXI from 'pixi.js';
-import { CgContainer } from './CgContainer';
+import { CgContainer } from '../Basic/CgContainer';
 
 export class CgDrawContainer extends CgContainer {
   graphicContent = new Map<string, PIXI.Graphics>();

@@ -1,6 +1,6 @@
 import { gsap } from 'gsap';
 // import { IGsapProps } from '../../types/global'; // for aditional props
-import { CgBaseObject } from './index';
+import { CgBaseObject } from '../index';
 
 interface IAnimationCallbacks {
   onStart(): void;

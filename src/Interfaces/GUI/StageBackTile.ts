@@ -35,8 +35,8 @@ export default class StageBackTile {
   }
 
   public updateGraphics() {
-    this.tileMiddle.tileScale.x = this.app.viewport.scale * 0.25;
-    this.tileMiddle.tileScale.y = this.app.viewport.scale * 0.25;
+    this.tileMiddle.tileScale.x = this.app.viewport.scaleX * 0.25;
+    this.tileMiddle.tileScale.y = this.app.viewport.scaleX * 0.25;
 
     this.tileMiddle.tilePosition.x = this.app.viewport.x;
     this.tileMiddle.tilePosition.y = this.app.viewport.y;
